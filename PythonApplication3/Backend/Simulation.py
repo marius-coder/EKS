@@ -2,49 +2,64 @@
 import pandas as pd
 import numpy as np
 import math
+import csv
 
+from Building import Building
+from Helper import *
+u_Wand = 0.15
+u_Boden = 0.2
+u_Dach = 0.1
+u_Fenster = 0.8
 
+W1 = Building( wand = {"Fläche":2217.63,"U-Wert":u_Wand},
+			  fenster = {"Fläche":1478.42,"U-Wert":u_Fenster},
+			  dach = {"Fläche":1973.94,"U-Wert":u_Dach},
+			  boden = {"Fläche":1973.94,"U-Wert":u_Boden})
+
+W2 = Building( wand = {"Fläche":3022.56,"U-Wert":u_Wand},
+			  fenster = {"Fläche":2015.04,"U-Wert":u_Fenster},
+			  dach = {"Fläche":2509.2,"U-Wert":u_Dach},
+			  boden = {"Fläche":2509.2,"U-Wert":u_Boden})
+
+W3 = Building( wand = {"Fläche":3370.92,"U-Wert":u_Wand},
+			  fenster = {"Fläche":2247.28,"U-Wert":u_Fenster},
+			  dach = {"Fläche":1710.52,"U-Wert":u_Dach},
+			  boden = {"Fläche":1710.52,"U-Wert":u_Boden})
+
+W4 = Building( wand = {"Fläche":3620.23,"U-Wert":u_Wand},
+			  fenster = {"Fläche":2413.48,"U-Wert":u_Fenster},
+			  dach = {"Fläche":1114.8,"U-Wert":u_Dach},
+			  boden = {"Fläche":1114.8,"U-Wert":u_Boden})
 
 class Simulation():
 
 	def __init__(self):		
 		#Jedes Teilgebäude wird in einem Dictionary gesammelt
-		li_buildings = {}  
+		self.dic_buildings = {"W1":W1,"W2":W2,"W3":W3,"W4":W4}  
 		
+		self.ta = np.genfromtxt("./Data/climate.csv", delimiter=";", usecols = (1), skip_header = 1)
+
+		self.electricProfile = pd.read_csv("./Data/Stromprofil.csv", delimiter=";", decimal = ",")
+
+		print(self.electricProfile.info())
+		self.time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[d]')
 
 
 
 
+	def Simulate(self):
 
-def DetermineHourofDay(hour):
-	return (hour+1) % 24
+		for hour in range(0,8760):
+
+			for key,building in self.dic_buildings.items():
+				pass
+				#print(building.CalcThermalFlows(self.ta[hour], DetermineHourofDay(hour)))
+
+		
+test = Simulation()
 
 
-def DetermineMonth(hour):
-	if 0 <= hour <= 744:
-		return 1
-	elif 744 < hour <= 1416:
-		return 2
-	elif 1416 < hour <= 2160:
-		return 3
-	elif 2160 < hour <= 2880:
-		return 4
-	elif 2880 < hour <= 3624:
-		return 5
-	elif 3624 < hour <= 4344:
-		return 6
-	elif 4344 < hour <= 5088:
-		return 7
-	elif 5088 < hour <= 5832:
-		return 8
-	elif 5832 < hour <= 6552:
-		return 9
-	elif 6552 < hour <= 7296:
-		return 10
-	elif 7296 < hour <= 8016:
-		return 11
-	elif 8016 < hour <= 8760:
-		return 12
+test.Simulate()
 
 
 

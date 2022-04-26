@@ -7,7 +7,7 @@ import numpy as np
 from HL_KL import HL
 
 class Building(HL):
-    def __init__(self):
+    def __init__(self, wand, dach, boden, fenster):
 
         self.NFBGF = 1 #Verhältnis von Nettofläche zu Bruttogeschoss fläche (max 1)
         self.gfa = 1 #Bruttogeschossfläche in m²
@@ -18,29 +18,32 @@ class Building(HL):
         self.volumen = self.gfa * self.net_storey_height * 0.8 #Beheiztes Volumen
         self.ABSCHIRMUNGSKOEFF = 0.04 #Abschirmungskoeffizient
 
+        self.ti = 20
+        self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)
+
 
         self.WRG = 95 #Wärmerückgewinnung der Lüftung in %
         self.Luftwechsel = 1 #Luftwechselrate in n^-1
 
-        self.wand = {"Fläche" : 1,
-                     "U-Wert" : 1,
+        self.wand = {"Fläche" : wand["Fläche"],
+                     "U-Wert" : wand["U-Wert"],
                      "f_T" : 1,}
         self.wand["LT"] = self.calc_LT("wand")
 
-        self.dach = {"Fläche" : 2,
-                     "U-Wert": 2,
+        self.dach = {"Fläche" : dach["Fläche"],
+                     "U-Wert": dach["U-Wert"],
                      "f_T": 2}
         self.dach["LT"] = self.calc_LT("dach")
 
-        self.fußboden = {"Fläche" : 3,
-                     "U-Wert": 3,
+        self.boden = {"Fläche" : boden["Fläche"],
+                     "U-Wert": boden["U-Wert"],
                      "f_T": 3}
-        self.fußboden["LT"] = self.calc_LT("fußboden")
+        self.boden["LT"] = self.calc_LT("boden")
 
-        self.window = {"Fläche" : 4,
-                "U-Wert": 4,
+        self.fenster = {"Fläche" : fenster["Fläche"],
+                "U-Wert": fenster["U-Wert"],
                 "f_T": 4}
-        self.window["LT"] = self.calc_LT("window")
+        self.fenster["LT"] = self.calc_LT("fenster")
 
        
 
@@ -55,7 +58,7 @@ class Building(HL):
 
 
 
-test = Building()
-print(test.calc_QT(-10,20))
+#test = Building()
+#print(test.calc_QT(-10,20))
 
-print("")
+#print("")

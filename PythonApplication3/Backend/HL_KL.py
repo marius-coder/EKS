@@ -12,7 +12,7 @@ class HL():
     		    return 0
 
             #Hygienischer Lüftungswechsel
-    		V_hyg_min = self.building.volumen * self.Luftwechsel
+    		V_hyg_min = self.volumen * self.Luftwechsel
     		 
     		Hv = self.cp_air * V_hyg_min  # W/K
             #Gesamtlüftungsverluste in Watt
@@ -44,3 +44,12 @@ class HL():
       		q_dach = self.calc_QT_Dach(ta)            
       		q_wand = self.calc_QT_Wand(ta)
       		return q_wand + q_dach + q_boden
+
+    def CalcThermalFlows(self, ta, hourofDay):
+        """Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
+            eines Gebäudes zu berechnen."""
+        qT = self.calc_QT_Sum(ta)
+        qV = self.calc_QV(ta)
+        qI = 1
+        qS = 1
+        return qT+qV+qI+qS

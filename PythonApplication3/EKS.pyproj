@@ -23,6 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Backend\Building.py" />
+    <Compile Include="Backend\Helper.py" />
     <Compile Include="Backend\HL_KL.py" />
     <Compile Include="Backend\Simulation.py" />
     <Compile Include="Backend\Simulation_alt.py" />
@@ -32,6 +33,12 @@
   <ItemGroup>
     <Folder Include="Backend\" />
     <Folder Include="Frontend\" />
+    <Folder Include="Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\climate.csv" />
+    <Content Include="Data\Profile_InnereGewinne.csv" />
+    <Content Include="Data\Stromprofil.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
