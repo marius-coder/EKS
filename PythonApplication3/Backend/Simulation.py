@@ -5,6 +5,7 @@ import math
 import csv
 
 from Building import Building
+from Wärmepumpe_Speicher import Speicher, Wärmepumpe
 from Helper import *
 u_Wand = 0.15
 u_Boden = 0.2
@@ -44,16 +45,23 @@ class Simulation():
 		print(self.electricProfile.info())
 		self.time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[d]')
 
-
+		speicher = Speicher(100000, 0.2)
+		self.WP  = Wärmepumpe(speicher, COP_HZG= 5, COP_WW= 3, Pel= 100)
 
 
 	def Simulate(self):
 
 		for hour in range(0,8760):
 
+			stromVerbrauch = GetStromProfil(hour)  #Ruft den aktuellen Stromverbrauch ab in W 
+
+			qHLSum = 0
+
 			for key,building in self.dic_buildings.items():
-				pass
-				#print(building.CalcThermalFlows(self.ta[hour], DetermineHourofDay(hour)))
+				qHLSum += building.CalcThermalFlows(self.ta[hour], DetermineHourofDay(hour))
+
+			self.WP.speicher.SpeicherEntladen(qHLSum, self.WP.hystEin
+
 
 		
 test = Simulation()

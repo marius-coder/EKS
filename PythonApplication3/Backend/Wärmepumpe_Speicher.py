@@ -10,10 +10,9 @@ class Speicher():
     TODO: Keine weiteren Verbesserungen geplant"""
 
 
-    def __init__(self, MAX_Speicherstand, MIN_Speicherstand = 0):
+    def __init__(self, MAX_Speicherstand):
 
         self.MAX_Speicherstand  = MAX_Speicherstand #Maximaler Speicherstand in kWh
-        self.MIN_Speicherstand  = MIN_Speicherstand #Minimaler Speicherstand in anteilen vom maximalen (max 1)
         self.speicherstand = self.MAX_Speicherstand / 2 #Momentaner Speicherstand in kWh
 
     def Speicherstand(self):
@@ -33,16 +32,16 @@ class Speicher():
             self.speicherstand = self.MAX_Speicherstand
         return rest
 
-    def SpeicherEntladen(self, qtoTake):
+    def SpeicherEntladen(self, qtoTake, MIN_Speicherstand):
         """Nimmt als Argument wie viel Energie dem Speicher entnommen werden soll
         Konstrolliert dabei ob der Speicher unterladen wird"""
             
         self.speicherstand -= qtoTake
         rest = 0
 
-        if self.speicherstand < self.MIN_Speicherstand:
-            rest = self.MIN_Speicherstand - self.speicherstand
-            self.speicherstand = self.MIN_Speicherstand
+        if self.speicherstand < MIN_Speicherstand:
+            rest = MIN_Speicherstand - self.speicherstand
+            self.speicherstand = MIN_Speicherstand
         return rest
 
 
@@ -52,7 +51,7 @@ class Wärmepumpe():
     TODO: Variabler COP nach Außentemperatur für Luftwärmepumpe
     """
 
-    def __init__(self, speicher):
+    def __init__(self, speicher, COP_HZG, COP_WW, Pel):
         self.COP_HZG = 3  #COP im Heizbetrieb
         self.COP_WW = 2 #COP im Warmwasserbetrieb
         self.Pel = 3 #Elektrische Leistungsaufnahme in kW
@@ -98,7 +97,7 @@ class Wärmepumpe():
 test_Speicher = Speicher(MAX_Speicherstand = 100, MIN_Speicherstand = 0)
 test_WP = Wärmepumpe(speicher = test_Speicher)
 for i in range(30):
-    test_WP.speicher.SpeicherEntladen(5)
+    test_WP.speicher.SpeicherEntladen(5, test_WP.hystEin)
     test_WP.CheckSpeicher(mode = "HZG")
     print(f"Status WP: {test_WP.bIsOn}")
     print(f"Ladestand Speicher: {test_WP.speicher.speicherstand}")

@@ -22,8 +22,10 @@ class Building(HL):
         self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)
 
 
-        self.WRG = 95 #Wärmerückgewinnung der Lüftung in %
+        self.WRG = 90 #Wärmerückgewinnung der Lüftung in %
         self.Luftwechsel = 1 #Luftwechselrate in n^-1
+
+        self.Stromverbrauch = 10 #kWh/m²
 
         self.wand = {"Fläche" : wand["Fläche"],
                      "U-Wert" : wand["U-Wert"],
