@@ -1,7 +1,7 @@
 from datetime import date
 import pandas as pd
 import numpy as np
-#Viertelstunden-Leistungswerte für den Jahresverbrauch von 1.000 kWh/a
+#Viertelstunden Leistungswerte fur den Jahresverbrauch von 1.000 kWh pro Jahr
 electricProfile = pd.read_csv("./Data/Stromprofil.csv", delimiter=";", decimal = ",")
 time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
 time = pd.to_datetime(time)
@@ -12,8 +12,8 @@ Autumn = date(2022,9,17)
 Winter = date(2022,12,21)
 
 def GetStromProfil(hour):
-	"""Nimmt eine Stunde und gibt den Stromverbrauch zurück.
-	Dabei wird nach Jahreszeiten unterschieden.
+	"""Nimmt eine Stunde und gibt den Stromverbrauch zuruck
+	Dabei wird nach Jahreszeiten unterschieden
 	Die Werte werden prozentuell aufgeteilt um scharfe Kanten im Verbrauch zu vermeiden"""
 	Date1 = date(time[hour].year,time[hour].month,time[hour].day)
 	if Spring <= Date1 <= Summer:
@@ -65,6 +65,14 @@ def GetStromProfil(hour):
 
 def DetermineHourofDay(hour):
 	return (hour+1) % 24
+
+def IsWeekday(hour):
+	if time[hour].weekday() == 6 or time[hour].weekday() == 5:
+		return False
+	else:
+		return True
+
+
 
 
 def DetermineMonth(hour):

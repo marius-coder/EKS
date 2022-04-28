@@ -6,12 +6,12 @@ import numpy as np
 
 
 class Speicher():
-    """Der Wärmespeicher ist simpel abgebildet und unterstützt simple Funktionen wie laden/entladen sowie das Abfragen des Ladestandes
+    """Speicher ist in kWh gemessen
+    Der Wärmespeicher ist simpel abgebildet und unterstützt simple Funktionen wie laden/entladen sowie das Abfragen des Ladestandes
     TODO: Keine weiteren Verbesserungen geplant"""
 
 
     def __init__(self, MAX_Speicherstand):
-
         self.MAX_Speicherstand  = MAX_Speicherstand #Maximaler Speicherstand in kWh
         self.speicherstand = self.MAX_Speicherstand / 2 #Momentaner Speicherstand in kWh
 
@@ -22,7 +22,7 @@ class Speicher():
     def SpeicherLaden(self, qtoLoad):
         """Nimmt als Argument wie viel Energie in den Speicher geladen werden soll
         Konstrolliert dabei ob der Speicher überladen wird"""
-
+        qtoLoad = abs(qtoLoad)
         self.speicherstand += qtoLoad
         rest = 0
 
@@ -35,13 +35,14 @@ class Speicher():
     def SpeicherEntladen(self, qtoTake, MIN_Speicherstand):
         """Nimmt als Argument wie viel Energie dem Speicher entnommen werden soll
         Konstrolliert dabei ob der Speicher unterladen wird"""
-            
+        qtoTake = abs(qtoTake)
         self.speicherstand -= qtoTake
         rest = 0
 
         if self.speicherstand < MIN_Speicherstand:
             rest = MIN_Speicherstand - self.speicherstand
             self.speicherstand = MIN_Speicherstand
+
         return rest
 
 
@@ -52,9 +53,9 @@ class Wärmepumpe():
     """
 
     def __init__(self, speicher, COP_HZG, COP_WW, Pel):
-        self.COP_HZG = 3  #COP im Heizbetrieb
-        self.COP_WW = 2 #COP im Warmwasserbetrieb
-        self.Pel = 3 #Elektrische Leistungsaufnahme in kW
+        self.COP_HZG = COP_HZG  #COP im Heizbetrieb
+        self.COP_WW = COP_WW #COP im Warmwasserbetrieb
+        self.Pel = Pel #Elektrische Leistungsaufnahme in kW
 
         self.hystEin = 0.2 #Gibt an ab welchen Ladestand sich die Wärmepumpe einschalten soll
         self.hystAus = 0.8 #Gibt an ab welchen Ladestand sich die Wärmepumpe ausschalten soll
@@ -94,11 +95,13 @@ class Wärmepumpe():
         if self.speicher.Speicherstand() > self.hystAus:
             self.TurnOff()
 
-test_Speicher = Speicher(MAX_Speicherstand = 100, MIN_Speicherstand = 0)
-test_WP = Wärmepumpe(speicher = test_Speicher)
-for i in range(30):
-    test_WP.speicher.SpeicherEntladen(5, test_WP.hystEin)
-    test_WP.CheckSpeicher(mode = "HZG")
-    print(f"Status WP: {test_WP.bIsOn}")
-    print(f"Ladestand Speicher: {test_WP.speicher.speicherstand}")
-    print("--------------------------")
+
+
+#test_Speicher = Speicher(MAX_Speicherstand = 100)
+#test_WP = Wärmepumpe(speicher = test_Speicher)
+#for i in range(30):
+#    test_WP.speicher.SpeicherEntladen(5, test_WP.hystEin)
+#    test_WP.CheckSpeicher(mode = "HZG")
+#    print(f"Status WP: {test_WP.bIsOn}")
+#    print(f"Ladestand Speicher: {test_WP.speicher.speicherstand}")
+#    print("--------------------------")

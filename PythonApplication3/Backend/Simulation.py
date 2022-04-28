@@ -32,35 +32,44 @@ W4 = Building( wand = {"Fläche":3620.23,"U-Wert":u_Wand},
 			  dach = {"Fläche":1114.8,"U-Wert":u_Dach},
 			  boden = {"Fläche":1114.8,"U-Wert":u_Boden})
 
+
 class Simulation():
 
 	def __init__(self):		
 		#Jedes Teilgebäude wird in einem Dictionary gesammelt
 		self.dic_buildings = {"W1":W1,"W2":W2,"W3":W3,"W4":W4}  
-		
+		for key,item in self.dic_buildings.items():
+			item.InitHeizlast()
+
+
 		self.ta = np.genfromtxt("./Data/climate.csv", delimiter=";", usecols = (1), skip_header = 1)
 
-		self.electricProfile = pd.read_csv("./Data/Stromprofil.csv", delimiter=";", decimal = ",")
+		speicher = Speicher(100000)
+		self.WP  = Wärmepumpe(speicher, COP_HZG= 5, COP_WW= 3, Pel= 1000)
 
-		print(self.electricProfile.info())
-		self.time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[d]')
-
-		speicher = Speicher(100000, 0.2)
-		self.WP  = Wärmepumpe(speicher, COP_HZG= 5, COP_WW= 3, Pel= 100)
+		self.anzPersonen = 1489 #Anzahl Personen in der Wohnanlage (Aus Excel)
 
 
 	def Simulate(self):
 
-		for hour in range(0,8760):
+		for hour in range(0,100):
 
 			stromVerbrauch = GetStromProfil(hour)  #Ruft den aktuellen Stromverbrauch ab in W 
 
 			qHLSum = 0
 
 			for key,building in self.dic_buildings.items():
-				qHLSum += building.CalcThermalFlows(self.ta[hour], DetermineHourofDay(hour))
+				qHLSum += building.CalcThermalFlows(ta=self.ta[hour], hour=hour, anz_Personen=self.anzPersonen, strom = stromVerbrauch) / 1000
 
-			self.WP.speicher.SpeicherEntladen(qHLSum, self.WP.hystEin
+			self.WP.speicher.SpeicherEntladen(qHLSum, self.WP.hystEin)
+			self.WP.CheckSpeicher(mode = "HZG")
+			print(f"Heizlast: {qHLSum/1000} MWh")
+			print(f"Status WP: {self.WP.bIsOn}")
+			print(f"Ladestand Speicher: {self.WP.speicher.Speicherstand()}")
+			print("--------------------------")
+
+
+
 
 
 		

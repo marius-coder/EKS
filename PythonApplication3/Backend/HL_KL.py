@@ -2,10 +2,17 @@
 import pandas as pd
 import numpy as np
 import math
+from Helper import *
 
 
 class HL():      
     
+    def InitHeizlast(self):
+    	self.belegungPersonen = pd.read_csv("./Data/Profile_PersonenGewinne.csv", delimiter=";")
+    	self.gewinnePersonen = 80 #W/Person
+
+
+
     def calc_QV(self, ta):
     		"""Ventilationswärmeverlust nach ÖNORM H 7500-1:2015"""
     		if ta > self.ti:
@@ -45,11 +52,29 @@ class HL():
       		q_wand = self.calc_QT_Wand(ta)
       		return q_wand + q_dach + q_boden
 
-    def CalcThermalFlows(self, ta, hourofDay):
-        """Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
+
+    def DetermineBelegung(self, hour):
+        hourofDay = DetermineHourofDay(hour)
+        if IsWeekday(hour):
+            return self.belegungPersonen["Belegung_Werktag [%]"][hourofDay] / 100
+        else:
+            return self.belegungPersonen["Belegung_Wochenende [%]"][hourofDay] / 100
+
+    def calc_Maschinen(self, strom):
+        return strom * 0.5
+
+    def calc_Personen(self, hour, anz_Personen):
+        belegung = self.DetermineBelegung(hour)
+        return self.gewinnePersonen * anz_Personen * belegung
+
+    def CalcThermalFlows(self, ta, hour, anz_Personen, strom):
+        """ Returns Watts
+        Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
             eines Gebäudes zu berechnen."""
         qT = self.calc_QT_Sum(ta)
         qV = self.calc_QV(ta)
-        qI = 1
+        qI = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
+        qM = self.calc_Maschinen(strom)
         qS = 1
-        return qT+qV+qI+qS
+        qSum = qT+qV+qI+qS
+        return qSum
