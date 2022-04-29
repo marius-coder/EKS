@@ -15,6 +15,9 @@ def GetStromProfil(hour):
 	"""Nimmt eine Stunde und gibt den Stromverbrauch zuruck
 	Dabei wird nach Jahreszeiten unterschieden
 	Die Werte werden prozentuell aufgeteilt um scharfe Kanten im Verbrauch zu vermeiden"""
+
+	mode = IsWeekday2(hour)
+
 	Date1 = date(time[hour].year,time[hour].month,time[hour].day)
 	if Spring <= Date1 <= Summer:
 		diffSpring = (Date1 - Spring).days
@@ -22,8 +25,9 @@ def GetStromProfil(hour):
 		diffSpringPercent = 1 - diffSpring / (diffSummer + diffSpring)
 		diffSummerPercent = 1 - diffSummer / (diffSummer + diffSpring)
 		hour = DetermineHourofDay(hour)
-		strom = electricProfile["Werktag_Sommer"][hour*4] * diffSummerPercent + electricProfile["Werktag_Ubergang"][hour*4] * diffSpringPercent
-		print("Spring-Summer")
+		strom = electricProfile[mode + "_Sommer"][hour*4:hour*4+4].mean() * diffSummerPercent + \
+			electricProfile[mode + "_Ubergang"][hour*4:hour*4+4].mean() * diffSpringPercent
+		#print("Spring-Summer")
 		return strom
 
 	elif Summer <= Date1 <= Autumn:
@@ -32,8 +36,9 @@ def GetStromProfil(hour):
 		diffSummerPercent = 1 - diffSummer / (diffSummer + diffAutumn)
 		diffAutumnPercent = 1 - diffAutumn / (diffSummer + diffAutumn)
 		hour = DetermineHourofDay(hour)
-		strom = electricProfile["Werktag_Sommer"][hour*4] * diffSummerPercent + electricProfile["Werktag_Ubergang"][hour*4] * diffAutumnPercent
-		print("Summer-Autumn")
+		strom = electricProfile[mode + "_Sommer"][hour*4:hour*4+4].mean() * diffSummerPercent + \
+			electricProfile[mode + "_Ubergang"][hour*4:hour*4+4].mean() * diffAutumnPercent
+		#print("Summer-Autumn")
 		return strom
 
 	elif Autumn <= Date1 <= Winter:
@@ -42,8 +47,9 @@ def GetStromProfil(hour):
 		diffAutumnPercent = 1 - diffAutumn / (diffWinter + diffAutumn)
 		diffWinterPercent = 1 - diffWinter / (diffWinter + diffAutumn)
 		hour = DetermineHourofDay(hour)
-		strom = electricProfile["Werktag_Winter"][hour*4] * diffWinterPercent + electricProfile["Werktag_Ubergang"][hour*4] * diffAutumnPercent
-		print("Autumn-Winter")
+		strom = electricProfile[mode + "_Winter"][hour*4:hour*4+4].mean() * diffWinterPercent + \
+			electricProfile[mode + "_Ubergang"][hour*4:hour*4+4].mean() * diffAutumnPercent
+		#print("Autumn-Winter")
 		return strom
 
 	else:
@@ -59,12 +65,21 @@ def GetStromProfil(hour):
 		diffWinterPercent = 1 - diffWinter / (diffSpring + diffWinter)
 
 		hour = DetermineHourofDay(hour)
-		strom = electricProfile["Werktag_Winter"][hour*4] * diffWinterPercent + electricProfile["Werktag_Ubergang"][hour*4] * diffSpringPercent
-		print("Winter-Spring")
+		strom = electricProfile[mode + "_Winter"][hour*4:hour*4+4].mean() * diffWinterPercent + \
+			electricProfile[mode + "_Ubergang"][hour*4:hour*4+4].mean() * diffSpringPercent
+		#print("Winter-Spring")
 		return strom
 
 def DetermineHourofDay(hour):
-	return (hour+1) % 24
+	return (hour) % 24
+
+def IsWeekday2(hour):
+	if time[hour].weekday() == 5:
+		return "Samstag"
+	elif time[hour].weekday() == 6:
+		return "Sonntag"
+	else:
+		return "Werktag"
 
 def IsWeekday(hour):
 	if time[hour].weekday() == 6 or time[hour].weekday() == 5:
