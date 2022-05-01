@@ -28,15 +28,19 @@
     <Compile Include="Backend\Simulation.py" />
     <Compile Include="Backend\Simulation_alt.py" />
     <Compile Include="Backend\Wärmepumpe_Speicher.py" />
+    <Compile Include="EMobility\Auto.py" />
+    <Compile Include="EMobility\LadeController.py" />
     <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Backend\" />
     <Folder Include="Frontend\" />
     <Folder Include="Data\" />
+    <Folder Include="EMobility\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\climate.csv" />
+    <Content Include="Data\Profile_GefahreneKilometer.csv" />
     <Content Include="Data\Profile_PersonenGewinne.csv" />
     <Content Include="Data\Stromprofil.csv" />
     <Content Include="Data\WrNeustadt.xlsx" />
