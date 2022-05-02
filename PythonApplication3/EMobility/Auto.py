@@ -8,6 +8,14 @@ class Auto():
 		self.minLadung = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
 		self.kapazitat = maxLadung #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
+		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
+
+		self.minTimeAway = 0 #gibt an wie lange das Auto mindestens weg sein muss (verhindert unlogische Zeiten wie 120km in einer Stunden)
+		self.borrowTime = 0 #gibt an wie lange das Auto bereits ausgeborgt worden ist
+
+	def DecrementMinTimeAway(self):
+		if self.minTimeAway != 0:
+			self.minTimeAway -= 1
 
 	def Laden(self, qtoLoad):
 		if qtoLoad > self.leistung_MAX:
@@ -62,3 +70,5 @@ class Auto():
 	def Speicherstand(self):
 		"""Gibt den aktuellen Speicherstand in Anteilen zuruck"""
 		return self.kapazitat / self.maxLadung
+
+

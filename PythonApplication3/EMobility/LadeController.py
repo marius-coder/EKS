@@ -2,9 +2,10 @@
 import pandas as pd
 import numpy as np
 import math
-
-from random import choices
+import matplotlib.pyplot as plt
+from random import choices, randint
 from Auto import Auto
+from PlotMobility import PlotStatusCollection, PlotSample
 
 class LadeController():
 
@@ -24,7 +25,13 @@ class LadeController():
 
 		self.population = mobilityData["Gefahrene Kilometer"].tolist()
 		self.weights = mobilityData["Wahrscheinlichkeit Kilometer gefahren"].tolist()
+
+		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
+
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
+		self.maxBorrowTime = 24 #Auto kann fur maximal 18 Stunden ausgeborgt werden
+		self.averageSpeed = 40 #km/h angenommene Durchschnittsgeschwindigkeit
+		self.li_state = [] #Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
 
 	def InitAutos(self,anzAutos, distMinLadung, maxLadung):
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
@@ -77,7 +84,41 @@ class LadeController():
 	def GetChargingCars(self):
 		return [car for car in self.li_Autos if car.bCharging == True]
 
-	def CheckTimestep(self, qLoad, qGeneration):
+	def DriveAway(self, car, ):
+		"""Auto fahrt weg. Es werden Kilometer generiert. 
+		Aus den km berechnet sich die mindestzeit die das Auto weg sein wird.
+		Speicher des autos wird aktualisiert und abgehangt"""
+		km = test.GenerateKilometer()
+		self.UpdateLadestand(car, km)
+		minTimeAway = round(km/self.averageSpeed+1,0) #Die Zeit die das Auto mindestens weg ist
+		car.minTimeAway = minTimeAway 
+		car.bCharging = False
+
+	def IterCars(self, hour):
+		
+
+		hour = hour%24
+		li_inter = []
+		for i,car in enumerate(test.li_Autos):
+			threshhold = randint(0,100)
+
+			if car.bCharging == True:
+				if test.travelData["Losfahren"][hour] > threshhold:
+					self.DriveAway(car)
+
+			elif car.bCharging == False and car.minTimeAway == 0:
+				car.borrowTime += 1
+				if test.travelData["Ankommen"][hour] > threshhold or car.borrowTime > self.maxBorrowTime:
+					car.borrowTime = 0
+					car.bCharging = True
+			li_inter.append(car.bCharging)
+		
+			car.DecrementMinTimeAway()
+		self.li_state.append(li_inter)
+
+	
+
+	def CheckTimestep(self, hour, qLoad, qGeneration):
 		#Reslast herausfinden
 		#je nach Prioritat Leistungen zuordnen
 		#Leistungen nach prioritat abarbeiten
@@ -85,12 +126,15 @@ class LadeController():
 
 		resLast = qGeneration - qLoad
 
-		self.li_Autos[0].bCharging = False
+		self.IterCars(hour) #Festlegen welche Autos wegfahren bzw. Zuruckkommen
 
 		chargingCars = self.GetChargingCars()
 
 		if resLast > 0:
-			pass
+			for car in chargingCars:
+				#Jedes Autos welches läft wird gleich geladen
+				#Keine Priorisierung
+				car.Laden(resLast/len(chargingCars)) 
 			#AufladeFall
 			#Autos die da sind aufladen
 
@@ -109,8 +153,16 @@ distMinLadung = {
 	"30" : 0.5		#50% mussen 50% geladen sein
 	}
 
-test = LadeController(anzAutos= 10, distMinLadung= distMinLadung, maxLadung = 75)
-test.CheckTimestep(10,20)
+
+
+test = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
+
+for hour in range(200):
+	test.CheckTimestep(hour= hour, qLoad= 10, qGeneration= 20)
+
+PlotSample(test.li_state, 10, 192)
+PlotStatusCollection(test.li_state)
+
 for _ in range(10):
 	for auto in test.li_Autos:
 		print(f"Stunde {_}")
@@ -132,6 +184,3 @@ for anzAutos in range(100):
 		print("--------------------")
 
 
-
-
-print("")
