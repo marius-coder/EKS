@@ -6,7 +6,7 @@ class Auto():
 		self.effizienz = 0.95 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
 		self.maxLadung = maxLadung #Ladekapazitat des Autos in kWh
 		self.minLadung = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
-		self.kapazitat = maxLadung #Laufvariable in kWh
+		self.kapazitat = maxLadung * minLadung #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
 

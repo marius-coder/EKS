@@ -183,6 +183,13 @@ class LadeController():
 			if car.Speicherstand() > car.minLadung:
 				raise ValueError('Cars capacity is too low')
 
+	def TakeSnapshot(self, toCheck):
+		inter = 0
+		for car in toCheck:
+			inter += car.kapazitat
+		return inter
+
+
 	def CheckTimestep(self, hour, qLoad, qGeneration):
 		"""Diese Funktion berechnet die Residuallast, entscheidet ob die Autos ge-/entladen werden 
 		und ruft die betreffenden Funktionen auf.
@@ -195,24 +202,32 @@ class LadeController():
 		self.IterCars(hour= hour, iterations= 1) #Festlegen welche Autos wegfahren bzw. Zuruckkommen
 		
 		resLast = qGeneration - qLoad
+		toTest1 = resLast
 		if resLast > 0:			
-		#Ladefall
+			#Ladefall
+			snap1 = self.TakeSnapshot(self.GetChargingCars())
 			for _ in range(3):
 				#Der Ladevorgang wird drei mal iteriert, wenn danach noch resLast ubrig ist wird diese weiter verwendet
 				resLast = self.LoadCars(resLast= resLast)
 				if resLast == 0: #Wenn resLast bereits 0 ist konnen wir vorzeitig abbrechen
 					break
 			self.ResetLoadParameter()
-		
+			snap2 = self.TakeSnapshot(self.GetChargingCars())
+			print(snap2-snap1)
+			print("")
+			
 		elif resLast < 0:
-		#Entladefall
+			#Entladefall
+			snap1 = self.TakeSnapshot(self.GetChargingCars())
 			for _ in range(3):
 				#Der Ladevorgang wird drei mal iteriert, wenn danach noch resLast ubrig ist wird diese weiter verwendet
 				resLast = self.DeloadCars(resLast= abs(resLast))
 				if resLast == 0: #Wenn resLast bereits 0 ist konnen wir vorzeitig abbrechen
 					break
 			self.ResetLoadParameter()
-			
+			snap2 = self.TakeSnapshot(self.GetChargingCars())
+			print(snap1-snap2)
+			print("")
 
 		
 distMinLadung = {
@@ -228,7 +243,7 @@ distMinLadung = {
 test = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
 
 for hour in range(128):
-	test.CheckTimestep(hour= hour, qLoad= 20, qGeneration= 10)
+	test.CheckTimestep(hour= hour, qLoad= 10, qGeneration= 20)
 
 PlotSample(test.li_state, 10, 128)
 PlotStatusCollection(test.li_state)
