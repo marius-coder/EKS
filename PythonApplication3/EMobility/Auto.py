@@ -12,6 +12,7 @@ class Auto():
 
 		self.minTimeAway = 0 #gibt an wie lange das Auto mindestens weg sein muss (verhindert unlogische Zeiten wie 120km in einer Stunden)
 		self.borrowTime = 0 #gibt an wie lange das Auto bereits ausgeborgt worden ist
+		self.loaded = self.leistung_MAX #Laufvariable die angibt an wie viel Energie bereits in einer Stunde geladen wurde
 
 	def DecrementMinTimeAway(self):
 		if self.minTimeAway != 0:

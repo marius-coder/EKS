@@ -29,7 +29,7 @@ class LadeController():
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
-		self.maxBorrowTime = 24 #Auto kann fur maximal 18 Stunden ausgeborgt werden
+		self.maxBorrowTime = 24 #Auto kann fur maximal 24 Stunden ausgeborgt werden
 		self.averageSpeed = 40 #km/h angenommene Durchschnittsgeschwindigkeit
 		self.li_state = [] #Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
 
@@ -68,6 +68,9 @@ class LadeController():
 			li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung))
 			checksum -= 1
 
+		for i in range(int(len(li_Autos)/2)):
+			li_Autos[i].bCharging = False
+
 		return li_Autos, checksum
 
 	def GenerateKilometer(self):
@@ -81,7 +84,7 @@ class LadeController():
 		if auto.kapazitat < 0:
 			auto.kapazitat = 0
 
-	def GetChargingCars(self):
+	def GetChargingCars(self) -> list:
 		return [car for car in self.li_Autos if car.bCharging == True]
 
 	def DriveAway(self, car, ):
@@ -94,55 +97,122 @@ class LadeController():
 		car.minTimeAway = minTimeAway 
 		car.bCharging = False
 
-	def IterCars(self, hour):
-		
+	def IterCars(self, hour, iterations):
+		"""Iteriert durch die Autos und entscheidet ob die Autos wegfahren bzw. Ankommen
+		iterations: int
+			Bestimmt wie oft der threshhold getestet wird. Je mehr iterations desto hoher werden die Extremwerte"""
 
 		hour = hour%24
 		li_inter = []
-		for i,car in enumerate(test.li_Autos):
-			threshhold = randint(0,100)
+		for car in test.li_Autos:
+			for _ in range(iterations):
+				threshhold = randint(0,100) #Threshhold der bestimmt ob das Auto wegfahrt bzw. zuruckkommt
 
-			if car.bCharging == True:
-				if test.travelData["Losfahren"][hour] > threshhold:
-					self.DriveAway(car)
-
-			elif car.bCharging == False and car.minTimeAway == 0:
-				car.borrowTime += 1
-				if test.travelData["Ankommen"][hour] > threshhold or car.borrowTime > self.maxBorrowTime:
-					car.borrowTime = 0
-					car.bCharging = True
-			li_inter.append(car.bCharging)
+				if car.bCharging == True: #Nur wenn das Auto da ist kann es wegfahren
+					if test.travelData["Losfahren"][hour] > threshhold:
+						self.DriveAway(car)
+			
+				#Nur wenn das Auto die Mindestzeit weg war kann es zuruckkommen
+				elif car.bCharging == False and car.minTimeAway == 0: 
+					car.borrowTime += 1
+					#Es gibt eine maximal ausborgezeit (um Wahrscheinlichkeiten zu verhindern dass ein Auto zu lange weg ist)
+					if test.travelData["Ankommen"][hour] > threshhold or car.borrowTime > self.maxBorrowTime:
+						car.borrowTime = 0
+						car.bCharging = True
+			li_inter.append(car.bCharging) #Datensammlung fur spateres plotting
 		
 			car.DecrementMinTimeAway()
 		self.li_state.append(li_inter)
+			
+	def ResetLoadParameter(self):
+		"""Nach jeden Zeitschritt muss die loaded Variable wieder zuruckgesetzt werden.
+		loaded beschreibt wie viel Energie bereits in das Auto geladen wurde in einem Zeitschritt"""
+		for car in self.li_Autos:
+			car.loaded = car.leistung_MAX #Laufvariablen zurucksetzen
 
-	
+	def GetAvailableCars(self) -> list:
+		"""Gibt liste an Autos zuruck welche entladbar sind"""
+		chargingCars = self.GetChargingCars() #first get all charging cars
+		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]
+
+	def LoadCars(self, resLast):
+		"""Diese Funktion ladt die Autos auf. dabei wird keine priorisierung in der Ladereihenfolge vorgenommen.
+		Alle Autos werden nach moglichkeit gleichmasig geladen"""
+
+		chargingCars = self.GetChargingCars()
+		#Theoretische Ladung pro Auto berechnen
+		length = len(chargingCars)
+		if length == 0:
+			length = 1		
+		ladungTheoretisch = resLast / length
+		for car in chargingCars:
+			ladeplatzAuto = car.maxLadung - car.kapazitat
+			#Es kann nur das Minimum dieser Werte geladen werden 
+			#(nicht genug ladeenergie, nicht genug Speicherplatz, Uberschreitung der Ladeleistung, bereits zu viel geladen)
+			ladung = min([ladungTheoretisch,ladeplatzAuto,car.leistung_MAX,car.loaded])
+			car.loaded -= ladung #Laufvariable wird abgezogen
+			check = car.Laden(ladung) #Auto aufladen
+			if check != 0: #Sanity Ceck, das sollte nie zutreffen
+				print("")
+			resLast -= ladung
+		return resLast
+
+	def DeloadCars(self, resLast):		
+		availableCars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die genugend Ladung haben
+		#Theoretische Ladung pro Auto berechnen
+		length = len(availableCars)
+		if length == 0:
+			length = 1		
+		ladungTheoretisch = resLast / length
+
+		for car in availableCars:
+			ladeKapAuto = car.kapazitat - car.kapazitat * car.minLadung
+			#Es kann nur das Minimum dieser Werte geladen werden 
+			#(nicht genug ladeenergie, nicht genug Speicherplatz, Uberschreitung der Ladeleistung, bereits zu viel geladen)
+			ladung = min([ladungTheoretisch,ladeKapAuto,car.leistung_MAX,car.loaded])
+			car.loaded -= ladung #Laufvariable wird abgezogen
+			check = car.Entladen(ladung) #Auto aufladen
+			if check != 0: #Sanity Ceck, das sollte nie zutreffen
+				print("")
+			resLast -= ladung
+		return resLast
+
+	def CheckCars(self):
+		cars = self.GetChargingCars()
+		for car in cars:
+			if car.Speicherstand() > car.minLadung:
+				raise ValueError('Cars capacity is too low')
 
 	def CheckTimestep(self, hour, qLoad, qGeneration):
+		"""Diese Funktion berechnet die Residuallast, entscheidet ob die Autos ge-/entladen werden 
+		und ruft die betreffenden Funktionen auf.
+		"""
 		#Reslast herausfinden
 		#je nach Prioritat Leistungen zuordnen
 		#Leistungen nach prioritat abarbeiten
 		#Falls rest besteht das Stromnetz einbeziehen (Einspeisung/Bezug)
 
+		self.IterCars(hour= hour, iterations= 1) #Festlegen welche Autos wegfahren bzw. Zuruckkommen
+		
 		resLast = qGeneration - qLoad
-
-		self.IterCars(hour) #Festlegen welche Autos wegfahren bzw. Zuruckkommen
-
-		chargingCars = self.GetChargingCars()
-
-		if resLast > 0:
-			for car in chargingCars:
-				#Jedes Autos welches läft wird gleich geladen
-				#Keine Priorisierung
-				car.Laden(resLast/len(chargingCars)) 
-			#AufladeFall
-			#Autos die da sind aufladen
-
-
-
+		if resLast > 0:			
+		#Ladefall
+			for _ in range(3):
+				#Der Ladevorgang wird drei mal iteriert, wenn danach noch resLast ubrig ist wird diese weiter verwendet
+				resLast = self.LoadCars(resLast= resLast)
+				if resLast == 0: #Wenn resLast bereits 0 ist konnen wir vorzeitig abbrechen
+					break
+			self.ResetLoadParameter()
+		
 		elif resLast < 0:
-			pass
-			#Entladefall
+		#Entladefall
+			for _ in range(3):
+				#Der Ladevorgang wird drei mal iteriert, wenn danach noch resLast ubrig ist wird diese weiter verwendet
+				resLast = self.DeloadCars(resLast= abs(resLast))
+				if resLast == 0: #Wenn resLast bereits 0 ist konnen wir vorzeitig abbrechen
+					break
+			self.ResetLoadParameter()
+			
 
 		
 distMinLadung = {
@@ -157,10 +227,10 @@ distMinLadung = {
 
 test = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
 
-for hour in range(200):
-	test.CheckTimestep(hour= hour, qLoad= 10, qGeneration= 20)
+for hour in range(128):
+	test.CheckTimestep(hour= hour, qLoad= 20, qGeneration= 10)
 
-PlotSample(test.li_state, 10, 192)
+PlotSample(test.li_state, 10, 128)
 PlotStatusCollection(test.li_state)
 
 for _ in range(10):
