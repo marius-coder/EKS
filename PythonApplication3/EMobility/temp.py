@@ -10,3 +10,8 @@ class cla_Gebaude():
         self.BGF = var_BGF   #m²
         self.EV = var_EV * self.BGF / 1000   #kW
 
+
+
+
+
+
