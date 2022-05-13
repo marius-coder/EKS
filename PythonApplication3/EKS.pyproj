@@ -5,7 +5,7 @@
     <ProjectGuid>29e0808a-7d25-4eec-9555-6f55aab3ca3f</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>EMobility\LadeController.py</StartupFile>
+    <StartupFile>EMobility\LadeController_OLD.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -30,6 +30,9 @@
     <Compile Include="Backend\Wärmepumpe_Speicher.py" />
     <Compile Include="EMobility\Auto.py" />
     <Compile Include="EMobility\LadeController.py" />
+    <Compile Include="EMobility\Ladecontroller_Helper.py" />
+    <Compile Include="EMobility\LadeController_OLD.py" />
+    <Compile Include="EMobility\miscellaneous.py" />
     <Compile Include="EMobility\temp.py" />
     <Compile Include="EMobility\PlotMobility.py" />
     <Compile Include="main.py" />
