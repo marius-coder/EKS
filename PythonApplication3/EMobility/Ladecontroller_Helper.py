@@ -1,6 +1,8 @@
 # -*- coding: <latin-1> -*-
-from random import seed, choices
+from itertools import count
+from random import seed, choices, uniform
 from miscellaneous import *
+from collections import Counter
 seed(10)
 def CalcMobilePersonen(day, personen):
     if day == "Werktag":
@@ -12,7 +14,7 @@ def CalcMobilePersonen(day, personen):
     return personen * factor
    
 def GenerateWeightedItem(pop, weights):
-	"""Gibt eine Zahl/String, mit einer custom Gewichtung, zwischen 2-5 zuruck"""
+	"""Gibt eine Zahl/String, mit einer custom Gewichtung zuruck"""
 	return choices(pop, weights)[0]
 
 def CalcNumberofWays(day):
@@ -35,8 +37,8 @@ def GenerateWegZweck(day):
         weights = [5,5,47,2,3,26,1,11]        
     return GenerateWeightedItem(pop= population, weights= weights)
 
-def GenerateIfDriving(zweck):
-    """Je nach Wegzweck ergibt sich eine Warscheihnlichkeit ob das Auto als Transportmittel gewählt wird"""
+def GenerateTransportmittel(zweck):
+    """Je nach Wegzweck ergibt sich eine Warscheihnlichkeit ob das Auto als Transportmittel gewahlt wird"""
     population = ["zuFus","Rad","AutolenkerIn","MitfahrerIn","Offentlich","Anderes"]
     if zweck == "Arbeitsplatz":
         weights = [8,7,60,5,20,0] 
@@ -61,15 +63,26 @@ def GenerateKilometer():
     population = [[0,0.5],[0.5,1],[1,2.5],[2.5,5],[5,10],[10,20],[20,50],[50,70]]
     weights = [2,5,12,21,21,19,15,5] 
     bereich = GenerateWeightedItem(pop= population, weights= weights)
-    return choices(bereich)
+    return round(uniform(bereich[0],bereich[1]),2)
 
+uberlauf = 0
+def CalcAutoWege(ways, day):
+    global uberlauf
+    gesTransport = []
+    for _ in range(ways):
+        zweck = GenerateWegZweck(day)
+        gesTransport.append(GenerateTransportmittel(zweck))
 
-
-
-for hour in range(10):
-    day = DetermineDay(hour)
-    pers = CalcMobilePersonen(day,1000)
-    ways = CalcNumberofWays(day)
-    zweck = GenerateWegZweck(day)
-    artMobilitat = GenerateIfDriving(zweck)
-    km = GenerateKilometer()
+    ret = dict(Counter(gesTransport))
+    if "AutolenkerIn" in ret:
+        if ret["AutolenkerIn"] == 1:
+            if uberlauf == 0:
+                return 0
+                uberlauf = 1
+            else:
+                return 2
+                uberlauf = 0
+        else:
+            return ret["AutolenkerIn"]
+    else:
+        return 0

@@ -1,7 +1,7 @@
 
 class Auto():
 
-	def __init__(self, maxLadung, minLadung):
+	def __init__(self, maxLadung, minLadung, counter):
 		self.leistung_MAX = 20 #kW Maximale Lade-/Entladeleistung der Station
 		self.effizienz = 0.95 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
 		self.maxLadung = maxLadung #Ladekapazitat des Autos in kWh
@@ -10,6 +10,7 @@ class Auto():
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
 
+		self.ID = counter
 		self.minTimeAway = 0 #gibt an wie lange das Auto mindestens weg sein muss (verhindert unlogische Zeiten wie 120km in einer Stunden)
 		self.borrowTime = 0 #gibt an wie lange das Auto bereits ausgeborgt worden ist
 		self.loaded = self.leistung_MAX #Laufvariable die angibt an wie viel Energie bereits in einer Stunde geladen wurde

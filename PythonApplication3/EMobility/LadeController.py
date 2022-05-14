@@ -1,14 +1,16 @@
-
+# -*- coding: <latin-1> -*-
 import pandas as pd
 import numpy as np
-import math
+from math import ceil
 import matplotlib.pyplot as plt
-from random import choices, randint
+from random import choice, choices, randint
 from Auto import Auto
 from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity
 from temp import *
 from miscellaneous import DetermineDay, Person
-from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateIfDriving,GenerateKilometer
+from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
+from collections import Counter
+from Backend.Helper import DetermineHourofDay
 
 import Plotting.DataScraper as DS
 
@@ -32,9 +34,12 @@ class LadeController():
 		self.weights = mobilityData["Wahrscheinlichkeit Kilometer gefahren"].tolist()
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
+		self.maxBorrowTime = 6
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
 		self.averageSpeed = 50 #km/h angenommene Durchschnittsgeschwindigkeit
+		self.drivingPersons = []
+		self.awayPersons = []
 
 
 	def InitAutos(self,anzAutos, distMinLadung, maxLadung):
@@ -55,6 +60,7 @@ class LadeController():
 
 		#Keys mussen aufsteigend sortiert sein fur spateres Egde-Case Handling
 		keys = sorted(distMinLadung.keys()) 
+		counter = 0
 
 		for percent in keys:
 			minLadung = distMinLadung[percent]
@@ -64,7 +70,8 @@ class LadeController():
 			for _ in range(anzInter):
 				if checksum == 0:
 					return li_Autos, checksum
-				li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung))
+				li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung, counter= counter))
+				counter += 1
 				checksum -= 1
 
 		#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
@@ -100,29 +107,83 @@ class LadeController():
 			useableCapacity += car.kapazitat - car.kapazitat * car.minLadung
 		return useableCapacity
 
+	def DriveAway(self, car, person):
+		"""Auto fahrt weg. Es werden Kilometer generiert. 
+		Aus den km berechnet sich die mindestzeit die das Auto weg sein wird.
+		Speicher des autos wird aktualisiert und abgehangt"""
+		person.carID = car.ID
+		
+		km = person.wegMitAuto + person.WaybackHome()
+		self.UpdateLadestand(car, km)
+		minTimeAway = round(km/self.averageSpeed+1,0) #Die Zeit die das Auto mindestens weg ist
+		car.minTimeAway = minTimeAway 
+		person.status = False
+		car.bCharging = False
+
+	def FindCarID(self, ID):
+		for car in self.li_Autos:
+			if car.ID == ID:
+				return car
+
+
+	def InitDay(self, day):
+		percent = 0.3
+		mobilePersons = ceil(CalcMobilePersonen(day, 1335))
+
+		persons = []
+		for _ in range(mobilePersons):
+			persons.append(Person()) #Neue Person generieren
+		
+		limit = ceil(mobilePersons * percent)
+		personsCarSharing = persons[0:limit]
+		drivingPersons = []
+			
+		for person in personsCarSharing:
+			ways = CalcNumberofWays(day) 
+			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)
+			if person.anzAutoWege >= 2:
+				for _ in range(person.anzAutoWege-1):
+					km = GenerateKilometer()
+					person.AddWay(km) #Fur den Ruckweg
+					person.wegMitAuto += km #Fur den Verbrauch des Autos
+				drivingPersons.append(person)
+		return drivingPersons
+
 	def CheckTimestep(self, hour, qLoad, qGeneration):
 		"""Diese Funktion berechnet die Residuallast, entscheidet ob die Autos ge-/entladen werden 
 		und ruft die betreffenden Funktionen auf.
 		"""
 		day = DetermineDay(hour)
+		hourIndex = DetermineHourofDay(hour)
+		#print(f"Hour: {hour}")
+		if hourIndex == 0:
+			self.drivingPersons = self.InitDay(day)
+			print(f"away Persons: {len(self.awayPersons)}")
 
-		mobilePersons = CalcMobilePersonen(1335)
-		li_Persons = []
-		for _ in mobilePersons:
-			person = Person() #Neue Person generieren
-			ways = CalcNumberofWays(day) -1 #Ein weg ist immer für den Nachhauseweg reserviert
-			if ways > 1:
-				for _ in range(ways):
-					zweck = GenerateWegZweck(day)
-					if GenerateIfDriving(zweck) == "AutolenkerIn":
-						weg = GenerateKilometer()
-						person.wegMitAuto += weg
-					else:
-						weg = GenerateKilometer()
-					person.wegGesamt += weg
-					person.AddWay(weg)
-						#Weg wird nicht mit auto zurückgelegt
-		,,GenerateIfDriving,GenerateKilometer
+		li_inter = []
+		for person in self.drivingPersons:
+			threshhold = randint(0,100) #Threshhold der bestimmt ob das Auto wegfahrt bzw. zuruckkommt
+			if person.status == True:
+				if self.travelData["Losfahren"][hourIndex] > threshhold:					
+					car = choice(self.GetChargingCars())
+					self.DriveAway(car= car, person= person)
+					self.awayPersons.append(person)
+
+		for person in self.awayPersons:
+			if person.status == False:
+				person.borrowTime += 1
+				if self.travelData["Ankommen"][hourIndex] > threshhold or person.borrowTime > self.maxBorrowTime:
+					person.borrowTime = 0
+					car = next((x for x in self.li_Autos if x.ID == person.carID), None)
+					person.status = True
+					car.bCharging = True
+					self.awayPersons.remove(person)
+			li_inter.append(person.status)
+		
+		DS.Scraper.li_state.append(li_inter)
+		
+		
+
 
 
 #Key gibt an wie viele Prozent an Autos (Prozent mussen ganze Zahlen sein)
@@ -135,9 +196,10 @@ distMinLadung = {
 
 
 
-test = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
+test = LadeController(anzAutos= 10000, distMinLadung= distMinLadung, maxLadung = 75)
 
 for hour in range(500):
 	test.CheckTimestep(hour,10,9)
 
 
+PlotStatusCollection(DS.Scraper.li_state)
