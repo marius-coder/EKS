@@ -13,6 +13,7 @@ class DataScraper():
 
     def Init_eMobility(self):
         self.li_state = []			#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
+        self.li_stateCars = []			#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
         self.useableCapacity = []	#Liste in der die verwendbare Kapazitat gespeichert wird zum plotten
         self.demand = []			#Liste in der der Bedarf von Auserhalb gespeichert wird
         self.demandDriving = []		#Liste in der der Bedarf der Autos zum Fahren gespeichert wird

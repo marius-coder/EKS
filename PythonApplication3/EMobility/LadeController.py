@@ -34,7 +34,8 @@ class LadeController():
 		self.weights = mobilityData["Wahrscheinlichkeit Kilometer gefahren"].tolist()
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
-		self.maxBorrowTime = 6
+		self.maxBorrowTime = 1000
+		self.maxWaitingTime = 1000
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
 		self.averageSpeed = 50 #km/h angenommene Durchschnittsgeschwindigkeit
@@ -80,7 +81,7 @@ class LadeController():
 			checksum -= 1
 
 		for i in range(int(len(li_Autos)/2)):
-			li_Autos[i].bCharging = False
+			li_Autos[i].bCharging = True
 
 		return li_Autos, checksum
 	
@@ -156,21 +157,30 @@ class LadeController():
 		day = DetermineDay(hour)
 		hourIndex = DetermineHourofDay(hour)
 		#print(f"Hour: {hour}")
+		
 		if hourIndex == 0:
-			self.drivingPersons = self.InitDay(day)
-			print(f"away Persons: {len(self.awayPersons)}")
 
-		li_inter = []
-		for person in self.drivingPersons:
+			drivingPersons = self.InitDay(day)
+			print(f"Personen Anwesend: {len([person for person in self.awayPersons if person.status == True])}")
+			self.awayPersons.extend(drivingPersons)			
+			print(f"Personen Unterwegs: {len([person for person in self.awayPersons if person.status == False])}")
+			
+
+
+		li_interCars = []
+		li_interPersons = []
+		for person in self.awayPersons:
 			threshhold = randint(0,100) #Threshhold der bestimmt ob das Auto wegfahrt bzw. zuruckkommt
 			if person.status == True:
-				if self.travelData["Losfahren"][hourIndex] > threshhold:					
+				person.waitingTime += 1
+				if self.travelData["Losfahren"][hourIndex] > threshhold or person.waitingTime > self.maxWaitingTime:					
 					car = choice(self.GetChargingCars())
 					self.DriveAway(car= car, person= person)
-					self.awayPersons.append(person)
+					person.waitingTime = 0
+					#self.awayPersons.append(person)
 
-		for person in self.awayPersons:
-			if person.status == False:
+		
+			elif person.status == False:
 				person.borrowTime += 1
 				if self.travelData["Ankommen"][hourIndex] > threshhold or person.borrowTime > self.maxBorrowTime:
 					person.borrowTime = 0
@@ -178,9 +188,12 @@ class LadeController():
 					person.status = True
 					car.bCharging = True
 					self.awayPersons.remove(person)
-			li_inter.append(person.status)
+			li_interPersons.append(person.status)
+		for car in self.li_Autos:
+			li_interCars.append(car.bCharging)
 		
-		DS.Scraper.li_state.append(li_inter)
+		DS.Scraper.li_state.append(li_interPersons)
+		DS.Scraper.li_stateCars.append(li_interCars)
 		
 		
 
@@ -196,10 +209,11 @@ distMinLadung = {
 
 
 
-test = LadeController(anzAutos= 10000, distMinLadung= distMinLadung, maxLadung = 75)
+test = LadeController(anzAutos= 500, distMinLadung= distMinLadung, maxLadung = 75)
 
 for hour in range(500):
 	test.CheckTimestep(hour,10,9)
 
 
 PlotStatusCollection(DS.Scraper.li_state)
+PlotStatusCollection(DS.Scraper.li_stateCars)

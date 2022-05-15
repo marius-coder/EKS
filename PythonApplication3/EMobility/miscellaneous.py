@@ -17,6 +17,7 @@ class Person():
 		self.wegMitAuto = 0
 		self.carID = None
 		self.borrowTime = 0 #gibt an wie lange das Auto bereits ausgeborgt worden ist
+		self.waitingTime = 0 #gibt an wie lange die Person bereits wartet zu fahren
 
 	def AddWay(self, distance):
 		alpha = radians(randint(0,359)) #alpha beschreibt die zufallige Richtung in die wir uns bewegen konnen in Bogenmas
