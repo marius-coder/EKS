@@ -28,18 +28,12 @@ class LadeController():
 			Eingabe in kWh.
 		"""		
 		self.spezVerbrauch = 0.170 #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
-		mobilityData = pd.read_csv("./Data/Profile_GefahreneKilometer.csv", usecols=[1,3], decimal=",", sep=";")
-
-		self.population = mobilityData["Gefahrene Kilometer"].tolist()
-		self.weights = mobilityData["Wahrscheinlichkeit Kilometer gefahren"].tolist()
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
-		self.maxBorrowTime = 1000
-		self.maxWaitingTime = 1000
 		self.anzPers2 = 0
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
-		self.averageSpeed = 50 #km/h angenommene Durchschnittsgeschwindigkeit
+		self.averageSpeed = 40 #km/h angenommene Durchschnittsgeschwindigkeit
 		self.drivingPersons = []
 		self.awayPersons = []
 
@@ -145,12 +139,7 @@ class LadeController():
 		return drivingPersons
 
 	def Control(self, losZahl2, conZahl):
-		b = round(losZahl2,0)
-           
-		if losZahl2 > b:
-			b = floor(losZahl2)
-		else:
-			b = ceil(losZahl2)
+		b = int(round(losZahl2,0))
 		r = b - conZahl
 		conZahl = b
 		return r, conZahl
@@ -248,7 +237,7 @@ distMinLadung = {
 
 Control = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
 
-for hour in range(500):
+for hour in range(48):
 	Control.CheckTimestep(hour,10,9)
 
 PlotStatusCollection(DS.Scraper.li_state)
