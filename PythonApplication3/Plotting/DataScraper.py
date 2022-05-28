@@ -22,6 +22,6 @@ class DataScraper():
         self.generationloaded = []  #Liste die speichert, wie viel Energie in den Autos gespeichert wurde
         self.resLast = []           #Liste in der die Residuallast gespeichert wird
                 
-
+        self.SOC = [] #Liste in der der SOC aller anwesenden Autos gepsiechert wird
 
 Scraper = DataScraper()

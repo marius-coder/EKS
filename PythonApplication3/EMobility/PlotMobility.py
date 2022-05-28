@@ -1,9 +1,13 @@
 # -*- coding: <latin-1> -*-
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import bokeh
 import pandas as pd
 import numpy as np
+
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
 
 def PlotStatusCollection(data):
     cars_Charging = []
@@ -72,3 +76,62 @@ def PlotUseableCapacity(data, resLast):
     fig.suptitle('Verwendbare Kapazitat der angeschlossenen Autos', fontsize=16)
     
     plt.show()
+
+def PlotSOC(data, anzAuto):
+    #Daten Aufbereitung
+
+    
+        
+    def PickData(schritt, anzAuto):
+        istSOC = []
+        sollSOC = []
+        correctionSoll = []
+        correctionIst = []
+
+        schrittSoll = sorted(schritt, key=lambda x: x.minLadung, reverse=True)
+        schrittIst = sorted(schritt, key=lambda x: x.kapazitat, reverse=True)
+
+        for car in schrittSoll: #anzAutos
+            sollSOC.append(car.minLadung * car.maxLadung)
+        
+        for car in schrittIst: #anzAutos
+            istSOC.append(car.kapazitat)
+
+        xWhite = np.linspace(len(istSOC),anzAuto,anzAuto-len(istSOC))        
+        for _ in range(len(istSOC),anzAuto):
+            correctionIst.append(istSOC[-1])
+            correctionSoll.append(sollSOC[-1])
+            istSOC.append(istSOC[-1])
+            sollSOC.append(sollSOC[-1])
+
+        return istSOC, sollSOC, xWhite, correctionSoll, correctionIst
+
+
+    x = np.linspace(0,anzAuto,anzAuto)
+    fig, ax = plt.subplots()
+
+    fps = 4.8
+    duration = (1 / fps) * len(data)
+    def make_frame(t):
+
+        ax.clear()
+        index = int(t / (1 / fps))
+        istSOC, sollSOC, xWhite, correctionSoll, correctionIst = PickData(data[index], anzAuto)
+        # plotting line    
+        
+        ax.plot(x, sollSOC, color= "#038222")
+        ax.plot(xWhite, correctionSoll, color= "white", lw=10)
+
+        ax.plot(x, istSOC, color= "#9e0303")
+        ax.plot(xWhite, correctionIst, color= "white", lw=10)
+
+        ax.set_ylim(0, 80)
+     
+        # returning numpy image
+        return mplfig_to_npimage(fig)
+
+    # creating animation
+    animation = VideoClip(make_frame, duration = duration)
+ 
+    # displaying animation with auto play and looping
+    animation.ipython_display(fps = fps, loop = True, autoplay = True)

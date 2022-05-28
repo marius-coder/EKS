@@ -5,14 +5,15 @@
     <ProjectGuid>29e0808a-7d25-4eec-9555-6f55aab3ca3f</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>EMobility\LadeController.py</StartupFile>
+    <StartupFile>EMobility\PlotMobility.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>EKS</Name>
     <RootNamespace>PythonApplication3</RootNamespace>
-    <InterpreterId>Global|VisualStudio|Python39_64</InterpreterId>
+    <InterpreterId>
+    </InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +58,7 @@
     <Content Include="Data\WrNeustadt.xlsx" />
   </ItemGroup>
   <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.9" />
     <InterpreterReference Include="Global|VisualStudio|Python39_64" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

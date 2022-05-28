@@ -38,7 +38,7 @@ def GenerateWegZweck(day):
     return GenerateWeightedItem(pop= population, weights= weights)
 
 def GenerateTransportmittel(zweck):
-    """Je nach Wegzweck ergibt sich eine Warscheihnlichkeit ob das Auto als Transportmittel gewahlt wird"""
+    """Je nach Wegzweck ergibt sich eine Warscheinlichkeit ob das Auto als Transportmittel gewahlt wird"""
     population = ["zuFus","Rad","AutolenkerIn","MitfahrerIn","Offentlich","Anderes"]
     if zweck == "Arbeitsplatz":
         weights = [8,7,60,5,20,0] 
@@ -67,6 +67,8 @@ def GenerateKilometer():
 
 uberlauf = 0
 def CalcAutoWege(ways, day):
+    """ways: int
+            Anzahl der Wege"""
     global uberlauf
     gesTransport = []
     for _ in range(ways):
@@ -76,12 +78,12 @@ def CalcAutoWege(ways, day):
     ret = dict(Counter(gesTransport))
     if "AutolenkerIn" in ret:
         if ret["AutolenkerIn"] == 1:
-            if uberlauf == 0:
-                return 0
+            if uberlauf == 0:                
                 uberlauf = 1
+                return 0
             else:
-                return 2
                 uberlauf = 0
+                return 2                
         else:
             return ret["AutolenkerIn"]
     else:

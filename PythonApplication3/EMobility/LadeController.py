@@ -3,14 +3,16 @@ import pandas as pd
 import numpy as np
 from math import ceil, floor
 import matplotlib.pyplot as plt
-from random import choice, choices, randint
+from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity
+from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC
 from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 from collections import Counter
 from Backend.Helper import DetermineHourofDay
+
+
 
 import Plotting.DataScraper as DS
 
@@ -31,6 +33,7 @@ class LadeController():
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 		self.anzPers2 = 0
+		self.anzAutos = anzAutos
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
 		self.averageSpeed = 40 #km/h angenommene Durchschnittsgeschwindigkeit
@@ -186,11 +189,13 @@ class LadeController():
 		for car in self.li_Autos:
 			li_interCars.append(car.bCharging)
 		
+		DS.Scraper.SOC.append(self.GetChargingCars())
+
 		DS.Scraper.li_state.append(li_interPersons)
 		DS.Scraper.li_stateCars.append(li_interCars)
 		
 	def PickCar(self, demand):
-		safety = 1
+		safety = 1.1
 		demand = demand * safety
 
 		cars = self.GetChargingCars()
@@ -240,5 +245,6 @@ Control = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung 
 for hour in range(48):
 	Control.CheckTimestep(hour,10,9)
 
-PlotStatusCollection(DS.Scraper.li_state)
-PlotStatusCollection(DS.Scraper.li_stateCars)
+#PlotStatusCollection(DS.Scraper.li_state)
+#PlotStatusCollection(DS.Scraper.li_stateCars)
+PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
