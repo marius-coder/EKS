@@ -78,9 +78,7 @@ def PlotUseableCapacity(data, resLast):
     plt.show()
 
 def PlotSOC(data, anzAuto):
-    #Daten Aufbereitung
-
-    
+    #Daten Aufbereitung    
         
     def PickData(schritt, anzAuto):
         istSOC = []

@@ -12,6 +12,7 @@ from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWe
 from collections import Counter
 from Backend.Helper import DetermineHourofDay
 
+from Strom.PV import Strombedarf, PV
 
 
 import Plotting.DataScraper as DS
@@ -147,7 +148,7 @@ class LadeController():
 		conZahl = b
 		return r, conZahl
 
-	def CheckTimestep(self, hour, qLoad, qGeneration):
+	def CheckTimestep(self, hour, resLast):
 		day = DetermineDay(hour)
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
@@ -180,6 +181,15 @@ class LadeController():
 				car.bCharging = True
 				self.awayPersons.remove(person)
 
+		if resLast > 0:
+		#Autos entladen
+			self.DischargeCars(resLast)
+		else:
+		#Autos laden
+			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
+			self.ChargeCars(resLast)
+
+		print(f"Autos verfugbar: {len(self.GetChargingCars())}")
 
 		#Bookkeeping zum Plotten
 		inter = self.drivingPersons.copy()
@@ -193,9 +203,36 @@ class LadeController():
 
 		DS.Scraper.li_state.append(li_interPersons)
 		DS.Scraper.li_stateCars.append(li_interCars)
+
+	def ChargeCars(self, last):
+		cars = self.GetChargingCars()
+
+		cars.sort(key=lambda x: x.kapazitat, reverse=False)
+
+		for car in cars:
+			if last == 0: #Wenn nichts mehr zu vergeben ist konnen wir fruher abbrechen
+				break
+			space = car.maxLadung - car.kapazitat
+			ladung = min([car.leistung_MAX, last, space]) #Die niedigste Zahl davon kann geladen werden
+			car.Laden(ladung)
+			last -= ladung
+
+
+	def DischargeCars(self, last):
+
+		cars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
+
+		for car in cars:
+			car.diff = car.maxLadung - car.kapazitat
+
+
+		cars.sort(key=lambda x: x.diff, reverse=False)
+
+		return
+
 		
 	def PickCar(self, demand):
-		safety = 1.1
+		safety = 1
 		demand = demand * safety
 
 		cars = self.GetChargingCars()
@@ -205,7 +242,7 @@ class LadeController():
 			return False
 
 		car = next(x for x in cars if x.kapazitat >= demand)
-		print(f"Best Choice: {car.kapazitat}")
+		#print(f"Best Choice: {car.kapazitat}")
 		return car
 
 	def DriveAway(self, person):
@@ -240,10 +277,17 @@ distMinLadung = {
 
 
 
-Control = LadeController(anzAutos= 100, distMinLadung= distMinLadung, maxLadung = 75)
+Control = LadeController(anzAutos= 150, distMinLadung= distMinLadung, maxLadung = 75)
 
-for hour in range(48):
-	Control.CheckTimestep(hour,10,9)
+for hour in range(8760):
+
+	pv = PV[hour]
+	bedarf = Strombedarf["Wohnen"][hour]
+
+	resLast = bedarf - pv
+	print(f"Stunde: {hour}")
+	print(f"Residuallast: {resLast} kWh")
+	Control.CheckTimestep(hour= hour,resLast= resLast)
 
 #PlotStatusCollection(DS.Scraper.li_state)
 #PlotStatusCollection(DS.Scraper.li_stateCars)

@@ -1,6 +1,8 @@
 from datetime import date
 import pandas as pd
 import numpy as np
+
+
 #Viertelstunden Leistungswerte fur den Jahresverbrauch von 1.000 kWh pro Jahr
 electricProfile = pd.read_csv("./Data/Stromprofil.csv", delimiter=";", decimal = ",")
 time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
