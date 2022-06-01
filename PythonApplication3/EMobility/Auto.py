@@ -70,6 +70,6 @@ class Auto():
 
 	def Speicherstand(self):
 		"""Gibt den aktuellen Speicherstand in Anteilen zuruck"""
-		return self.kapazitat / self.maxLadung
+		return abs(self.kapazitat) / self.maxLadung
 
 

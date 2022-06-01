@@ -41,6 +41,8 @@ class LadeController():
 		self.drivingPersons = []
 		self.awayPersons = []
 
+		self.tooMany = 0
+
 
 	def InitAutos(self,anzAutos, distMinLadung, maxLadung):
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
@@ -153,6 +155,8 @@ class LadeController():
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
 			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
+			print(f"Anzahl Leute die gerade weg sind: {len(self.awayPersons)}")
+			self.tooMany = len(self.awayPersons)
 		
 		self.CheckMinKap()
 
@@ -160,7 +164,7 @@ class LadeController():
 		li_interPersons = []
 
 		#Anzahl an Personen die Losgefahren sollen
-		self.anzPers += self.travelData["Losfahren"][hourIndex] / 100 * self.lendrivingPersons 
+		self.anzPers += self.travelData["Losfahren"][hourIndex] / 100 * self.lendrivingPersons
 
 		#Anzahl an Personen die zu dieser Stunde losfahren sollen
 		driveAway, self.anzPers2 = self.Control(self.anzPers, self.anzPers2)
@@ -170,7 +174,7 @@ class LadeController():
 			self.DriveAway(person= person)
 			self.awayPersons.append(person)
 
-		pers = self.travelData["Ankommen"][hourIndex] / 100 * self.lendrivingPersons
+		pers = self.travelData["Ankommen"][hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
 		comingBack, t = self.Control(pers,0)
 
 		for _ in range(comingBack):
@@ -189,7 +193,7 @@ class LadeController():
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
 			self.ChargeCars(resLast)
 
-		print(f"Autos verfugbar: {len(self.GetChargingCars())}")
+		#print(f"Autos verfugbar: {len(self.GetChargingCars())}")
 
 		#Bookkeeping zum Plotten
 		inter = self.drivingPersons.copy()
@@ -207,13 +211,13 @@ class LadeController():
 	def ChargeCars(self, last):
 		cars = self.GetChargingCars()
 
-		cars.sort(key=lambda x: x.kapazitat, reverse=False)
+		cars.sort(key=lambda x: x.kapazitat, reverse=True)
 
 		for car in cars:
 			if last == 0: #Wenn nichts mehr zu vergeben ist konnen wir fruher abbrechen
 				break
 			space = car.maxLadung - car.kapazitat
-			ladung = min([car.leistung_MAX, last, space]) #Die niedigste Zahl davon kann geladen werden
+			ladung = min([car.leistung_MAX, last, space]) #Die niedrigste Zahl davon kann geladen werden
 			car.Laden(ladung)
 			last -= ladung
 
@@ -221,18 +225,28 @@ class LadeController():
 	def DischargeCars(self, last):
 
 		cars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
-
 		for car in cars:
-			car.diff = car.maxLadung - car.kapazitat
+			car.diff = car.kapazitat - car.maxLadung * car.minLadung
 
 
-		cars.sort(key=lambda x: x.diff, reverse=False)
+		cars.sort(key=lambda x: x.diff, reverse= True)
+		if cars:
+			for car in cars:
+				if last == 0: #Wenn die Last abgedeckt werden konnte, konnen wir fruher abbrechen
+					break
+				qtoTake = min([car.leistung_MAX, last, car.diff]) #Die niedrigste Zahl davon kann entladen werden
+
+
+
+				qtoTake -= car.Entladen(qtoTake)				
+				last -= qtoTake
+
 
 		return
 
 		
 	def PickCar(self, demand):
-		safety = 1
+		safety = 1.1
 		demand = demand * safety
 
 		cars = self.GetChargingCars()
@@ -277,7 +291,7 @@ distMinLadung = {
 
 
 
-Control = LadeController(anzAutos= 150, distMinLadung= distMinLadung, maxLadung = 75)
+Control = LadeController(anzAutos= 110, distMinLadung= distMinLadung, maxLadung = 75)
 
 for hour in range(8760):
 
@@ -285,10 +299,10 @@ for hour in range(8760):
 	bedarf = Strombedarf["Wohnen"][hour]
 
 	resLast = bedarf - pv
-	print(f"Stunde: {hour}")
-	print(f"Residuallast: {resLast} kWh")
+	#print(f"Stunde: {hour}")
+	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
-#PlotStatusCollection(DS.Scraper.li_state)
-#PlotStatusCollection(DS.Scraper.li_stateCars)
+PlotStatusCollection(DS.Scraper.li_state)
+PlotStatusCollection(DS.Scraper.li_stateCars)
 PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
