@@ -62,6 +62,7 @@ class Wärmepumpe():
 
         self.type = "Luft" #Gibt des Typen der Wärmepumpe an. Optionen: Wasser/Luft
         self.bIsOn = False #Legt fest ob die Wärmepumpe gerade eingeschalten ist
+        self.PelBetrieb = 0#Gibt die Leistung der Warmepumpe im Betrieb an
 
         self.speicher = speicher  #Falls ein Speicher vorhanden ist wird dieser hier definiert
 
@@ -73,24 +74,30 @@ class Wärmepumpe():
             return self.COP_HZG * self.Pel
 
     def TurnOn(self):
-        """Schaltet die Wärmepumpe ein"""
+        """Schaltet die Wärmepumpe ein"""        
         self.bIsOn = True
 
     def TurnOff(self):
+        self.PelBetrieb = 0
         self.bIsOn = False
 
     def CheckSpeicher(self, mode):
         """Simple Regelung für den Speicher
         mode: Modus in der die Wärmepume fährt || Optionen: HZG/WW"""
 
-        if self.bIsOn == False: #Nur wenn die WP nicht läuft müssen wir kontrollieren ob der Speicher unter der Ladegrenze ist
+        if not self.bIsOn: #Nur wenn die WP nicht läuft müssen wir kontrollieren ob der Speicher unter der Ladegrenze ist
             if self.speicher.Speicherstand() < self.hystEin:
                     self.TurnOn()
-        if self.bIsOn == True:
+        if self.bIsOn:
             qHeat = self.ProcessStep(mode)
             rest = self.speicher.SpeicherLaden(qHeat)
             if rest != 0: #Falls der Speicher zu voll geladen wird, wird die geladene Energie reduziert
                 qHeat -= rest
+
+        if self.bIsOn:            
+            self.PelBetrieb = self.Pel
+        else:
+            self.PelBetrieb = 0
 
         if self.speicher.Speicherstand() > self.hystAus:
             self.TurnOff()

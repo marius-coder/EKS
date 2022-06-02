@@ -17,29 +17,29 @@ W1 = Building( wand = {"Fläche":2217.63,"U-Wert":u_Wand},
 			  dach = {"Fläche":1973.94,"U-Wert":u_Dach},
 			  boden = {"Fläche":1973.94,"U-Wert":u_Boden}, 
 			  gfa = 11844, volumen=41454,
-			  anzPersonen=311, stromVerbrauch = 840500)
+			  anzPersonen=311, stromVerbrauch = 346885)
 
 W2 = Building( wand = {"Fläche":3022.56,"U-Wert":u_Wand},
 			  fenster = {"Fläche":2015.04,"U-Wert":u_Fenster},
 			  dach = {"Fläche":2509.2,"U-Wert":u_Dach},
 			  boden = {"Fläche":2509.2,"U-Wert":u_Boden},
 			  gfa = 15361, volumen=57282,
-			  anzPersonen=405, stromVerbrauch = 1095100)
+			  anzPersonen=405, stromVerbrauch = 451627)
 
 W3 = Building( wand = {"Fläche":3370.92,"U-Wert":u_Wand},
 			  fenster = {"Fläche":2247.28,"U-Wert":u_Fenster},
 			  dach = {"Fläche":1710.52,"U-Wert":u_Dach},
 			  boden = {"Fläche":1710.52,"U-Wert":u_Boden},
 			  gfa = 13700, volumen=49750,
-			  anzPersonen=331, stromVerbrauch = 895700)
+			  anzPersonen=331, stromVerbrauch = 368929)
 
 W4 = Building( wand = {"Fläche":3620.23,"U-Wert":u_Wand},
 			  fenster = {"Fläche":2413.48,"U-Wert":u_Fenster},
 			  dach = {"Fläche":1114.8,"U-Wert":u_Dach},
 			  boden = {"Fläche":1114.8,"U-Wert":u_Boden},
 			  gfa = 10976, volumen=36270,
-			  anzPersonen=288, stromVerbrauch = 779000)
-
+			  anzPersonen=288, stromVerbrauch = 321124)
+stromKoeff = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";") #Jahresstromverbrauch bei 1 kWh Verbrauch
 
 class Simulation():
 
@@ -57,21 +57,33 @@ class Simulation():
 		COP_HZG = 5
 		COP_WW = 3
 
+
+
 		speicherW1 = Speicher(10000)
-		dic_buildings["W1"].WP = Wärmepumpe(speicherW1, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherW1, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
 
 		speicherW2 = Speicher(10000)
-		dic_buildings["W2"].WP = Wärmepumpe(speicherW2, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W2"].WP_HZG = Wärmepumpe(speicherW2, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
 
 		speicherW3 = Speicher(10000)
-		dic_buildings["W3"].WP = Wärmepumpe(speicherW3, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W3"].WP_HZG = Wärmepumpe(speicherW3, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
 
 		speicherW4 = Speicher(10000)
-		dic_buildings["W4"].WP = Wärmepumpe(speicherW4, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W4"].WP_HZG = Wärmepumpe(speicherW4, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
 
 
 	def InitSzenarioFW(self):
 		pass
+
+
+	def SimWP(self, building, qHLSum):
+		building.WP_HZG.speicher.SpeicherEntladen(qHLSum, building.WP_HZG.hystEin)
+		building.WP_HZG.CheckSpeicher(mode = "HZG")
+		building.stromVerbrauchBetrieb += building.WP_HZG.PelBetrieb
+		
+		print(f"Status WP: {building.WP_HZG.bIsOn}")
+		print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
+		print("------------------")
 
 	def Simulate(self):
 		self.InitSzenarioWP(self.dic_buildings)
@@ -83,17 +95,14 @@ class Simulation():
 
 			for key,building in self.dic_buildings.items():
 
-				stromVerbrauch = GetStromProfil(hour) / 10**6 * building.stromVerbrauch
+				building.stromVerbrauchBetrieb = stromKoeff["Wohnen"][hour] * building.stromVerbrauch
 
 				qHLSum = building.CalcThermalFlows(ta=self.ta[hour], hour=hour,
-									  anz_Personen=building.anzPersonen, strom = stromVerbrauch) / 1000
-				building.WP.speicher.SpeicherEntladen(qHLSum, building.WP.hystEin)
-				building.WP.CheckSpeicher(mode = "HZG")
+									  anz_Personen=building.anzPersonen, strom = building.stromVerbrauchBetrieb) / 1000
 				print(f"Gebäude: {key}")
 				print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
-				print(f"Status WP: {building.WP.bIsOn}")
-				print(f"Ladestand Speicher: {round(building.WP.speicher.Speicherstand(),3)}")
-				print("------------------")
+				self.SimWP(building= building, qHLSum= qHLSum)
+				building.AddDataflows(qHL= qHLSum)
 			print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 
 

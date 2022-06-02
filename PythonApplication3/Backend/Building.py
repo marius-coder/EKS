@@ -5,10 +5,11 @@ import matplotlib as plt
 import numpy as np
 
 from HL_KL import HL
+from Dataflows import Dataflows
 
-class Building(HL):
+class Building(HL,Dataflows):
     def __init__(self, wand, dach, boden, fenster, gfa, volumen, anzPersonen, stromVerbrauch):
-
+        self.DF = Dataflows()
         self.NFBGF = 0.8 #Verhältnis von Nettofläche zu Bruttogeschoss fläche (max 1)
         self.gfa = gfa #Bruttogeschossfläche in m²
         self.anzPersonen = anzPersonen #Anzahl Personen
@@ -22,6 +23,7 @@ class Building(HL):
         self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)
 
         self.stromVerbrauch = stromVerbrauch #Jährlicher Stromverbrauch in kWh/a
+        self.stromVerbrauchBetrieb = 0
         self.WRG = 90 #Wärmerückgewinnung der Lüftung in %
         self.Luftwechsel = 0.5 #Luftwechselrate in n^-1
 
@@ -54,6 +56,18 @@ class Building(HL):
         except:
             return getattr(self, Bauteil)["Fläche"] * getattr(self, Bauteil)["U-Wert"]
 
+    def AddDataflows(self, qHL):
+
+        self.DF.qHL.append(qHL)
+        self.DF.qWW.append(0)
+        self.DF.stromBedarf.append(self.stromVerbrauchBetrieb)
+
+
+        if self.DF.szen == "WP":
+            self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
+            self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
+            #self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb)
+            #self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG)
 
 
 

@@ -5,7 +5,7 @@
     <ProjectGuid>29e0808a-7d25-4eec-9555-6f55aab3ca3f</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>EMobility\LadeController.py</StartupFile>
+    <StartupFile>Backend\Simulation.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Backend\Building.py" />
+    <Compile Include="Backend\Dataflows.py" />
     <Compile Include="Backend\Helper.py" />
     <Compile Include="Backend\HL_KL.py" />
     <Compile Include="Backend\Simulation.py" />
