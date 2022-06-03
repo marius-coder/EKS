@@ -14,12 +14,13 @@ class Building(HL,Dataflows):
         self.gfa = gfa #Bruttogeschossfläche in m²
         self.anzPersonen = anzPersonen #Anzahl Personen
         self.heat_capacity = 200 #cp des Gebäudes in Wh/m³
-        self.TsWinter = 22 #Solltemperatur im Winter in °C
+        self.TsWinter = 20 #Solltemperatur im Winter in °C
         self.TsSommer = 26 #Solltemperatur im Sommer in °C
         self.volumen = volumen * 0.8 #Beheiztes Volumen
         self.ABSCHIRMUNGSKOEFF = 0.04 #Abschirmungskoeffizient
+        self.Warmebrucken = 0.05
 
-        self.ti = 22
+        self.ti = 20
         self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)
 
         self.stromVerbrauch = stromVerbrauch #Jährlicher Stromverbrauch in kWh/a
@@ -51,7 +52,7 @@ class Building(HL,Dataflows):
 
     def calc_LT(self, Bauteil:str):
         try:
-            return getattr(self, Bauteil)["Fläche"] * getattr(self, Bauteil)["U-Wert"] * getattr(self, Bauteil)["f_T"]
+            return getattr(self, Bauteil)["Fläche"] * (getattr(self, Bauteil)["U-Wert"]+self.Warmebrucken) * getattr(self, Bauteil)["f_T"]
 
         except:
             return getattr(self, Bauteil)["Fläche"] * getattr(self, Bauteil)["U-Wert"]

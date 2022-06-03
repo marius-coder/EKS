@@ -9,7 +9,37 @@ import numpy as np
 from moviepy.editor import VideoClip
 from moviepy.video.io.bindings import mplfig_to_npimage
 
+time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
+time = pd.to_datetime(time)
+
 def PlotStatusCollection(data):
+    cars_Charging = []
+    cars_Away = []
+    fig, ax = plt.subplots()
+
+    
+    for subData in data:
+        cars_Charging.append(subData.count(True))
+        cars_Away.append(subData.count(False))
+
+    toPlot = pd.DataFrame({ "Laden" : cars_Charging,
+                            "Fahren" : cars_Away
+                            })
+
+    timePlot = time[0:len(cars_Charging)]
+    toPlot = toPlot.set_index(timePlot)
+
+    ax.stackplot(toPlot.index,toPlot["Laden"], toPlot["Fahren"],
+        labels=['Laden', 'Fahren'],
+        colors= ["green", "red"])
+
+    fig.suptitle('Gesammelter Status aller Autos', fontsize=16)
+    ax.legend(loc='upper left')
+    ax.set_xlabel('Stunde [h]')
+    ax.set_ylabel('Anzahl Autos')
+    plt.show()
+
+def PlotPersonStatus(data):
     cars_Charging = []
     cars_Away = []
     fig, ax = plt.subplots()
@@ -18,21 +48,23 @@ def PlotStatusCollection(data):
     for subData in data:
         cars_Charging.append(subData.count(True))
         cars_Away.append(subData.count(False))
-
-    toPlot = pd.DataFrame({ "Laden" : cars_Charging,
-                            "Fahren" : cars_Away
+    
+    toPlot = pd.DataFrame({ "Fahrbereit" : cars_Charging,
+                            "Unterwegs" : cars_Away
                             })
-    hours = list(range(len(cars_Charging)))
+    timePlot = time[0:len(cars_Charging)]
+    toPlot = toPlot.set_index(timePlot)
 
-    sns.set_theme()
-    ax.stackplot(hours,toPlot["Laden"], toPlot["Fahren"],
-        labels=['Laden', 'Fahren'],
+    print(toPlot.info(verbose = True))
+
+    ax.stackplot(toPlot.index,toPlot["Fahrbereit"], toPlot["Unterwegs"],
+        labels=['Fahrbereit', 'Unterwegs'],
         colors= ["green", "red"])
 
-    fig.suptitle('Gesammelter Status aller Autos', fontsize=16)
+    fig.suptitle('Status der mobilen Personen', fontsize=16)
     ax.legend(loc='upper left')
     ax.set_xlabel('Stunde [h]')
-    ax.set_ylabel('anzahl Autos')
+    ax.set_ylabel('Anzahl Personen')
     plt.show()
 
 def PlotSample(data, anzCars, hours):

@@ -7,10 +7,13 @@ import csv
 from Building import Building
 from Wärmepumpe_Speicher import Speicher, Wärmepumpe
 from Helper import *
-u_Wand = 0.2
+from PlotHeat import PlotspezVerbrauch
+
+
+u_Wand = 0.15
 u_Boden = 0.25
 u_Dach = 0.15
-u_Fenster = 0.9
+u_Fenster = 0.8
 
 W1 = Building( wand = {"Fläche":2217.63,"U-Wert":u_Wand},
 			  fenster = {"Fläche":1478.42,"U-Wert":u_Fenster},
@@ -42,7 +45,6 @@ W4 = Building( wand = {"Fläche":3620.23,"U-Wert":u_Wand},
 stromKoeff = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";") #Jahresstromverbrauch bei 1 kWh Verbrauch
 
 class Simulation():
-
 	def __init__(self):		
 		#Jedes Teilgebäude wird in einem Dictionary gesammelt
 		self.dic_buildings = {"W1":W1,"W2":W2,"W3":W3,"W4":W4}  
@@ -52,6 +54,7 @@ class Simulation():
 
 		self.ta = np.genfromtxt("./Data/climate.csv", delimiter=";", usecols = (1), skip_header = 1)
 
+		self.wwProfile = dict(pd.read_csv("./Data/Warmwasser.csv", decimal=",", sep=";"))
 
 	def InitSzenarioWP(self, dic_buildings):
 		COP_HZG = 5
@@ -59,17 +62,29 @@ class Simulation():
 
 
 
-		speicherW1 = Speicher(10000)
-		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherW1, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		speicherHZG_W1 = Speicher(10000)
+		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherHZG_W1, COP_HZG= COP_HZG, Pel= 250)
+		speicherWW_W1 = Speicher(10000)
+		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W1"].DF.InitSzenWP()
 
-		speicherW2 = Speicher(10000)
-		dic_buildings["W2"].WP_HZG = Wärmepumpe(speicherW2, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		speicherHZG_W2 = Speicher(10000)
+		dic_buildings["W2"].WP_HZG = Wärmepumpe(speicherHZG_W2, COP_HZG= COP_HZG, Pel= 250)
+		speicherWW_W2 = Speicher(10000)
+		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W2"].DF.InitSzenWP()
 
-		speicherW3 = Speicher(10000)
-		dic_buildings["W3"].WP_HZG = Wärmepumpe(speicherW3, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		speicherHZG_W3 = Speicher(10000)
+		dic_buildings["W3"].WP_HZG = Wärmepumpe(speicherHZG_W3, COP_HZG= COP_HZG, Pel= 250)
+		speicherWW_W3 = Speicher(10000)
+		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W3"].DF.InitSzenWP()
 
-		speicherW4 = Speicher(10000)
-		dic_buildings["W4"].WP_HZG = Wärmepumpe(speicherW4, COP_HZG= COP_HZG, COP_WW= COP_WW, Pel= 250)
+		speicherHZG_W4 = Speicher(10000)
+		dic_buildings["W4"].WP_HZG = Wärmepumpe(speicherHZG_W4, COP_HZG= COP_HZG, Pel= 250)
+		speicherWW_W4 = Speicher(10000)
+		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 250)
+		dic_buildings["W4"].DF.InitSzenWP()
 
 
 	def InitSzenarioFW(self):
@@ -81,15 +96,13 @@ class Simulation():
 		building.WP_HZG.CheckSpeicher(mode = "HZG")
 		building.stromVerbrauchBetrieb += building.WP_HZG.PelBetrieb
 		
-		print(f"Status WP: {building.WP_HZG.bIsOn}")
-		print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
-		print("------------------")
+		#print(f"Status WP: {building.WP_HZG.bIsOn}")
+		#print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
+		#print("------------------")
 
 	def Simulate(self):
 		self.InitSzenarioWP(self.dic_buildings)
-		for hour in range(0,100):
-
-			
+		for hour in range(8760):			
 
 			qHLSum = 0
 
@@ -99,14 +112,14 @@ class Simulation():
 
 				qHLSum = building.CalcThermalFlows(ta=self.ta[hour], hour=hour,
 									  anz_Personen=building.anzPersonen, strom = building.stromVerbrauchBetrieb) / 1000
-				print(f"Gebäude: {key}")
-				print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
+				#print(f"Gebäude: {key}")
+				#print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
 				self.SimWP(building= building, qHLSum= qHLSum)
 				building.AddDataflows(qHL= qHLSum)
-			print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
+			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 
 
-
+		PlotspezVerbrauch(self.dic_buildings)
 
 
 		

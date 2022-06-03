@@ -5,7 +5,7 @@ from math import ceil, floor
 import matplotlib.pyplot as plt
 from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC
+from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus
 from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
@@ -291,9 +291,9 @@ distMinLadung = {
 
 
 
-Control = LadeController(anzAutos= 110, distMinLadung= distMinLadung, maxLadung = 75)
+Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
 
-for hour in range(8760):
+for hour in range(168):
 
 	pv = PV[hour]
 	bedarf = Strombedarf["Wohnen"][hour]
@@ -303,6 +303,6 @@ for hour in range(8760):
 	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
-PlotStatusCollection(DS.Scraper.li_state)
+PlotPersonStatus(DS.Scraper.li_state)
 PlotStatusCollection(DS.Scraper.li_stateCars)
 PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)

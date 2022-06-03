@@ -71,12 +71,12 @@ class HL():
         """ Returns Watts
         Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
             eines Gebäudes zu berechnen."""
-        qT = self.calc_QT_Sum(-12)
-        qV = self.calc_QV(-12)
-        print(f"spez. Heizlast: {(qT+qV)/self.gfa} W/m²")
+        qT = self.calc_QT_Sum(ta)
+        qV = self.calc_QV(ta)
+        #print(f"spez. Heizlast: {(qT+qV)/self.gfa} W/m²")
         qI = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
         qM = self.calc_Maschinen(strom) * 1000
         qS = 1
         qSum = qT+qV+qI+qS+qM
-        print(f"spez. Heizlast: {(qSum)/self.gfa} W/m²")
+        #print(f"spez. Heizlast: {(qSum)/self.gfa} W/m²")
         return qSum

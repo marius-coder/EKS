@@ -52,13 +52,13 @@ class Wärmepumpe():
     TODO: Variabler COP nach Außentemperatur für Luftwärmepumpe
     """
 
-    def __init__(self, speicher, COP_HZG, COP_WW, Pel):
+    def __init__(self, speicher, Pel, COP_HZG = 0, COP_WW = 0):
         self.COP_HZG = COP_HZG  #COP im Heizbetrieb
         self.COP_WW = COP_WW #COP im Warmwasserbetrieb
         self.Pel = Pel #Elektrische Leistungsaufnahme in kW
 
         self.hystEin = 0.2 #Gibt an ab welchen Ladestand sich die Wärmepumpe einschalten soll
-        self.hystAus = 0.8 #Gibt an ab welchen Ladestand sich die Wärmepumpe ausschalten soll
+        self.hystAus = 0.9 #Gibt an ab welchen Ladestand sich die Wärmepumpe ausschalten soll
 
         self.type = "Luft" #Gibt des Typen der Wärmepumpe an. Optionen: Wasser/Luft
         self.bIsOn = False #Legt fest ob die Wärmepumpe gerade eingeschalten ist
