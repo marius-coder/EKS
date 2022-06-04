@@ -5,7 +5,7 @@ from math import ceil, floor
 import matplotlib.pyplot as plt
 from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus
+from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast
 from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
@@ -158,7 +158,7 @@ class LadeController():
 			print(f"Anzahl Leute die gerade weg sind: {len(self.awayPersons)}")
 			self.tooMany = len(self.awayPersons)
 		
-		self.CheckMinKap()
+		
 
 		li_interCars = []
 		li_interPersons = []
@@ -192,6 +192,8 @@ class LadeController():
 		#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
 			self.ChargeCars(resLast)
+
+		self.CheckMinKap()
 
 		#print(f"Autos verfugbar: {len(self.GetChargingCars())}")
 
@@ -291,18 +293,20 @@ distMinLadung = {
 
 
 
-Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
+Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 75)
 
-for hour in range(168):
+for hour in range(8760):
 
 	pv = PV[hour]
 	bedarf = Strombedarf["Wohnen"][hour]
 
 	resLast = bedarf - pv
+	DS.Scraper.resLast.append(resLast)
 	#print(f"Stunde: {hour}")
 	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
+PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
 PlotPersonStatus(DS.Scraper.li_state)
 PlotStatusCollection(DS.Scraper.li_stateCars)
 PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)

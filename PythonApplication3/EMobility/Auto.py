@@ -22,8 +22,7 @@ class Auto():
 		if qtoLoad > self.leistung_MAX:
 			#Wenn ja wird gekappt
 			self.verlust = self.leistung_MAX * (1-self.effizienz)
-			self.leistung = self.leistung_MAX * self.effizienz 
-            
+			self.leistung = self.leistung_MAX * self.effizienz            
 		else:
 			#Wenn nein, g2g
 			self.verlust = qtoLoad * (1-self.effizienz)

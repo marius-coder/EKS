@@ -9,7 +9,7 @@ class HL():
     
     def InitHeizlast(self):
     	self.belegungPersonen = pd.read_csv("./Data/Profile_PersonenGewinne.csv", delimiter=";")
-    	self.gewinnePersonen = 80 #W/Person
+    	self.gewinnePersonen = pd.read_csv("./Data/Profile_PersonenGewinne.csv", delimiter=";")["Leistung [W/Person]"].tolist()
     	self.qsolar = np.genfromtxt("./Data/Solar_gains.csv") #W/m² Solar gains
     	self.infiltration = pd.read_csv("./Data/usage_profiles.csv", encoding="cp1252")["Luftwechsel_Infiltration_1_h"]
 
@@ -76,7 +76,7 @@ class HL():
 
     def calc_Personen(self, hour, anz_Personen):
         belegung = self.DetermineBelegung(hour)
-        return self.gewinnePersonen * anz_Personen * belegung / self.gfa
+        return self.gewinnePersonen[hour%24] * anz_Personen * belegung / self.gfa
 
     def CalcThermalFlows(self, ta, hour, anz_Personen, strom):
         """ Returns Watts
@@ -87,7 +87,7 @@ class HL():
         #print(f"spez. Heizlast: {(qT+qV)/self.gfa} W/m²")
         qI = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
         qM = self.calc_Maschinen(strom) * 1000
-        qS = self.qsolar[hour]
+        qS = (self.qsolar[hour] * self.fenster["Fläche"])/self.gfa
         qSum = qT+qV+qI+qS+qM
         #print(f"spez. Heizlast: {(qSum)/self.gfa} W/m²")
         return qSum
@@ -97,9 +97,9 @@ class HL():
 
         
 
-    def CalcQtoTargetTemperature(self):
+    def CalcQtoTargetTemperature(self, heating):
 
-        if self.ti < self.TsWinter:
+        if self.ti < self.TsWinter and heating:
             return self.heat_capacity * (self.TsWinter - self.ti)
         elif self.ti > self.TsSommer:
             return self.heat_capacity * (self.TsSommer - self.ti)

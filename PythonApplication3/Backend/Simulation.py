@@ -51,6 +51,7 @@ class Simulation():
 		for key,item in self.dic_buildings.items():
 			item.InitHeizlast()
 
+		self.heating = True
 
 		self.ta = np.genfromtxt("./Data/climate.csv", delimiter=";", usecols = (1), skip_header = 1)
 
@@ -95,7 +96,7 @@ class Simulation():
 
 	def SimWP(self, building, qHLSum):
 
-		qtoTake = building.CalcQtoTargetTemperature() * building.gfa
+		qtoTake = building.CalcQtoTargetTemperature(self.heating) * building.gfa
 		if qtoTake != 0:
 			building.WP_HZG.speicher.SpeicherEntladen(qtoTake, building.WP_HZG.hystEin)
 			building.CalcNewTemperature(qtoTake / building.gfa)
@@ -110,11 +111,22 @@ class Simulation():
 		self.InitSzenarioWP(self.dic_buildings)
 		for hour in range(8760):			
 			print(hour)
+
+			if DetermineMonth(hour) < 4 or DetermineMonth(hour) > 9:
+				self.heating == True
+			else:
+				self.heating == False
+
 			qHLSum = 0
 
 			for key,building in self.dic_buildings.items():
 
 				building.stromVerbrauchBetrieb = stromKoeff["Wohnen"][hour] * building.stromVerbrauch
+
+
+
+				if hour == 4000:
+					print("")
 
 				qHLSum = building.CalcThermalFlows(ta=self.ta[hour], hour=hour,
 									  anz_Personen=building.anzPersonen, strom = building.stromVerbrauchBetrieb) / 1000

@@ -13,3 +13,7 @@ Strombedarf = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")
 
 wohnen = 1488565
 Strombedarf["Wohnen"] = Strombedarf["Wohnen"] * wohnen
+
+
+
+

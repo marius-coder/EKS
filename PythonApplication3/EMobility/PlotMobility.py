@@ -109,6 +109,33 @@ def PlotUseableCapacity(data, resLast):
     
     plt.show()
 
+
+
+def PlotResiduallast(pv, strom, reslast):
+    fig, ax = plt.subplots()  
+
+    
+    pv = pv[0:len(reslast)]
+    strom = strom[0:len(reslast)]
+
+    toPlot = pd.DataFrame({ "PV-Ertrag" : pv,
+                            "Stromverbrauch" : strom,
+                            "Residuallast" : reslast
+                            })
+
+    timePlot = time[0:len(reslast)]
+    toPlot = toPlot.set_index(timePlot)
+    #toPlot = toPlot.resample("d").sum()
+
+    sns.lineplot(data=toPlot, ax = ax)
+    
+    fig.suptitle('PV-Ertrag, Stromverbrauch und Residuallast der Anlage', fontsize=16)
+    ax.legend(loc='upper left')
+    ax.set_xlabel('Zeit')
+    ax.set_ylabel('Energie [kWh]')
+    plt.show()
+
+
 def PlotSOC(data, anzAuto):
     #Daten Aufbereitung    
         
