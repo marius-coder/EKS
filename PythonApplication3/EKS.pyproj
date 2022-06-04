@@ -60,6 +60,7 @@
     <Content Include="Data\Profile_Travel.csv" />
     <Content Include="Data\PV.csv" />
     <Content Include="Data\PV_1kWp.csv" />
+    <Content Include="Data\Solar_gains.csv" />
     <Content Include="Data\Strombedarf.csv" />
     <Content Include="Data\Stromprofil.csv" />
     <Content Include="Data\Var_Dach100.bis" />

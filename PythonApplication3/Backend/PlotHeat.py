@@ -26,7 +26,25 @@ def PlotspezVerbrauch(dicBuildings):
     
     fig.suptitle('Spezifischer Heizwärmebedarf der Gebäude', fontsize=16)
     ax.set_xlabel('Gebäude')
-    ax.set_ylabel('spezifische Heizwärmebedarf [kWh/m²a]')
+    ax.set_ylabel('spezifischer Heizwärmebedarf [kWh/m²a]')
+    plt.show()
+
+def PlotspezVerbrauchKWB(dicBuildings):
+    fig, ax = plt.subplots()    
+
+    dic = {}
+
+    for key,building in dicBuildings.items():
+        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL >= 0 ]) / building.gfa)
+
+
+    toPlot = pd.DataFrame(dic, index = ['W1', 'W2', 'W3', 'W4'])
+
+    sns.barplot(data=toPlot, ax = ax)
+    
+    fig.suptitle('Spezifischer Kühlenergiebedarf der Gebäude', fontsize=16)
+    ax.set_xlabel('Gebäude')
+    ax.set_ylabel('spezifischer Kühlenergiebedarf [kWh/m²a]')
     plt.show()
 
 
@@ -44,11 +62,33 @@ def PlotWochenVerbrauch(data):
     toPlot = toPlot.resample("d").sum()
     toPlot = toPlot.resample("w").mean()
 
-    sns.barplot(data=toPlot, ax = ax)
+    sns.lineplot(data=toPlot, ax = ax)
     
-    fig.suptitle('Gesammelter Status aller Autos', fontsize=16)
+    fig.suptitle('Durchschnittlicher Tagesverbrauch der einzelnen Gebäude', fontsize=16)
     ax.legend(loc='upper left')
-    ax.set_xlabel('Stunde [h]')
-    ax.set_ylabel('Anzahl Autos')
+    ax.set_xlabel('Woche')
+    ax.set_ylabel('Heizwärmebedarf [kWh/d]')
+    plt.show()
+
+def PlotInnentemperatur(data):
+    fig, ax = plt.subplots()    
+
+    toPlot = pd.DataFrame({ "W1" : data["W1"].DF.tInnen,
+                            "W2" : data["W2"].DF.tInnen,
+                            "W3" : data["W3"].DF.tInnen,
+                            "W4" : data["W4"].DF.tInnen,
+                            })
+
+    timePlot = time[0:len(data["W1"].DF.tInnen)]
+    toPlot = toPlot.set_index(timePlot)
+    #toPlot = toPlot.resample("d").sum()
+    #toPlot = toPlot.resample("w").mean()
+
+    sns.lineplot(data=toPlot, ax = ax)
+    
+    fig.suptitle('Innentempemperatur der einzelnen Gebäude', fontsize=16)
+    ax.legend(loc='upper left')
+    ax.set_xlabel('Zeit')
+    ax.set_ylabel('Innentemperatur [°C]')
     plt.show()
 

@@ -5,6 +5,7 @@ class Dataflows():
 
 
     def __init__(self) -> None:
+        self.tInnen = []  #Liste die die Innentemperaturen der Gebäude enthält
         self.qHL = []  #Liste mit den Energieflussen des Gebaudes
         self.qWW = []  #Liste mit dem Warmwasserverbrauch des Gebaudes
         self.stromBedarf = [] #Liste die den Strombedarf aller Nutzer enthalt (Wohnen+Gewerbe)
