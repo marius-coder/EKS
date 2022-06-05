@@ -141,70 +141,10 @@ def CalcEigenverbrauch(pv, reslast):
     Einspeisung = abs(sum([x for x in reslast if x < 0]))
 
     Eigenverbrauchsanteil = 1 - Einspeisung/sum(pv)
-    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil)
-    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil)
+    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil) / 1000
+    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil) / 1000
     return Eigenverbrauch, Überschuss
 
-def plot_stacked_bar(data, series_labels, category_labels=None, 
-                     show_values=False, value_format="{}", y_label=None, 
-                     colors=None, grid=True, reverse=False):
-    """Plots a stacked bar chart with the data and labels provided.
-
-    Keyword arguments:
-    data            -- 2-dimensional numpy array or nested list
-                       containing data for each series in rows
-    series_labels   -- list of series labels (these appear in
-                       the legend)
-    category_labels -- list of category labels (these appear
-                       on the x-axis)
-    show_values     -- If True then numeric value labels will 
-                       be shown on each bar
-    value_format    -- Format string for numeric value labels
-                       (default is "{}")
-    y_label         -- Label for y-axis (str)
-    colors          -- List of color labels
-    grid            -- If True display grid
-    reverse         -- If True reverse the order that the
-                       series are displayed (left-to-right
-                       or right-to-left)
-    """
-
-    ny = len(data[0])
-    ind = list(range(ny))
-
-    axes = []
-    cum_size = np.zeros(ny)
-
-    data = np.array(data)
-
-    if reverse:
-        data = np.flip(data, axis=1)
-        category_labels = reversed(category_labels)
-
-    for i, row_data in enumerate(data):
-        color = colors[i] if colors is not None else None
-        axes.append(plt.bar(ind, row_data, bottom=cum_size, 
-                            label=series_labels[i], color=color))
-        cum_size += row_data
-
-    if category_labels:
-        plt.xticks(ind, category_labels)
-
-    if y_label:
-        plt.ylabel(y_label)
-
-    plt.legend()
-
-    if grid:
-        plt.grid()
-
-    if show_values:
-        for axis in axes:
-            for bar in axis:
-                w, h = bar.get_width(), bar.get_height()
-                plt.text(bar.get_x() + w/2, bar.get_y() + h/2, 
-                         value_format.format(h), ha="center", 
-                         va="center")
 
 def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
     fig, ax = plt.subplots()  
@@ -213,22 +153,11 @@ def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
     
     Eigenverbrauch, Überschuss = CalcEigenverbrauch(pv,reslast)
     newResLast = [x + y for (x, y) in zip(reslast, resLastAfterCharging)]
-
-    print(f"Summe alte ResLast: {sum(reslast)}")
-    print(f"Summe neue ResLast: {sum(newResLast)}")
-    print(f"Differenz: {sum(reslast) - sum(newResLast)}")
-
     EigenverbrauchAfterCharging, ÜberschussAfterCharging = CalcEigenverbrauch(pv,newResLast)
 
-    print(Eigenverbrauch)
-    print(Überschuss)
-    print(EigenverbrauchAfterCharging)
-    print(ÜberschussAfterCharging)
 
-    plot_stacked_bar(data= [[Eigenverbrauch,Überschuss],[EigenverbrauchAfterCharging, ÜberschussAfterCharging]],
-                     series_labels=["1","2","3","4"])
 
-    labels = ['Standard', 'mit E-Mobilität',]
+    labels = ['Ohne E-Mobilität', 'mit E-Mobilität',]
     Eigenverbrauchplot = [Eigenverbrauch, EigenverbrauchAfterCharging]
     Überschuss = [Überschuss, ÜberschussAfterCharging]
     width = 0.35       # the width of the bars: can also be len(x) sequence
@@ -239,9 +168,9 @@ def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
     ax.bar(labels, Überschuss, width, bottom=Eigenverbrauchplot,
            label='Einspeisung')
 
-    ax.set_ylabel('kWh')
-    ax.set_title('Einspeisung zu Autoladung')
-    ax.legend()
+    ax.set_ylabel('Energie [MWh]', fontsize=16)
+    ax.set_title('Vergleich Eigenverbrauch ohne/mit E-Mobilität', fontsize=18)
+    ax.legend(fontsize=12)
    
     plt.show()
 
