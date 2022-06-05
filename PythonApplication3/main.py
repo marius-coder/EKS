@@ -1,19 +1,21 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import numpy.ma as ma
 
-layerdict = dict()
-layerdict['Xc'] = [50.6, 69.4, 69.4, 50.6, 50.6, 50.2, 69.8, 69.8, 50.2, 50.2, 69.053, 69.12, 69.12]
-layerdict['Yc'] = [50.6, 50.6, 69.4, 69.4, 50.6, 50.2, 50.2, 69.8, 69.8, 50.2, 50.88, 50.996, 51.796]
 
-highlightmask = np.ones(len(layerdict['Xc'])).astype(bool)
-highlightmask[4:6] = highlightmask[9:11] = False
+labels = ['G1', 'G2', 'G3', 'G4', 'G5']
+men_means = [20, 35, 30, 35, 27]
+women_means = [25, 32, 34, 20, 25]
+men_std = [2, 3, 4, 1, 2]
+women_std = [3, 5, 2, 3, 3]
+width = 0.35       # the width of the bars: can also be len(x) sequence
 
-layerdict['Xc'] = ma.array(layerdict['Xc'])
-layerdict['Yc'] = ma.array(layerdict['Yc'], mask=highlightmask)
+fig, ax = plt.subplots()
 
-plt.plot(layerdict['Xc'], layerdict['Yc'].data, label='linepath', linewidth=3.5)
-plt.plot(layerdict['Xc'], layerdict['Yc'], 'r', linewidth=3.5)
-plt.xlabel('X')
-plt.ylabel('Y')
+ax.bar(labels, men_means, width, yerr=men_std, label='Men')
+ax.bar(labels, women_means, width, yerr=women_std, bottom=men_means,
+       label='Women')
+
+ax.set_ylabel('Scores')
+ax.set_title('Scores by group and gender')
+ax.legend()
+
 plt.show()

@@ -5,7 +5,7 @@
     <ProjectGuid>29e0808a-7d25-4eec-9555-6f55aab3ca3f</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Backend\Simulation.py</StartupFile>
+    <StartupFile>EMobility\LadeController.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

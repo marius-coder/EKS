@@ -5,7 +5,7 @@ from math import ceil, floor
 import matplotlib.pyplot as plt
 from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast
+from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast, PlotEigenverbrauch, PlotEigenverbrauchmitAutoeinspeisung
 from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
@@ -188,10 +188,15 @@ class LadeController():
 		if resLast > 0:
 		#Autos entladen
 			self.DischargeCars(resLast)
+			resLastAfterDischarging = self.DischargeCars(resLast)
+
+			DS.Scraper.resLastAfterDischarging[hour] = resLastAfterDischarging
 		else:
 		#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
-			self.ChargeCars(resLast)
+			resLastAfterCharging = self.ChargeCars(resLast)
+
+			DS.Scraper.resLastAfterCharging[hour] = resLastAfterCharging
 
 		self.CheckMinKap()
 
@@ -204,6 +209,9 @@ class LadeController():
 			li_interPersons.append(person.status)
 		for car in self.li_Autos:
 			li_interCars.append(car.bCharging)
+		
+		
+		
 		
 		DS.Scraper.SOC.append(self.GetChargingCars())
 
@@ -222,6 +230,7 @@ class LadeController():
 			ladung = min([car.leistung_MAX, last, space]) #Die niedrigste Zahl davon kann geladen werden
 			car.Laden(ladung)
 			last -= ladung
+		return last
 
 
 	def DischargeCars(self, last):
@@ -244,7 +253,7 @@ class LadeController():
 				last -= qtoTake
 
 
-		return
+		return last
 
 		
 	def PickCar(self, demand):
@@ -280,7 +289,7 @@ class LadeController():
 		cars = self.GetChargingCars()
 		for car in cars:
 			if car.kapazitat < car.minLadung * car.maxLadung:
-				toLoad = (car.minLadung * car.maxLadung - car.kapazitat) / car.effizienz
+				toLoad = (car.minLadung * car.maxLadung - car.kapazitat)
 				car.Laden(toLoad)
 
 #Key gibt an wie viele Prozent an Autos (Prozent mussen ganze Zahlen sein)
@@ -299,14 +308,17 @@ for hour in range(8760):
 
 	pv = PV[hour]
 	bedarf = Strombedarf["Wohnen"][hour]
-
+	
+	#resLast = 1 - pv
 	resLast = bedarf - pv
 	DS.Scraper.resLast.append(resLast)
 	#print(f"Stunde: {hour}")
 	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
-PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
-PlotPersonStatus(DS.Scraper.li_state)
-PlotStatusCollection(DS.Scraper.li_stateCars)
-PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
+PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastAfterCharging)
+#PlotEigenverbrauch(PV,DS.Scraper.resLast)
+#PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
+#PlotPersonStatus(DS.Scraper.li_state)
+#PlotStatusCollection(DS.Scraper.li_stateCars)
+#PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
