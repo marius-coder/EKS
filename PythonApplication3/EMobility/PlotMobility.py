@@ -138,30 +138,32 @@ def PlotResiduallast(pv, strom, reslast):
     ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 
-def CalcEigenverbrauch(pv, residual): 
+def CalcEigenverbrauch(pv, reslast): 
     pv = pv[0:len(reslast)]
-    Residuallast = abs(sum([x for x in reslast if x < 0]))
-    Eigenverbrauch = 1 - Residuallast/sum(pv)
-    Überschuss = Residuallast - Eigenverbrauch
+    Einspeisung = abs(sum([x for x in reslast if x < 0]))
+
+    Eigenverbrauchsanteil = 1 - Einspeisung/sum(pv)
+    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil)
+    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil)
     return Eigenverbrauch, Überschuss
 
 def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
     fig, ax = plt.subplots()  
 
     
-    Eigenverbrauch, = CalcEigenverbrauch(pv,reslast)
-    EigenverbrauchAfterCharging = CalcEigenverbrauch(pv,resLastAfterCharging)
+    Eigenverbrauch, Überschuss = CalcEigenverbrauch(pv,reslast)
+    EigenverbrauchAfterCharging, ÜberschussAfterCharging = CalcEigenverbrauch(pv,resLastAfterCharging)
 
 
     labels = ['Standard', 'mit E-Mobilität',]
-    Eigenverbrauch1 = [int(sum(pv) - sum(pv) * Eigenverbrauch), int(sum(pv) - sum(pv) * EigenverbrauchAfterCharging)]
-    Überschuss = [int(sum(pv) * Eigenverbrauch), int(sum(pv) * EigenverbrauchAfterCharging)]
+    Eigenverbrauchplot = [Eigenverbrauch, EigenverbrauchAfterCharging]
+    Überschuss = [Überschuss, ÜberschussAfterCharging]
     width = 0.35       # the width of the bars: can also be len(x) sequence
 
     fig, ax = plt.subplots()
 
-    ax.bar(labels, Eigenverbrauch1, width, label='Überschuss')
-    ax.bar(labels, Überschuss, width, bottom=Eigenverbrauch1,
+    ax.bar(labels, Eigenverbrauchplot, width, label='Überschuss')
+    ax.bar(labels, Überschuss, width, bottom=Eigenverbrauchplot,
            label='Eigenverbrauch')
 
     ax.set_ylabel('kWh')
@@ -172,14 +174,11 @@ def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
 
 def PlotEigenverbrauch(pv, reslast):
     fig, ax = plt.subplots()  
-    
-    pv = pv[0:len(reslast)]
-    Residuallast = abs(sum([x for x in reslast if x < 0]))
 
-    Eigenverbrauch = 1 - Residuallast/sum(pv)
+    Eigenverbrauch,Überschuss = CalcEigenverbrauch(pv,reslast)
 
     labels = ["Überschuss", "Eigenverbrauch"]
-    sizes = [int(sum(pv) - sum(pv) * Eigenverbrauch), int(sum(pv) * Eigenverbrauch)]
+    sizes = [Eigenverbrauch, Überschuss]
     
     fig.suptitle('Eigenverbrauchsanteil am PV-Ertrag des Quartiers', fontsize=18)
     ax.pie(sizes, labels=labels, autopct='%1.1f%%')
