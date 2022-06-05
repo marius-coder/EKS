@@ -109,6 +109,26 @@ def PlotUseableCapacity(data, resLast):
     
     plt.show()
 
+def PlotPieDischarge(discharge, charge, car):
+    fig, ax = plt.subplots()  
+
+    verlustLaden = charge * (1-car.effizienz)
+    vorFahren = charge - verlustLaden
+
+    nachFahren = discharge / car.effizienz
+    verlustEntladen = nachFahren * (1-car.effizienz)
+    nachFahrenEntladen = nachFahren - verlustEntladen
+    verlustGesamt = verlustEntladen + verlustLaden
+    Fahrverbrauch = vorFahren - nachFahren
+
+    labels = ["Verbrauch durch Gebäude", "Verbrauch durch Fahren","Lade/Entladeverluste"]
+    sizes = [nachFahrenEntladen, Fahrverbrauch, verlustGesamt]    
+
+    fig.suptitle('Aufteilung der zwischengespeicherten Energie', fontsize=18)
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+    plt.show()
+
+
 def PlotResiduallast(pv, strom, reslast):
     fig, ax = plt.subplots()  
 
@@ -155,7 +175,8 @@ def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
     newResLast = [x + y for (x, y) in zip(reslast, resLastAfterCharging)]
     EigenverbrauchAfterCharging, ÜberschussAfterCharging = CalcEigenverbrauch(pv,newResLast)
 
-
+    print(Eigenverbrauch / (Eigenverbrauch+Überschuss))
+    print(EigenverbrauchAfterCharging / (EigenverbrauchAfterCharging+ÜberschussAfterCharging))
 
     labels = ['Ohne E-Mobilität', 'mit E-Mobilität',]
     Eigenverbrauchplot = [Eigenverbrauch, EigenverbrauchAfterCharging]
@@ -182,6 +203,8 @@ def PlotEigenverbrauch(pv, reslast):
     labels = ["Überschuss", "Eigenverbrauch"]
     sizes = [Eigenverbrauch, Überschuss]
     
+    
+
     fig.suptitle('Eigenverbrauchsanteil am PV-Ertrag des Quartiers', fontsize=18)
     ax.pie(sizes, labels=labels, autopct='%1.1f%%')
     plt.show()

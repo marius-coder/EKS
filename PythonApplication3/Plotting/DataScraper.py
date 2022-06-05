@@ -22,6 +22,9 @@ class DataScraper():
         self.generationloaded = []  #Liste die speichert, wie viel Energie in den Autos gespeichert wurde
         self.resLast = []           #Liste in der die Residuallast gespeichert wird
         
+
+
+        self.resLastDifferenceAfterDischarge = [0] * 8760
         self.resLastDifference = [0] * 8760
         self.resLastAfterDischarging = [0] * 8760
         self.resLastAfterCharging = [0] * 8760

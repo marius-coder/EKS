@@ -5,7 +5,7 @@ from math import ceil, floor
 import matplotlib.pyplot as plt
 from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast, PlotEigenverbrauch, PlotEigenverbrauchmitAutoeinspeisung
+from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast, PlotEigenverbrauch, PlotEigenverbrauchmitAutoeinspeisung, PlotPieDischarge
 from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
@@ -189,7 +189,7 @@ class LadeController():
 		#Autos entladen
 			self.DischargeCars(resLast)
 			resLastAfterDischarging = self.DischargeCars(resLast)
-
+			DS.Scraper.resLastDifferenceAfterDischarge[hour] =  resLast - resLastAfterDischarging
 			DS.Scraper.resLastAfterDischarging[hour] = resLastAfterDischarging
 		else:
 		#Autos laden
@@ -208,9 +208,7 @@ class LadeController():
 		for person in inter:
 			li_interPersons.append(person.status)
 		for car in self.li_Autos:
-			li_interCars.append(car.bCharging)
-		
-		
+			li_interCars.append(car.bCharging)		
 		
 		
 		DS.Scraper.SOC.append(self.GetChargingCars())
@@ -220,7 +218,6 @@ class LadeController():
 
 	def ChargeCars(self, last):
 		cars = self.GetChargingCars()
-
 		cars.sort(key=lambda x: x.kapazitat, reverse=True)
 
 		for car in cars:
@@ -232,13 +229,10 @@ class LadeController():
 			last -= ladung
 		return last
 
-
 	def DischargeCars(self, last):
-
 		cars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
 		for car in cars:
 			car.diff = car.kapazitat - car.maxLadung * car.minLadung
-
 
 		cars.sort(key=lambda x: x.diff, reverse= True)
 		if cars:
@@ -246,16 +240,10 @@ class LadeController():
 				if last == 0: #Wenn die Last abgedeckt werden konnte, konnen wir fruher abbrechen
 					break
 				qtoTake = min([car.leistung_MAX, last, car.diff]) #Die niedrigste Zahl davon kann entladen werden
-
-
-
-				qtoTake -= car.Entladen(qtoTake)				
+				qtoTake -= car.Entladen(qtoTake)
 				last -= qtoTake
-
-
 		return last
-
-		
+			
 	def PickCar(self, demand):
 		safety = 1.1
 		demand = demand * safety
@@ -264,7 +252,7 @@ class LadeController():
 		cars.sort(key=lambda x: x.kapazitat, reverse=False)
 
 		if cars[-1].kapazitat < demand:
-			return False
+			return cars[-1]
 
 		car = next(x for x in cars if x.kapazitat >= demand)
 		#print(f"Best Choice: {car.kapazitat}")
@@ -276,6 +264,7 @@ class LadeController():
 		Person und Auto werden auf abwesend gestellt"""
 		km = person.wegMitAuto + person.WaybackHome()
 		car = self.PickCar(km * self.spezVerbrauch)
+
 		person.carID = car.ID
 		
 		
@@ -302,7 +291,7 @@ distMinLadung = {
 
 
 
-Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 75)
+Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
 
 for hour in range(8760):
 
@@ -318,8 +307,9 @@ for hour in range(8760):
 
 
 
+print(sum(DS.Scraper.resLastDifferenceAfterDischarge))
 print(sum(DS.Scraper.resLastDifference))
-
+PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
 PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
 #PlotEigenverbrauch(PV,DS.Scraper.resLast)
