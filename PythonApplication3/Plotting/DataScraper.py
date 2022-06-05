@@ -22,6 +22,7 @@ class DataScraper():
         self.generationloaded = []  #Liste die speichert, wie viel Energie in den Autos gespeichert wurde
         self.resLast = []           #Liste in der die Residuallast gespeichert wird
         
+        self.resLastDifference = [0] * 8760
         self.resLastAfterDischarging = [0] * 8760
         self.resLastAfterCharging = [0] * 8760
         self.SOC = [] #Liste in der der SOC aller anwesenden Autos gepsiechert wird

@@ -195,9 +195,9 @@ class LadeController():
 		#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
 			resLastAfterCharging = self.ChargeCars(resLast)
-
 			DS.Scraper.resLastAfterCharging[hour] = resLastAfterCharging
-
+			DS.Scraper.resLastDifference[hour] =  resLast - resLastAfterCharging
+			
 		self.CheckMinKap()
 
 		#print(f"Autos verfugbar: {len(self.GetChargingCars())}")
@@ -316,7 +316,12 @@ for hour in range(8760):
 	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
-PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastAfterCharging)
+
+
+print(sum(DS.Scraper.resLastDifference))
+
+PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
+
 #PlotEigenverbrauch(PV,DS.Scraper.resLast)
 #PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
 #PlotPersonStatus(DS.Scraper.li_state)
