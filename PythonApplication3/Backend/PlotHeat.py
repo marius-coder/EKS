@@ -24,9 +24,12 @@ def PlotspezVerbrauch(dicBuildings):
 
     sns.barplot(data=toPlot, ax = ax)
     
-    fig.suptitle('Spezifischer Heizwärmebedarf der Gebäude', fontsize=16)
-    ax.set_xlabel('Gebäude')
-    ax.set_ylabel('spezifischer Heizwärmebedarf [kWh/m²a]')
+    fig.suptitle('Spezifischer Heizwärmebedarf der Gebäude', fontsize=18)
+    ax.set_xlabel('Gebäude', fontsize=14)
+    ax.set_ylabel('spezifischer Heizwärmebedarf [kWh/m²a]', fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_axisbelow(True)
+    ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 
 def PlotspezVerbrauchKWB(dicBuildings):
@@ -42,9 +45,13 @@ def PlotspezVerbrauchKWB(dicBuildings):
 
     sns.barplot(data=toPlot, ax = ax)
     
-    fig.suptitle('Spezifischer Kühlenergiebedarf der Gebäude', fontsize=16)
-    ax.set_xlabel('Gebäude')
-    ax.set_ylabel('spezifischer Kühlenergiebedarf [kWh/m²a]')
+    fig.suptitle('Spezifischer Kühlenergiebedarf der Gebäude', fontsize=18)
+    ax.set_xlabel('Gebäude', fontsize=14)
+    ax.set_ylabel('spezifischer Kühlenergiebedarf [kWh/m²a]', fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_axisbelow(True)
+    ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
+    ax.set_ylim([0, 35])
     plt.show()
 
 
@@ -64,10 +71,13 @@ def PlotWochenVerbrauch(data):
 
     sns.lineplot(data=toPlot, ax = ax)
     
-    fig.suptitle('Durchschnittlicher Tagesverbrauch der einzelnen Gebäude', fontsize=16)
+    fig.suptitle('Täglicher Wärmeeintrag im Wochendurchschnitt der einzelnen Gebäude', fontsize=18)
     ax.legend(loc='upper left')
-    ax.set_xlabel('Woche')
-    ax.set_ylabel('Heizwärmebedarf [kWh/d]')
+    ax.set_xlabel('Zeit [Woche]', fontsize=14)
+    ax.set_ylabel('Wärmefluss [kWh/d]', fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_axisbelow(True)
+    ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 
 def PlotInnentemperatur(data):
@@ -86,9 +96,12 @@ def PlotInnentemperatur(data):
 
     sns.lineplot(data=toPlot, ax = ax)
     
-    fig.suptitle('Innentempemperatur der einzelnen Gebäude', fontsize=16)
+    fig.suptitle('Innentempemperatur der einzelnen Gebäude', fontsize=18)
     ax.legend(loc='upper left')
-    ax.set_xlabel('Zeit')
-    ax.set_ylabel('Innentemperatur [°C]')
+    ax.set_xlabel('Zeit [h]', fontsize=14)
+    ax.set_ylabel('Innentemperatur [°C]', fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_axisbelow(True)
+    ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 

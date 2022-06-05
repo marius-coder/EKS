@@ -12,8 +12,7 @@
     <OutputPath>.</OutputPath>
     <Name>EKS</Name>
     <RootNamespace>PythonApplication3</RootNamespace>
-    <InterpreterId>
-    </InterpreterId>
+    <InterpreterId>Global|VisualStudio|Python39_64</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
