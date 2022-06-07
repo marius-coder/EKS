@@ -250,13 +250,18 @@ def PlotSOC(data, anzAuto):
         istSOC, sollSOC, xWhite, correctionSoll, correctionIst = PickData(data[index], anzAuto)
         # plotting line    
         
-        ax.plot(x, sollSOC, color= "#038222")
+        ax.plot(x, sollSOC, color= "#038222", label= "Mindestladestand")
         ax.plot(xWhite, correctionSoll, color= "white", lw=10)
 
-        ax.plot(x, istSOC, color= "#9e0303")
+        ax.plot(x, istSOC, color= "#9e0303", label= "Istladestand")
         ax.plot(xWhite, correctionIst, color= "white", lw=10)
-
-        ax.set_ylim(0, 80)
+        ax.set_title(f"Ladestand im Vergleich zum Mindestladestand am: {time[int(t)]}")
+        ax.set_ylabel("Ladestand [kWh]")
+        ax.set_xlabel("Anwesende Autos")
+        #print(f"legend handles: {ax.get_legend_handles_labels()}")
+        ax.legend()
+        
+        ax.set_ylim(0, 50)
      
         # returning numpy image
         return mplfig_to_npimage(fig)
@@ -265,4 +270,4 @@ def PlotSOC(data, anzAuto):
     animation = VideoClip(make_frame, duration = duration)
  
     # displaying animation with auto play and looping
-    animation.ipython_display(fps = fps, loop = True, autoplay = True)
+    animation.ipython_display(fps = fps, loop = True, autoplay = True, maxduration= 1000000)

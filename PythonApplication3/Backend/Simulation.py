@@ -63,8 +63,8 @@ class Simulation():
 
 
 
-		speicherHZG_W1 = Speicher(10000)
-		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherHZG_W1, COP_HZG= COP_HZG, Pel= 250)
+		speicherHZG_W1 = Speicher(1000)
+		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherHZG_W1, COP_HZG= COP_HZG, Pel= 10)
 		speicherWW_W1 = Speicher(10000)
 		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 250)
 		dic_buildings["W1"].DF.InitSzenWP()
@@ -98,8 +98,8 @@ class Simulation():
 
 		qtoTake = building.CalcQtoTargetTemperature(self.heating) * building.gfa
 		if qtoTake != 0:
-			building.WP_HZG.speicher.SpeicherEntladen(qtoTake, building.WP_HZG.hystEin)
-			building.CalcNewTemperature(qtoTake / building.gfa)
+			rest = building.WP_HZG.speicher.SpeicherEntladen(qtoTake, building.WP_HZG.hystEin)
+			building.CalcNewTemperature((qtoTake-rest) / building.gfa)
 		building.WP_HZG.CheckSpeicher(mode = "HZG")
 		building.stromVerbrauchBetrieb += building.WP_HZG.PelBetrieb
 		

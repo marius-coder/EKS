@@ -10,6 +10,7 @@ Strombedarf = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")
 #Bedarf_Schule = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")["Schule"].to_list()  #in kWh
 #Bedarf_Gewerbe = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")["Gewerbe"].to_list()  #in kWh
 
+print(sum(PV))
 
 wohnen = 1488565
 Strombedarf["Wohnen"] = Strombedarf["Wohnen"] * wohnen
