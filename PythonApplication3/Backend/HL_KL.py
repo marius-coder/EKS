@@ -93,12 +93,13 @@ class HL():
         return qSum
 
     def CalcNewTemperature(self, Q):
-        self.ti = self.ti + Q / self.heat_capacity
+        """Q ist kWh. Rechnung erwartet Wh"""
+        self.ti = self.ti + Q * 1000 / self.heat_capacity
 
         
 
     def CalcQtoTargetTemperature(self, heating):
-
+        """Return Wh"""
         if self.ti < self.TsWinter and heating:
             return self.heat_capacity * (self.TsWinter - self.ti)
         elif self.ti > self.TsSommer:

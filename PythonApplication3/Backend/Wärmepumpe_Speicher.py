@@ -36,12 +36,15 @@ class Speicher():
         """Nimmt als Argument wie viel Energie dem Speicher entnommen werden soll
         Konstrolliert dabei ob der Speicher unterladen wird"""
         qtoTake = abs(qtoTake)
-        self.speicherstand -= qtoTake
-        rest = 0
 
-        if self.speicherstand < MIN_Speicherstand:
-            rest = MIN_Speicherstand - self.speicherstand
-            self.speicherstand = MIN_Speicherstand
+        if self.speicherstand - qtoTake < 0:
+            rest = qtoTake - self.speicherstand
+            self.speicherstand = 0
+        else:
+            self.speicherstand -= qtoTake
+            rest = 0
+
+
 
         return rest
 
@@ -89,7 +92,7 @@ class Wärmepumpe():
             if self.speicher.Speicherstand() < self.hystEin:
                     self.TurnOn()
         if self.bIsOn:
-            qHeat = self.ProcessStep(mode)
+            qHeat = self.ProcessStep(mode) #kWh
             rest = self.speicher.SpeicherLaden(qHeat)
             if rest != 0: #Falls der Speicher zu voll geladen wird, wird die geladene Energie reduziert
                 qHeat -= rest

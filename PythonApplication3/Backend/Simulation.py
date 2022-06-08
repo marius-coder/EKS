@@ -57,32 +57,35 @@ class Simulation():
 
 		self.wwProfile = dict(pd.read_csv("./Data/Warmwasser.csv", decimal=",", sep=";"))
 
+	def InitCoolingPeriod(self):
+		pass
+
 	def InitSzenarioWP(self, dic_buildings):
-		COP_HZG = 5
-		COP_WW = 3
+		COP_HZG = 4.5
+		COP_WW = 2.8
 
 
 
 		speicherHZG_W1 = Speicher(1000)
-		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherHZG_W1, COP_HZG= COP_HZG, Pel= 10)
+		dic_buildings["W1"].WP_HZG = Wärmepumpe(speicherHZG_W1, COP_HZG= COP_HZG, Pel= 30)
 		speicherWW_W1 = Speicher(10000)
 		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 250)
 		dic_buildings["W1"].DF.InitSzenWP()
 
-		speicherHZG_W2 = Speicher(10000)
-		dic_buildings["W2"].WP_HZG = Wärmepumpe(speicherHZG_W2, COP_HZG= COP_HZG, Pel= 250)
+		speicherHZG_W2 = Speicher(1000)
+		dic_buildings["W2"].WP_HZG = Wärmepumpe(speicherHZG_W2, COP_HZG= COP_HZG, Pel= 30)
 		speicherWW_W2 = Speicher(10000)
 		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 250)
 		dic_buildings["W2"].DF.InitSzenWP()
 
-		speicherHZG_W3 = Speicher(10000)
-		dic_buildings["W3"].WP_HZG = Wärmepumpe(speicherHZG_W3, COP_HZG= COP_HZG, Pel= 250)
+		speicherHZG_W3 = Speicher(1000)
+		dic_buildings["W3"].WP_HZG = Wärmepumpe(speicherHZG_W3, COP_HZG= COP_HZG, Pel= 30)
 		speicherWW_W3 = Speicher(10000)
 		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 250)
 		dic_buildings["W3"].DF.InitSzenWP()
 
-		speicherHZG_W4 = Speicher(10000)
-		dic_buildings["W4"].WP_HZG = Wärmepumpe(speicherHZG_W4, COP_HZG= COP_HZG, Pel= 250)
+		speicherHZG_W4 = Speicher(1000)
+		dic_buildings["W4"].WP_HZG = Wärmepumpe(speicherHZG_W4, COP_HZG= COP_HZG, Pel= 30)
 		speicherWW_W4 = Speicher(10000)
 		dic_buildings["W1"].WP_WW = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 250)
 		dic_buildings["W4"].DF.InitSzenWP()
@@ -96,21 +99,22 @@ class Simulation():
 
 	def SimWP(self, building, qHLSum):
 
-		qtoTake = building.CalcQtoTargetTemperature(self.heating) * building.gfa
+		qtoTake = building.CalcQtoTargetTemperature(self.heating) * building.gfa / 1000 #kWh
 		if qtoTake != 0:
 			rest = building.WP_HZG.speicher.SpeicherEntladen(qtoTake, building.WP_HZG.hystEin)
 			building.CalcNewTemperature((qtoTake-rest) / building.gfa)
 		building.WP_HZG.CheckSpeicher(mode = "HZG")
 		building.stromVerbrauchBetrieb += building.WP_HZG.PelBetrieb
 		
-		#print(f"Status WP: {building.WP_HZG.bIsOn}")
-		#print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
-		#print("------------------")
+		print(f"Status WP: {building.WP_HZG.bIsOn}")
+		print(f"Innentemperatur: {building.ti} °C")
+		print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
+		print("------------------")
 
 	def Simulate(self):
 		self.InitSzenarioWP(self.dic_buildings)
 		for hour in range(8760):			
-			print(hour)
+			print(f"Stunde: {hour}")
 
 			if DetermineMonth(hour) < 4 or DetermineMonth(hour) > 9:
 				self.heating == True
@@ -120,18 +124,20 @@ class Simulation():
 			qHLSum = 0
 
 			for key,building in self.dic_buildings.items():
+				
+				if key in ["W2","W3","W4"]:
+					continue
 
 				building.stromVerbrauchBetrieb = stromKoeff["Wohnen"][hour] * building.stromVerbrauch
 
 
 
-				if hour == 4000:
-					print("")
 
 				qHLSum = building.CalcThermalFlows(ta=self.ta[hour], hour=hour,
 									  anz_Personen=building.anzPersonen, strom = building.stromVerbrauchBetrieb) / 1000
-
-				building.CalcNewTemperature(qHLSum * 1000)
+				if building.ti >= 26:
+					print("")
+				building.CalcNewTemperature(qHLSum)
 				#print(f"Gebäude: {key}")
 				#print(f"Innentemperatur: {building.ti}")
 
