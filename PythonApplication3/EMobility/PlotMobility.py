@@ -200,7 +200,7 @@ def PlotEigenverbrauch(pv, reslast):
 
     Eigenverbrauch,Überschuss = CalcEigenverbrauch(pv,reslast)
 
-    labels = ["Überschuss", "Eigenverbrauch"]
+    labels = ["Eigenverbrauch", "Überschuss"]
     sizes = [Eigenverbrauch, Überschuss]
     
     

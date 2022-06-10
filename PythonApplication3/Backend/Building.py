@@ -18,9 +18,7 @@ class Building(HL,Dataflows):
         self.TsSommer = 26 #Solltemperatur im Sommer in °C
         self.volumen = volumen * 0.8 #Beheiztes Volumen
         self.ABSCHIRMUNGSKOEFF = 0.04 #Abschirmungskoeffizient
-        self.Warmebrucken = 0.05
-
-        
+        self.Warmebrucken = 0.05        
 
         self.ti = 20
         self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)

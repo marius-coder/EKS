@@ -187,13 +187,15 @@ class LadeController():
 
 		if resLast > 0:
 		#Autos entladen
-			self.DischargeCars(resLast)
+			#Data Gathering
 			resLastAfterDischarging = self.DischargeCars(resLast)
 			DS.Scraper.resLastDifferenceAfterDischarge[hour] =  resLast - resLastAfterDischarging
 			DS.Scraper.resLastAfterDischarging[hour] = resLastAfterDischarging
 		else:
 		#Autos laden
-			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl
+			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl			
+
+			#Data Gathering
 			resLastAfterCharging = self.ChargeCars(resLast)
 			DS.Scraper.resLastAfterCharging[hour] = resLastAfterCharging
 			DS.Scraper.resLastDifference[hour] =  resLast - resLastAfterCharging
@@ -293,13 +295,13 @@ distMinLadung = {
 
 Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
 
-for hour in range(168):
+for hour in range(8760):
 
 	pv = PV[hour]
-	bedarf = Strombedarf["Wohnen"][hour]
+	bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]
 	
-	resLast = 1 - pv
-	#resLast = bedarf - pv
+	#resLast = 1 - pv
+	resLast = bedarf - pv
 	DS.Scraper.resLast.append(resLast)
 	#print(f"Stunde: {hour}")
 	#print(f"Residuallast: {resLast} kWh")
@@ -307,15 +309,13 @@ for hour in range(168):
 
 
 
-#print(sum(DS.Scraper.resLastDifferenceAfterDischarge))
-#print(sum(DS.Scraper.resLastDifference))
-#PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
-#PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
+PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
+PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
-#PlotEigenverbrauch(PV,DS.Scraper.resLast)
-#PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
-#PlotPersonStatus(DS.Scraper.li_state)
-#PlotStatusCollection(DS.Scraper.li_stateCars)
-PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
+PlotEigenverbrauch(PV,DS.Scraper.resLast)
+PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
+PlotPersonStatus(DS.Scraper.li_state)
+PlotStatusCollection(DS.Scraper.li_stateCars)
+#PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
 
 
