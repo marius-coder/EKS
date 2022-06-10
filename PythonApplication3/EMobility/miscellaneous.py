@@ -42,7 +42,10 @@ time = pd.to_datetime(time)
 Feiertage = holidays.country_holidays('Austria')
 
 
-def DetermineDay(hour):
+def DetermineDay(hour) -> str:
+	"""Findet den Typ des Tages heraus. Achtet dabei auf Feiertage.
+	hour: int
+		Stunde des Jahres"""
 	if time[hour] in Feiertage:
 		#Feiertage werden als Sonntage gehandhabt
 		return "Sonntag"

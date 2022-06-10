@@ -44,7 +44,7 @@ class LadeController():
 		self.tooMany = 0
 
 
-	def InitAutos(self,anzAutos, distMinLadung, maxLadung):
+	def InitAutos(self,anzAutos, distMinLadung, maxLadung) -> list:
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -86,13 +86,18 @@ class LadeController():
 
 		return li_Autos, checksum
 	
-	def UpdateLadestand(self, auto, kilometer):
-		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren"""
-		auto.kapazitat -= kilometer * self.spezVerbrauch / 1000
+	def UpdateLadestand(self, auto, kilometer) -> None:
+		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
+		auto: auto
+			Auto, welches seinen Ladestand reduziert bekommt
+		kilometer: float
+			Kilometer welches das Auto fahrt"""
+		auto.kapazitat -= kilometer * auto.spezVerbrauch / 1000
 		if auto.kapazitat < 0:
 			auto.kapazitat = 0
 
 	def GetChargingCars(self) -> list:
+		"""Gibt jedes Auto zuruck, welches gerade an der Ladestation hangt"""
 		return [car for car in self.li_Autos if car.bCharging == True]
 
 	def GetAvailableCars(self) -> list:
@@ -100,24 +105,24 @@ class LadeController():
 		chargingCars = self.GetChargingCars() #first get all charging cars
 		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]
 
-	def GetUseableCapacity(self):
-		chargingCars = self.GetChargingCars()	#Alle Autos die angesteckt sind
-		availableCars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die genugend Ladung haben
-
-		useableCapacity = 0
-		for car in availableCars:
-			useableCapacity += car.kapazitat - car.kapazitat * car.minLadung
-		return useableCapacity
-
-
-
-	def FindCarID(self, ID):
+	def FindCarID(self, ID) -> Auto:
+		"""sucht Auto in Liste und gibt das gefundene Auto zuruck
+		ID: str
+			ID des Autos, welches gesucht wird"""
 		for car in self.li_Autos:
 			if car.ID == ID:
 				return car
 
 
-	def InitDay(self, day):
+	def InitDay(self, day) -> list:
+		"""InitDay wird einmal am Tag aufgerufen und initialisiert den Tag.
+		Dabei werden verschiedene Variablen fur den kommenden tag gesetzt.
+		Die Personen, welche an diesen tag mit dem Auto fahren und beim Mobilitatsprogramm
+		mitmachen werden ausgewahlt und returned
+		day: str
+			Typ des Tages
+		return: list
+			drivingPersons enthalt eine Liste an Personen objekten, welche mit dem Auto fahren"""
 		self.anzPers = 0 #Anzahl an Personen die bereits losgefahren sind zurucksetzen
 		self.anzPers2 = 0 #Anzahl an Personen die bereits losgefahren sind vom letzten Zeitschritt zurucksetzen
 		percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
@@ -145,6 +150,11 @@ class LadeController():
 		return drivingPersons
 
 	def Control(self, losZahl2, conZahl):
+		"""Berechnet die Zahl der Personen, welche in einer Stunde wegfahren/zuruckkommen
+		losZahl2: float
+			Personenzahl, die fahren/zuruckgekommt (inkl. jetziger Stunde)
+		conZahl: float
+			Personenzahl, die bereits gefahren/zuruckgekommen sein muss"""
 		b = int(round(losZahl2,0))
 		r = b - conZahl
 		conZahl = b
@@ -277,6 +287,8 @@ class LadeController():
 		car.bCharging = False
 
 	def CheckMinKap(self):
+		"""Kontrolliert alle Autos, welche an der Ladestation laden.
+		Falls Autos unter der Mindestladegrenze sind, werden diese aus dem Netz geladen"""
 		cars = self.GetChargingCars()
 		for car in cars:
 			if car.kapazitat < car.minLadung * car.maxLadung:

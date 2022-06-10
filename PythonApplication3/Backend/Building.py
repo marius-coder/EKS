@@ -20,7 +20,7 @@ class Building(HL,Dataflows):
         self.ABSCHIRMUNGSKOEFF = 0.04 #Abschirmungskoeffizient
         self.Warmebrucken = 0.05        
 
-        self.ti = 20
+        self.ti = 20 #°C
         self.cp_air = 0.34  # spez. Wärme kapazität * rho von Luft (Wh/m3K)
 
         self.stromVerbrauch = stromVerbrauch #Jährlicher Stromverbrauch in kWh/a

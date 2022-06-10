@@ -9,16 +9,17 @@ class Auto():
 		self.kapazitat = maxLadung * minLadung #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
-		self.verlust = 0
-		self.ID = counter
-		self.minTimeAway = 0 #gibt an wie lange das Auto mindestens weg sein muss (verhindert unlogische Zeiten wie 120km in einer Stunden)
-		
-
-	def DecrementMinTimeAway(self):
-		if self.minTimeAway != 0:
-			self.minTimeAway -= 1
+		self.verlust = 0 #Verlust von Lade/Entladevorgangen in kWh
+		self.ID = counter #Unique ID die jedem Auto gegeben wird
+		self.spezVerbrauch = 0.170 #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
 
 	def Laden(self, qtoLoad):
+		"""Ladet das Auto mit einer gegebenen Ladung
+		qtoLoad: float,  
+			Ladung mit dem das Auto geladen wird in kWh
+		Return:
+		qtoLoad: float,
+			gibt den Input zurück. Falls alles geladen werden konnte, ist der return 0"""
 		if qtoLoad > self.leistung_MAX:
 			#Wenn ja wird gekappt
 			self.verlust = self.leistung_MAX * (1-self.effizienz)
@@ -40,6 +41,12 @@ class Auto():
 		return qtoLoad
 
 	def Entladen(self, qtoTake):
+		"""Entladet das Auto mit einer gegebenen Ladung
+		qtoTake: float,  
+			Ladung mit dem das Auto entladen wird in kWh
+		Return:
+		qtoTake: float,
+			gibt den Input zurück. Falls alles entladen werden konnte, ist der return 0"""
 
 		if qtoTake > self.leistung_MAX:
 			#Wenn ja wird gekappt
@@ -68,7 +75,7 @@ class Auto():
 		return qtoTake
 
 	def Speicherstand(self):
-		"""Gibt den aktuellen Speicherstand in Anteilen zuruck"""
+		"""Gibt den aktuellen Speicherstand in Anteilen (0-1) zuruck"""
 		return abs(self.kapazitat) / self.maxLadung
 
 

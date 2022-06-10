@@ -10,10 +10,10 @@ from Helper import *
 from PlotHeat import PlotspezVerbrauch, PlotWochenVerbrauch, PlotInnentemperatur, PlotspezVerbrauchKWB
 
 
-u_Wand = 0.2
-u_Boden = 0.25
-u_Dach = 0.15
-u_Fenster = 0.9
+u_Wand = 0.2 #W/m²K
+u_Boden = 0.25 #W/m²K
+u_Dach = 0.15 #W/m²K
+u_Fenster = 0.9 #W/m²K
 
 W1 = Building( wand = {"Fläche":1911.29,"U-Wert":u_Wand},
 			  fenster = {"Fläche":1274.19,"U-Wert":u_Fenster},
