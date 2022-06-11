@@ -19,7 +19,7 @@ class Auto():
 			Ladung mit dem das Auto geladen wird in kWh
 		Return:
 		qtoLoad: float,
-			gibt den Input zurück. Falls alles geladen werden konnte, ist der return 0"""
+			gibt den Input zuruck. Falls alles geladen werden konnte, ist der return 0"""
 		if qtoLoad > self.leistung_MAX:
 			#Wenn ja wird gekappt
 			self.verlust = self.leistung_MAX * (1-self.effizienz)
@@ -46,7 +46,7 @@ class Auto():
 			Ladung mit dem das Auto entladen wird in kWh
 		Return:
 		qtoTake: float,
-			gibt den Input zurück. Falls alles entladen werden konnte, ist der return 0"""
+			gibt den Input zuruck. Falls alles entladen werden konnte, ist der return 0"""
 
 		if qtoTake > self.leistung_MAX:
 			#Wenn ja wird gekappt

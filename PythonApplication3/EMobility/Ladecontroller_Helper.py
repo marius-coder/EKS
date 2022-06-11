@@ -25,7 +25,7 @@ def GenerateWeightedItem(pop, weights):
     wheights: list
         Liste an gewichten nach denen gewahlt wird        
     return: int/float/string
-        Gibt eine Zahl/String zurück"""
+        Gibt eine Zahl/String zuruck"""
 	return choices(pop, weights)[0]
 
 def CalcNumberofWays(day) -> int:
@@ -55,7 +55,7 @@ def GenerateWegZweck(day) -> int:
 def GenerateTransportmittel(zweck) -> str:
     """Je nach Wegzweck ergibt sich eine Warscheinlichkeit ob das Auto als Transportmittel gewahlt wird
     zweck: string
-        zweck für den gewähöten Weg"""
+        zweck fur den gewahlten Weg"""
     population = ["zuFus","Rad","AutolenkerIn","MitfahrerIn","Offentlich","Anderes"]
     if zweck == "Arbeitsplatz":
         weights = [8,7,60,5,20,0] 
