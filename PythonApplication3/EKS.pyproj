@@ -5,14 +5,14 @@
     <ProjectGuid>29e0808a-7d25-4eec-9555-6f55aab3ca3f</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Strom\PV.py</StartupFile>
+    <StartupFile>EMobility\main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>EKS</Name>
     <RootNamespace>PythonApplication3</RootNamespace>
-    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
+    <InterpreterId>Global|VisualStudio|Python39_64</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,11 +33,11 @@
     <Compile Include="Backend\Warmwasser.py" />
     <Compile Include="Backend\Wärmepumpe_Speicher.py" />
     <Compile Include="EMobility\Auto.py" />
-    <Compile Include="EMobility\LadeController.py" />
+    <Compile Include="EMobility\LadeController_Personen.py" />
+    <Compile Include="EMobility\main.py" />
+    <Compile Include="EMobility\LadeController_Main.py" />
     <Compile Include="EMobility\Ladecontroller_Helper.py" />
-    <Compile Include="EMobility\LadeController_OLD.py" />
     <Compile Include="EMobility\miscellaneous.py" />
-    <Compile Include="EMobility\temp.py" />
     <Compile Include="EMobility\PlotMobility.py" />
     <Compile Include="main.py" />
     <Compile Include="Plotting\DataScraper.py" />

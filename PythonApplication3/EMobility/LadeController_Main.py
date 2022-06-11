@@ -1,23 +1,17 @@
 # -*- coding: <latin-1> -*-
 import pandas as pd
-import numpy as np
 from math import ceil, floor
-import matplotlib.pyplot as plt
 from random import choice
 from Auto import Auto
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast, PlotEigenverbrauch, PlotEigenverbrauchmitAutoeinspeisung, PlotPieDischarge
-from temp import *
 from miscellaneous import DetermineDay, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
-from collections import Counter
 from Backend.Helper import DetermineHourofDay
-
-from Strom.PV import Strombedarf, PV
-
 
 import Plotting.DataScraper as DS
 
-class LadeController():
+from LadeController_Personen import LadeController_Personen
+
+class LadeController(LadeController_Personen):
 
 	def __init__(self, anzAutos, distMinLadung, maxLadung):
 		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
@@ -29,19 +23,17 @@ class LadeController():
 			Maximale Ladekapazitat der Autos. 
 			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
 			Eingabe in kWh.
-		"""		
-		self.spezVerbrauch = 0.170 #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
+		"""	
+		LadeController_Personen.__init__(self)
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
-		self.anzPers2 = 0
 		self.anzAutos = anzAutos
 
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
-		self.averageSpeed = 40 #km/h angenommene Durchschnittsgeschwindigkeit
-		self.drivingPersons = []
-		self.awayPersons = []
-
+		
 		self.tooMany = 0
+
+		self.safety = 1.2 #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
 
 
 	def InitAutos(self,anzAutos, distMinLadung, maxLadung) -> list:
@@ -104,97 +96,14 @@ class LadeController():
 		"""Gibt liste an Autos zuruck welche entladbar sind"""
 		chargingCars = self.GetChargingCars() #first get all charging cars
 		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]
-
-	def FindCarID(self, ID) -> Auto:
-		"""sucht Auto in Liste und gibt das gefundene Auto zuruck
-		ID: str
-			ID des Autos, welches gesucht wird"""
-		for car in self.li_Autos:
-			if car.ID == ID:
-				return car
-
-
-	def InitDay(self, day) -> list:
-		"""InitDay wird einmal am Tag aufgerufen und initialisiert den Tag.
-		Dabei werden verschiedene Variablen fur den kommenden tag gesetzt.
-		Die Personen, welche an diesen tag mit dem Auto fahren und beim Mobilitatsprogramm
-		mitmachen werden ausgewahlt und returned
-		day: str
-			Typ des Tages
-		return: list
-			drivingPersons enthalt eine Liste an Personen objekten, welche mit dem Auto fahren"""
-		self.anzPers = 0 #Anzahl an Personen die bereits losgefahren sind zurucksetzen
-		self.anzPers2 = 0 #Anzahl an Personen die bereits losgefahren sind vom letzten Zeitschritt zurucksetzen
-		percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
-		mobilePersons = ceil(CalcMobilePersonen(day, 1335))
-
-		persons = []
-		for _ in range(mobilePersons):
-			persons.append(Person()) #Neue Person generieren
-		
-		limit = ceil(mobilePersons * percent)
-		personsCarSharing = persons[0:limit]
-		drivingPersons = []
-			
-		for person in personsCarSharing:
-			ways = CalcNumberofWays(day) 
-			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)
-			if person.anzAutoWege >= 2:
-				for _ in range(person.anzAutoWege-1):
-					km = GenerateKilometer()
-					person.AddWay(km) #Fur den Ruckweg
-					person.wegMitAuto += km #Fur den Verbrauch des Autos
-				drivingPersons.append(person)
-
-		self.lendrivingPersons = len(drivingPersons)	
-		return drivingPersons
-
-	def Control(self, losZahl2, conZahl):
-		"""Berechnet die Zahl der Personen, welche in einer Stunde wegfahren/zuruckkommen
-		losZahl2: float
-			Personenzahl, die fahren/zuruckgekommt (inkl. jetziger Stunde)
-		conZahl: float
-			Personenzahl, die bereits gefahren/zuruckgekommen sein muss"""
-		b = int(round(losZahl2,0))
-		r = b - conZahl
-		conZahl = b
-		return r, conZahl
+	
 
 	def CheckTimestep(self, hour, resLast):
-		day = DetermineDay(hour)
-		hourIndex = DetermineHourofDay(hour)
-		if hourIndex == 0:			
-			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
-			print(f"Anzahl Leute die gerade weg sind: {len(self.awayPersons)}")
-			self.tooMany = len(self.awayPersons)
+		self.CheckPersonsHourly(hour)
 		
-		
-
 		li_interCars = []
 		li_interPersons = []
-
-		#Anzahl an Personen die Losgefahren sollen
-		self.anzPers += self.travelData["Losfahren"][hourIndex] / 100 * self.lendrivingPersons
-
-		#Anzahl an Personen die zu dieser Stunde losfahren sollen
-		driveAway, self.anzPers2 = self.Control(self.anzPers, self.anzPers2)
-		for _ in range(driveAway):			
-			person = choice(self.drivingPersons)
-			self.drivingPersons.remove(person)			
-			self.DriveAway(person= person)
-			self.awayPersons.append(person)
-
-		pers = self.travelData["Ankommen"][hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
-		comingBack, t = self.Control(pers,0)
-
-		for _ in range(comingBack):
-			if len(self.awayPersons) > 0: #Ask for permission
-				person = choice(self.awayPersons)
-				car = next((x for x in self.li_Autos if x.ID == person.carID), None)
-				person.status = True
-				car.bCharging = True
-				self.awayPersons.remove(person)
-
+		
 		if resLast > 0:
 		#Autos entladen
 			#Data Gathering
@@ -256,12 +165,16 @@ class LadeController():
 				last -= qtoTake
 		return last
 			
-	def PickCar(self, demand):
-		safety = 1.1
-		demand = demand * safety
-
+	def PickCar(self, km):
 		cars = self.GetChargingCars()
+		if not cars:
+			return None
+
 		cars.sort(key=lambda x: x.kapazitat, reverse=False)
+
+		demand = km * cars[-1].spezVerbrauch * self.safety
+
+		demandDriven += demand / self.safety
 
 		if cars[-1].kapazitat < demand:
 			return cars[-1]
@@ -275,14 +188,13 @@ class LadeController():
 		Es wird ein passendes Auto ausgesucht und zugewiesen.
 		Person und Auto werden auf abwesend gestellt"""
 		km = person.wegMitAuto + person.WaybackHome()
-		car = self.PickCar(km * self.spezVerbrauch)
+		car = self.PickCar(km)
 
 		person.carID = car.ID
 		
 		
 		self.UpdateLadestand(car, km)
-		minTimeAway = round(km/self.averageSpeed+1,0) #Die Zeit die das Auto mindestens weg ist
-		car.minTimeAway = minTimeAway 
+
 		person.status = False
 		car.bCharging = False
 
@@ -294,40 +206,3 @@ class LadeController():
 			if car.kapazitat < car.minLadung * car.maxLadung:
 				toLoad = (car.minLadung * car.maxLadung - car.kapazitat)
 				car.Laden(toLoad)
-
-#Key gibt an wie viele Prozent an Autos (Prozent mussen ganze Zahlen sein)
-#Item gibt die Mindestladung in Anteilen an	
-distMinLadung = {
-	"10" : 1,		#10% mussen voll geladen sein
-	"60" : 0.75,	#60% mussen 75% geladen sein
-	"30" : 0.5		#30% mussen 50% geladen sein
-	}
-
-
-
-Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
-
-for hour in range(8760):
-
-	pv = PV[hour]
-	bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]
-	
-	#resLast = 1 - pv
-	resLast = bedarf - pv * 1.5
-	DS.Scraper.resLast.append(resLast)
-	#print(f"Stunde: {hour}")
-	#print(f"Residuallast: {resLast} kWh")
-	Control.CheckTimestep(hour= hour,resLast= resLast)
-
-
-
-PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
-PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
-
-PlotEigenverbrauch(PV,DS.Scraper.resLast)
-PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
-PlotPersonStatus(DS.Scraper.li_state)
-PlotStatusCollection(DS.Scraper.li_stateCars)
-#PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
-
-
