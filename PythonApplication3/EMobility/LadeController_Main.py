@@ -137,6 +137,8 @@ class LadeController(LadeController_Personen):
 		DS.Scraper.li_state.append(li_interPersons)
 		DS.Scraper.li_stateCars.append(li_interCars)
 
+		self.ResetAlreadyLoaded()
+
 	def ChargeCars(self, last):
 		cars = self.GetChargingCars()
 		cars.sort(key=lambda x: x.kapazitat, reverse=True)
@@ -174,7 +176,7 @@ class LadeController(LadeController_Personen):
 
 		demand = km * cars[-1].spezVerbrauch * self.safety
 
-		demandDriven += demand / self.safety
+		DS.Scraper.demandDriven += demand / self.safety
 
 		if cars[-1].kapazitat < demand:
 			return cars[-1]
@@ -204,5 +206,12 @@ class LadeController(LadeController_Personen):
 		cars = self.GetChargingCars()
 		for car in cars:
 			if car.kapazitat < car.minLadung * car.maxLadung:
-				toLoad = (car.minLadung * car.maxLadung - car.kapazitat)
+				space = (car.minLadung * car.maxLadung - car.kapazitat)
+				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
 				car.Laden(toLoad)
+				DS.Scraper.gridCharging += toLoad
+
+	def ResetAlreadyLoaded(self):
+		cars = self.GetChargingCars()
+		for car in cars:
+			car.alreadyLoaded = car.leistung_MAX

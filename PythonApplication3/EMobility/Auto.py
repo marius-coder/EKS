@@ -12,6 +12,7 @@ class Auto():
 		self.verlust = 0 #Verlust von Lade/Entladevorgangen in kWh
 		self.ID = counter #Unique ID die jedem Auto gegeben wird
 		self.spezVerbrauch = 0.170 #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
+		self.alreadyLoaded = self.leistung_MAX	#Laufvariable die angibt wie viel nach der PV noch geladen werden darf
 
 	def Laden(self, qtoLoad):
 		"""Ladet das Auto mit einer gegebenen Ladung
@@ -38,6 +39,8 @@ class Auto():
 		self.kapazitat += self.leistung
 		qtoLoad -= (self.leistung + self.verlust)
         
+		self.alreadyLoaded -= (self.leistung + self.verlust)
+
 		return qtoLoad
 
 	def Entladen(self, qtoTake):

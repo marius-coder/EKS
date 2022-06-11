@@ -109,7 +109,7 @@ def PlotUseableCapacity(data, resLast):
     
     plt.show()
 
-def PlotPieDischarge(discharge, charge, car):
+def PlotPieDischarge(discharge, charge, car, demandDriven, gridCharging):
     fig, ax = plt.subplots()  
 
     verlustLaden = charge * (1-car.effizienz)

@@ -27,15 +27,18 @@ for hour in range(8760):
 	bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]
 	
 	#resLast = 1 - pv
-	resLast = bedarf - pv
+	resLast = bedarf #- pv
 	DS.Scraper.resLast.append(resLast)
 	#print(f"Stunde: {hour}")
 	#print(f"Residuallast: {resLast} kWh")
 	Control.CheckTimestep(hour= hour,resLast= resLast)
 
+print(sum(DS.Scraper.resLastDifferenceAfterDischarge))
+print(sum(DS.Scraper.resLastDifference))
+print(DS.Scraper.demandDriven)
+print(DS.Scraper.gridCharging)
 
-
-PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
+PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0], DS.Scraper.demandDriven, DS.Scraper.gridCharging)
 PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
 PlotEigenverbrauch(PV,DS.Scraper.resLast)
