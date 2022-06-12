@@ -88,8 +88,8 @@ class LadeController_Personen():
 		for _ in range(driveAway):			
 			person = choice(self.drivingPersons)
 			self.drivingPersons.remove(person)			
-			self.DriveAway(person= person)
-			self.awayPersons.append(person)
+			if self.DriveAway(person= person):
+				self.awayPersons.append(person)
 
 		pers = self.travelData["Ankommen"][hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
 		comingBack, t = self.Control(pers,0)

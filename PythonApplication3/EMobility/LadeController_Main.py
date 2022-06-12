@@ -70,7 +70,7 @@ class LadeController(LadeController_Personen):
 
 		#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 		for _ in range(checksum):
-			li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung))
+			li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung, counter= counter))
 			checksum -= 1
 
 		for i in range(int(len(li_Autos)/2)):
@@ -192,6 +192,9 @@ class LadeController(LadeController_Personen):
 		km = person.wegMitAuto + person.WaybackHome()
 		car = self.PickCar(km)
 
+		if not car:
+			return False
+
 		person.carID = car.ID
 		
 		
@@ -199,6 +202,7 @@ class LadeController(LadeController_Personen):
 
 		person.status = False
 		car.bCharging = False
+		return True
 
 	def CheckMinKap(self):
 		"""Kontrolliert alle Autos, welche an der Ladestation laden.

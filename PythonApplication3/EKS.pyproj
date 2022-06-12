@@ -38,6 +38,7 @@
     <Compile Include="EMobility\LadeController_Main.py" />
     <Compile Include="EMobility\Ladecontroller_Helper.py" />
     <Compile Include="EMobility\miscellaneous.py" />
+    <Compile Include="EMobility\PlotScenarios.py" />
     <Compile Include="EMobility\PlotMobility.py" />
     <Compile Include="main.py" />
     <Compile Include="Plotting\DataScraper.py" />
@@ -58,7 +59,6 @@
     <Content Include="Data\Profile_PersonenGewinne.csv" />
     <Content Include="Data\Profile_Travel.csv" />
     <Content Include="Data\PV.csv" />
-    <Content Include="Data\PV_1kWp.csv" />
     <Content Include="Data\Solar_gains.csv" />
     <Content Include="Data\Strombedarf.csv" />
     <Content Include="Data\Stromprofil.csv" />
