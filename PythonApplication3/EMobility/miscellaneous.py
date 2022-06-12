@@ -1,5 +1,5 @@
 # -*- coding: <latin-1> -*-
-import holidays
+
 import numpy as np
 import pandas as pd
 from random import seed, randint
@@ -36,22 +36,3 @@ class Person():
 	def AirtoRoadDistance(self,distance):
 		"""Nimmt eine bewegte Strecke und wandelt diese in eine Luftliniendistanz um"""
 		return distance * 1.417
-
-time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
-time = pd.to_datetime(time)
-Feiertage = holidays.country_holidays('Austria')
-
-
-def DetermineDay(hour) -> str:
-	"""Findet den Typ des Tages heraus. Achtet dabei auf Feiertage.
-	hour: int
-		Stunde des Jahres"""
-	if time[hour] in Feiertage:
-		#Feiertage werden als Sonntage gehandhabt
-		return "Sonntag"
-	if time[hour].weekday() == 5:
-		return "Samstag"
-	elif time[hour].weekday() == 6:
-		return "Sonntag"
-	else:
-		return "Werktag"

@@ -204,6 +204,7 @@ class Simulation():
 		self.InitSzenarioWP(self.dic_buildings)
 		for hour in range(8760):			
 			print(f"Stunde: {hour}")
+			dayType = DetermineDay(hour)
 
 			if DetermineMonth(hour) < 4 or DetermineMonth(hour) > 9:
 				self.heating == True
@@ -233,10 +234,10 @@ class Simulation():
 				qHLSum = qHLSum * building.gfa
 				
 				#print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
-
-
-
 				self.SimWP(building= building, qHLSum= qHLSum)
+
+				test = building.CalcWWEnergy(hour= hour, typ= dayType)
+
 				building.AddDataflows(qHL= qHLSum)
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 

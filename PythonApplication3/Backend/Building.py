@@ -6,9 +6,11 @@ import numpy as np
 
 from HL_KL import HL
 from Dataflows import Dataflows
+from Warmwasser import WW
 
-class Building(HL,Dataflows):
+class Building(HL,Dataflows,WW):
     def __init__(self, wand, dach, boden, fenster, gfa, volumen, anzPersonen, stromVerbrauch):
+        WW.__init__(self)
         self.DF = Dataflows()
         self.NFBGF = 0.8 #Verhältnis von Nettofläche zu Bruttogeschoss fläche (max 1)
         self.gfa = gfa #Bruttogeschossfläche in m²

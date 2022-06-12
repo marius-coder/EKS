@@ -1,7 +1,7 @@
 from datetime import date
 import pandas as pd
 import numpy as np
-
+import holidays
 
 #Viertelstunden Leistungswerte fur den Jahresverbrauch von 1.000 kWh pro Jahr
 electricProfile = pd.read_csv("./Data/Stromprofil.csv", delimiter=";", decimal = ",")
@@ -18,7 +18,7 @@ def GetStromProfil(hour):
 	Dabei wird nach Jahreszeiten unterschieden
 	Die Werte werden prozentuell aufgeteilt um scharfe Kanten im Verbrauch zu vermeiden"""
 
-	mode = IsWeekday2(hour)
+	mode = DetermineDay(hour)
 
 	Date1 = date(time[hour].year,time[hour].month,time[hour].day)
 	if Spring <= Date1 <= Summer:
@@ -74,6 +74,27 @@ def GetStromProfil(hour):
 
 def DetermineHourofDay(hour):
 	return (hour) % 24
+
+
+
+time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
+time = pd.to_datetime(time)
+Feiertage = holidays.country_holidays('Austria')
+
+
+def DetermineDay(hour) -> str:
+	"""Findet den Typ des Tages heraus. Achtet dabei auf Feiertage.
+	hour: int
+		Stunde des Jahres"""
+	if time[hour] in Feiertage:
+		#Feiertage werden als Sonntage gehandhabt
+		return "Sonntag"
+	if time[hour].weekday() == 5:
+		return "Samstag"
+	elif time[hour].weekday() == 6:
+		return "Sonntag"
+	else:
+		return "Werktag"
 
 def IsWeekday2(hour):
 	if time[hour].weekday() == 5:
