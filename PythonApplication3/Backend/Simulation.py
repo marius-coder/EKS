@@ -111,8 +111,8 @@ class Simulation():
 
 		speicherHZG_B1 = Speicher(1000)
 		WP_HZG_B1 = Wärmepumpe(speicherHZG_B1, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_W1 = Speicher(10000)
-		WP_WW_B1 = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 250)
+		speicherWW_W1 = Speicher(600)
+		WP_WW_B1 = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["W1"].WP_HZG = WP_HZG_B1
 		dic_buildings["W1"].WP_WW = WP_WW_B1
@@ -124,8 +124,8 @@ class Simulation():
 		#------------------------------------------------------------------------
 		speicherHZG_B2 = Speicher(1000)
 		WP_HZG_B2 = Wärmepumpe(speicherHZG_B2, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_W2 = Speicher(10000)
-		WP_WW_B2 = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 250)
+		speicherWW_W2 = Speicher(600)
+		WP_WW_B2 = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["W2"].WP_HZG = WP_HZG_B2
 		dic_buildings["W2"].WP_WW = WP_WW_B2
@@ -137,8 +137,8 @@ class Simulation():
 		#------------------------------------------------------------------------
 		speicherHZG_B3 = Speicher(1000)
 		WP_HZG_B3 = Wärmepumpe(speicherHZG_B3, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_W3 = Speicher(10000)
-		WP_WW_B3 = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 250)
+		speicherWW_W3 = Speicher(600)
+		WP_WW_B3 = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["W3"].WP_HZG = WP_HZG_B3
 		dic_buildings["W3"].WP_WW = WP_WW_B3
@@ -150,8 +150,8 @@ class Simulation():
 		#------------------------------------------------------------------------
 		speicherHZG_B4 = Speicher(1000)
 		WP_HZG_B4 = Wärmepumpe(speicherHZG_B4, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_W4 = Speicher(10000)
-		WP_WW_B4 = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 250)
+		speicherWW_W4 = Speicher(600)
+		WP_WW_B4 = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["W4"].WP_HZG = WP_HZG_B4
 		dic_buildings["W4"].WP_WW = WP_WW_B4
@@ -163,8 +163,8 @@ class Simulation():
 		#------------------------------------------------------------------------
 		speicherHZG_S1 = Speicher(1000)
 		WP_HZG_S1 = Wärmepumpe(speicherHZG_S1, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_S1 = Speicher(10000)
-		WP_WW_S1 = Wärmepumpe(speicherWW_S1, COP_WW= COP_WW, Pel= 250)
+		speicherWW_S1 = Speicher(600)
+		WP_WW_S1 = Wärmepumpe(speicherWW_S1, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["S1"].WP_HZG = WP_HZG_S1
 		dic_buildings["S1"].WP_WW = WP_WW_S1
@@ -172,8 +172,8 @@ class Simulation():
 		#------------------------------------------------------------------------
 		speicherHZG_S2 = Speicher(1000)
 		WP_HZG_S2 = Wärmepumpe(speicherHZG_S2, COP_HZG= COP_HZG, Pel= 40)		
-		speicherWW_S2 = Speicher(10000)
-		WP_WW_S2 = Wärmepumpe(speicherWW_S2, COP_WW= COP_WW, Pel= 250)
+		speicherWW_S2 = Speicher(600)
+		WP_WW_S2 = Wärmepumpe(speicherWW_S2, COP_WW= COP_WW, Pel= 40)
 
 		dic_buildings["S2"].WP_HZG = WP_HZG_S2
 		dic_buildings["S2"].WP_WW = WP_WW_S2
@@ -183,7 +183,21 @@ class Simulation():
 	def InitSzenarioFW(self):
 		pass
 
-	
+
+	def SimWPWW(self, building, qWWSum):
+
+
+		rest = building.WP_WW.speicher.SpeicherEntladen(qWWSum, building.WP_WW.hystEin)
+		if rest != 0:
+			raise ValueError("Nicht genug WW Leistung!")
+		building.CalcNewTemperature((qWWSum-rest) / building.gfa)
+		building.WP_WW.CheckSpeicher(mode = "WW")
+		building.stromVerbrauchBetrieb += building.WP_WW.PelBetrieb
+
+		print(f"Status WP: {building.WP_WW.bIsOn}")
+		print(f"Innentemperatur: {building.ti} °C")
+		print(f"Ladestand Speicher Warmwasser: {round(building.WP_WW.speicher.Speicherstand(),3)}")
+		print("------------------")
 
 
 	def SimWP(self, building, qHLSum):
@@ -197,7 +211,7 @@ class Simulation():
 		
 		print(f"Status WP: {building.WP_HZG.bIsOn}")
 		print(f"Innentemperatur: {building.ti} °C")
-		print(f"Ladestand Speicher: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
+		print(f"Ladestand Speicher Heizen: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
 		print("------------------")
 
 	def Simulate(self):
@@ -219,10 +233,6 @@ class Simulation():
 				#	continue
 
 				building.stromVerbrauchBetrieb = stromKoeff["Wohnen"][hour] * building.stromVerbrauch
-
-
-
-
 				qHLSum = building.CalcThermalFlows(ta=self.ta[hour], hour=hour,
 									  anz_Personen=building.anzPersonen, strom = building.stromVerbrauchBetrieb) / 1000
 				if building.ti >= 26:
@@ -236,8 +246,8 @@ class Simulation():
 				#print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
 				self.SimWP(building= building, qHLSum= qHLSum)
 
-				test = building.CalcWWEnergy(hour= hour, typ= dayType)
-
+				qWWSum = building.CalcWWEnergy(hour= hour, typ= dayType)
+				self.SimWPWW(building= building, qWWSum= qWWSum)
 				building.AddDataflows(qHL= qHLSum)
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 

@@ -62,6 +62,13 @@ def PlotWochenVerbrauch(data):
                             "W2" : data["W2"].DF.qHL,
                             "W3" : data["W3"].DF.qHL,
                             "W4" : data["W4"].DF.qHL,
+                            "G1" : data["W1"].DF.qHL,
+                            "G2" : data["W2"].DF.qHL,
+                            "G3" : data["W3"].DF.qHL,
+                            "G4" : data["W4"].DF.qHL,
+                            "S1" : data["W1"].DF.qHL,
+                            "S2" : data["W2"].DF.qHL,
+
                             })
 
     timePlot = time[0:len(data["W1"].DF.qHL)]
@@ -72,7 +79,7 @@ def PlotWochenVerbrauch(data):
     sns.lineplot(data=toPlot, ax = ax)
     
     fig.suptitle('Täglicher Wärmeeintrag im Wochendurchschnitt der einzelnen Gebäude', fontsize=18)
-    ax.legend(loc='upper left')
+    ax.legend(loc='lower center', ncol = 5)
     ax.set_xlabel('Zeit [Woche]', fontsize=14)
     ax.set_ylabel('Wärmefluss [kWh/d]', fontsize=14)
     ax.tick_params(axis='both', which='major', labelsize=12)
@@ -87,6 +94,12 @@ def PlotInnentemperatur(data):
                             "W2" : data["W2"].DF.tInnen,
                             "W3" : data["W3"].DF.tInnen,
                             "W4" : data["W4"].DF.tInnen,
+                            "G1" : data["W1"].DF.tInnen,
+                            "G2" : data["W2"].DF.tInnen,
+                            "G3" : data["W3"].DF.tInnen,
+                            "G4" : data["W4"].DF.tInnen,
+                            "S1" : data["W1"].DF.tInnen,
+                            "S2" : data["W2"].DF.tInnen,
                             })
 
     timePlot = time[0:len(data["W1"].DF.tInnen)]
@@ -97,7 +110,7 @@ def PlotInnentemperatur(data):
     sns.lineplot(data=toPlot, ax = ax)
     
     fig.suptitle('Innentempemperatur der einzelnen Gebäude', fontsize=18)
-    ax.legend(loc='upper left')
+    ax.legend(loc='upper left', ncol = 2)
     ax.set_xlabel('Zeit [h]', fontsize=14)
     ax.set_ylabel('Innentemperatur [°C]', fontsize=14)
     ax.tick_params(axis='both', which='major', labelsize=12)

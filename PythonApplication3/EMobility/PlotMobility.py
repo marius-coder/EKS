@@ -109,7 +109,7 @@ def PlotUseableCapacity(data, resLast):
     
     plt.show()
 
-def PlotPieDischarge(discharge, charge, car, demandDriven, gridCharging):
+def PlotPieDischarge(discharge, charge, car):
     fig, ax = plt.subplots()  
 
     verlustLaden = charge * (1-car.effizienz)
@@ -121,12 +121,29 @@ def PlotPieDischarge(discharge, charge, car, demandDriven, gridCharging):
     verlustGesamt = verlustEntladen + verlustLaden
     Fahrverbrauch = vorFahren - nachFahren
 
+    def make_autopct(values):
+        def my_autopct(pct):
+            total = sum(values)
+            val = int(round(pct*total/100.0))
+            return '{p:.2f}% \n ({v:d} kWh)'.format(p=pct,v=val)
+        return my_autopct
+
     labels = ["Verbrauch durch Gebäude", "Verbrauch durch Fahren","Lade/Entladeverluste"]
-    sizes = [nachFahrenEntladen, Fahrverbrauch, verlustGesamt]    
+    sizes = [nachFahrenEntladen,verlustGesamt, Fahrverbrauch ]    
 
     fig.suptitle('Aufteilung der zwischengespeicherten Energie', fontsize=18)
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+    ax.pie(sizes, autopct=make_autopct(sizes), colors=['#1ec726', '#919191', "#42abdb"],pctdistance = 1.35,startangle=90)
+
+    leg = fig.legend(labels = ["Verbrauch durch Gebäude", "Verbrauch durch Fahren","Lade/Entladeverluste"], loc= "lower center",
+            prop={'size': 9},ncol = 3,facecolor='#f5f5f5', framealpha=1)
+    leg.legendHandles[0].set_color('#1ec726')
+    leg.legendHandles[1].set_color('#42abdb')
+    leg.legendHandles[2].set_color('#919191')
+  
+    plt.tight_layout()
     plt.show()
+
+
 
 
 def PlotResiduallast(pv, strom, reslast):
@@ -167,32 +184,35 @@ def CalcEigenverbrauch(pv, reslast):
 
 
 def PlotEigenverbrauchmitAutoeinspeisung(pv, reslast, resLastAfterCharging):
-    fig, ax = plt.subplots()  
-
-    
+    fig, ax = plt.subplots(1,2)      
     
     Eigenverbrauch, Überschuss = CalcEigenverbrauch(pv,reslast)
     newResLast = [x + y for (x, y) in zip(reslast, resLastAfterCharging)]
     EigenverbrauchAfterCharging, ÜberschussAfterCharging = CalcEigenverbrauch(pv,newResLast)
+    eigenOhne = [Eigenverbrauch, Überschuss]
+    eigenMit = [EigenverbrauchAfterCharging, ÜberschussAfterCharging]
 
-    print(Eigenverbrauch / (Eigenverbrauch+Überschuss))
-    print(EigenverbrauchAfterCharging / (EigenverbrauchAfterCharging+ÜberschussAfterCharging))
+    def make_autopct(values):
+        def my_autopct(pct):
+            total = sum(values)
+            val = int(round(pct*total/100.0))
+            return '{p:.2f}% \n ({v:d} kWh)'.format(p=pct,v=val)
+        return my_autopct
 
-    labels = ['Ohne E-Mobilität', 'mit E-Mobilität',]
-    Eigenverbrauchplot = [Eigenverbrauch, EigenverbrauchAfterCharging]
-    Überschuss = [Überschuss, ÜberschussAfterCharging]
-    width = 0.35       # the width of the bars: can also be len(x) sequence
+    labels = ["Eigenverbrauch", "Überschuss"]
+    fig.suptitle('Vergleich Eigenverbrauch', fontsize=18)
+    ax[0].set_title("Ohne E-Mobilität")
+    ax[0].pie(eigenOhne, autopct=make_autopct(eigenOhne), colors=['#fc8d17', '#0f31db'],pctdistance = 1.25,startangle=90)
 
-    fig, ax = plt.subplots()
+    ax[1].set_title("Mit E-Mobilität")
+    ax[1].pie(eigenMit, autopct=make_autopct(eigenMit), colors=['#fc8d17', '#0f31db'],pctdistance = 1.25,startangle=90)
 
-    ax.bar(labels, Eigenverbrauchplot, width, label='Eigenverbrauch')
-    ax.bar(labels, Überschuss, width, bottom=Eigenverbrauchplot,
-           label='Einspeisung')
-
-    ax.set_ylabel('Energie [MWh]', fontsize=16)
-    ax.set_title('Vergleich Eigenverbrauch ohne/mit E-Mobilität', fontsize=18)
-    ax.legend(fontsize=12)
-   
+    leg = fig.legend(labels = labels, loc= "lower center",
+            prop={'size': 9},ncol = 2,facecolor='#f5f5f5', framealpha=1)
+    leg.legendHandles[0].set_color('#fc8d17')
+    leg.legendHandles[1].set_color('#0f31db')
+  
+    #plt.tight_layout()
     plt.show()
 
 def PlotEigenverbrauch(pv, reslast):
@@ -201,9 +221,7 @@ def PlotEigenverbrauch(pv, reslast):
     Eigenverbrauch,Überschuss = CalcEigenverbrauch(pv,reslast)
 
     labels = ["Eigenverbrauch", "Überschuss"]
-    sizes = [Eigenverbrauch, Überschuss]
-    
-    
+    sizes = [Eigenverbrauch, Überschuss]    
 
     fig.suptitle('Eigenverbrauchsanteil am PV-Ertrag des Quartiers', fontsize=18)
     ax.pie(sizes, labels=labels, autopct='%1.1f%%')

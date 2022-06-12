@@ -38,14 +38,15 @@ for Scen in scenarios:
 		#print(f"Residuallast: {resLast} kWh")
 		Control.CheckTimestep(hour= hour,resLast= resLast)
 
+	DS.Scraper.ExtractData(Control.li_Autos[0])
 	DS.ScenarioScraper.AppendData(DS.Scraper, Scen)
-	
+	DS.ScenarioScraper.ExportData()
 	print(sum(DS.Scraper.resLastDifferenceAfterDischarge))
 	print(sum(DS.Scraper.resLastDifference))
 	print(DS.Scraper.demandDriven)
 	print(DS.Scraper.gridCharging)
 
-	PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0], DS.Scraper.demandDriven, DS.Scraper.gridCharging)
+	PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
 	PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
 	PlotEigenverbrauch(PV,DS.Scraper.resLast)
