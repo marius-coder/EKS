@@ -27,7 +27,7 @@ for hour in range(8760):
 	bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]
 	
 	#resLast = 1 - pv
-	resLast = bedarf #- pv
+	resLast = bedarf - 1.5 * pv
 	DS.Scraper.resLast.append(resLast)
 	#print(f"Stunde: {hour}")
 	#print(f"Residuallast: {resLast} kWh")

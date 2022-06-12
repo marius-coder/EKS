@@ -3,9 +3,9 @@ import pandas as pd
 from math import ceil, floor
 from random import choice
 from Auto import Auto
-from miscellaneous import DetermineDay, Person
+from miscellaneous import Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
-from Backend.Helper import DetermineHourofDay
+from Backend.Helper import DetermineHourofDay, DetermineDay
 
 import Plotting.DataScraper as DS
 
@@ -84,7 +84,7 @@ class LadeController(LadeController_Personen):
 			Auto, welches seinen Ladestand reduziert bekommt
 		kilometer: float
 			Kilometer welches das Auto fahrt"""
-		auto.kapazitat -= kilometer * auto.spezVerbrauch / 1000
+		auto.kapazitat -= kilometer * auto.spezVerbrauch
 		if auto.kapazitat < 0:
 			auto.kapazitat = 0
 

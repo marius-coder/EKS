@@ -1,7 +1,7 @@
 from Auto import Auto
 from math import ceil, floor
-from miscellaneous import DetermineDay, Person
-from Backend.Helper import DetermineHourofDay
+from miscellaneous import Person
+from Backend.Helper import DetermineHourofDay, DetermineDay
 from random import choice
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 
