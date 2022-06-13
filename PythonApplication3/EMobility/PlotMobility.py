@@ -132,7 +132,7 @@ def PlotPieDischarge(discharge, charge, car):
     sizes = [nachFahrenEntladen,verlustGesamt, Fahrverbrauch ]    
 
     fig.suptitle('Aufteilung der zwischengespeicherten Energie', fontsize=18)
-    ax.pie(sizes, autopct=make_autopct(sizes), colors=['#1ec726', '#919191', "#42abdb"],pctdistance = 1.35,startangle=90)
+    ax.pie(sizes, autopct=make_autopct(sizes), colors=['#1ec726', '#919191', "#42abdb"],pctdistance = 1.25,startangle=270)
 
     leg = fig.legend(labels = ["Verbrauch durch Gebäude", "Verbrauch durch Fahren","Lade/Entladeverluste"], loc= "lower center",
             prop={'size': 9},ncol = 3,facecolor='#f5f5f5', framealpha=1)

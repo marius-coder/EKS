@@ -257,11 +257,47 @@ class Simulation():
 		PlotWochenVerbrauch(self.dic_buildings)
 		PlotInnentemperatur(self.dic_buildings)
 
+	def GetStrombedarf(self):
+		self.summeWohnen = 0
+		self.summeGewerbe = 0
+		self.summeSchule = 0
+
+		self.summeGesamt = [0] * 8760
+
+		for key,building in self.dic_buildings.items():
+			if "W" in key:
+				self.summeWohnen += sum(building.DF.stromWP_WW)
+				self.summeWohnen += sum(building.DF.stromWP_HZG)
+			elif "G" in key:
+				self.summeGewerbe += sum(building.DF.stromWP_WW)
+				self.summeGewerbe += sum(building.DF.stromWP_HZG)
+			elif "S" in key:
+				self.summeSchule += sum(building.DF.stromWP_WW)
+				self.summeSchule += sum(building.DF.stromWP_HZG)
+
+			temp = [a + b for a, b in zip(building.DF.stromWP_HZG, building.DF.stromWP_WW)]
+			self.summeGesamt = [a + b for a, b in zip(temp, self.summeGesamt)]
+
+	def ExportData(self):
+
+		df = pd.DataFrame()
+		df["Strombedarf_WP"] = self.summeGesamt
+		df.to_csv(f"./Ergebnis/Strombedarf_WP.csv", sep= ";", decimal= ",", encoding= "cp1252")
+
 		
-test = Simulation()
+sim_WP = Simulation()
 
 
-test.Simulate()
+sim_WP.Simulate()
+sim_WP.GetStrombedarf()
+sim_WP.ExportData()
+
+print(f"Summe Stromverbrauch Wohnen: {sim_WP.summeWohnen} kWh")
+print(f"Summe Stromverbrauch Gewerbe: {sim_WP.summeGewerbe} kWh")
+print(f"Summe Stromverbrauch Schule: {sim_WP.summeSchule} kWh")
+print(f"Summe Stromverbrauch Gesamt: {sum(sim_WP.summeGesamt)} kWh")
+
+
 
 
 

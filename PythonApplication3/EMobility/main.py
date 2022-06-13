@@ -27,7 +27,7 @@ for Scen in scenarios:
 	for hour in range(8760):
 
 		pv = PV[hour]
-		bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]
+		bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour]# + Strombedarf["WP"][hour]
 	
 		#resLast = 1 - pv
 		resLast = bedarf - pv

@@ -59,12 +59,15 @@
     <Content Include="Data\Profile_GefahreneKilometer.csv" />
     <Content Include="Data\Profile_PersonenGewinne.csv" />
     <Content Include="Data\Profile_Travel.csv" />
+    <Content Include="Data\Profile_Warmwasser.csv" />
     <Content Include="Data\PV.csv" />
     <Content Include="Data\Solar_gains.csv" />
     <Content Include="Data\Strombedarf.csv" />
     <Content Include="Data\Stromprofil.csv" />
     <Content Include="Data\Var_Dach100.bis" />
     <Content Include="Data\WrNeustadt.xlsx" />
+    <Content Include="Ergebnis\Ergebnis_PV.csv" />
+    <Content Include="Ergebnis\Strombedarf_WP.csv" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.9" />

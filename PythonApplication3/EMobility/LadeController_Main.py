@@ -93,8 +93,7 @@ class LadeController(LadeController_Personen):
 	def GetAvailableCars(self) -> list:
 		"""Gibt liste an Autos zuruck welche entladbar sind"""
 		chargingCars = self.GetChargingCars() #first get all charging cars
-		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]
-	
+		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]	
 
 	def CheckTimestep(self, hour, resLast):
 		self.CheckPersonsHourly(hour)
@@ -117,9 +116,8 @@ class LadeController(LadeController_Personen):
 			DS.Scraper.resLastAfterCharging[hour] = resLastAfterCharging
 			DS.Scraper.resLastDifference[hour] =  resLast - resLastAfterCharging
 			
+		#Autos aus dem Netz auf Mindestladung laden
 		self.CheckMinKap()
-
-		#print(f"Autos verfugbar: {len(self.GetChargingCars())}")
 
 		#Bookkeeping zum Plotten
 		inter = self.drivingPersons.copy()
@@ -127,14 +125,14 @@ class LadeController(LadeController_Personen):
 		for person in inter:
 			li_interPersons.append(person.status)
 		for car in self.li_Autos:
-			li_interCars.append(car.bCharging)		
-		
+			li_interCars.append(car.bCharging)				
 		
 		DS.Scraper.SOC.append(self.GetChargingCars())
 
 		DS.Scraper.li_state.append(li_interPersons)
 		DS.Scraper.li_stateCars.append(li_interCars)
 
+		#Laufvariable der bereits geladenen Energie zurücksetzen
 		self.ResetAlreadyLoaded()
 
 	def ChargeCars(self, last):

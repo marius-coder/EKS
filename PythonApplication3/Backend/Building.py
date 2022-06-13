@@ -69,8 +69,8 @@ class Building(HL,Dataflows,WW):
         if self.DF.szen == "WP":
             self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
             self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
-            #self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb)
-            #self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG)
+            self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb)
+            self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG)
 
 
 
