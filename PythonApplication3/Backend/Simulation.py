@@ -215,17 +215,17 @@ class Simulation():
 		print(f"Ladestand Speicher Heizen: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
 		print("------------------")
 
-	def SetLuftwechsel(self, hour, building, key):
+	def SetNachtLuftwechsel(self, hour, building, key):
 		if "W" in key:
 			wechsel = self.LuftwechselWohnen
 		if "G" in key:
 			wechsel = self.LuftwechselGewerbe
 		if "S" in key:
 			wechsel = self.LuftwechselSchule
-		if self.heating == False:
-			if hour%24 > 20 or hour%24<7:
+		if self.heating == False: 
+			if hour%24 > 20 or hour%24<7: #Hoherer Luftwechsel nur in der Nacht
 				if building.ti > self.ta[hour]:
-					building.Luftwechsel = wechsel + 1.5
+					building.Luftwechsel = wechsel + 1.5 #Offenes Fenster addiert 1,5 fachen Luftwechsel
 
 		else:
 			building.Luftwechsel = wechsel
@@ -244,7 +244,7 @@ class Simulation():
 			qHLSum = 0
 
 			for key,building in self.dic_buildings.items():
-				self.SetLuftwechsel(hour, building, key)
+				self.SetNachtLuftwechsel(hour, building, key)
 				#if key in ["W2","W3","W4"]:
 				#	continue
 
