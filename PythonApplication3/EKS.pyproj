@@ -67,6 +67,7 @@
     <Content Include="Data\Var_Dach100.bis" />
     <Content Include="Data\WrNeustadt.xlsx" />
     <Content Include="Ergebnis\Ergebnis_PV.csv" />
+    <Content Include="Ergebnis\Ergebnis_PV_max.csv" />
     <Content Include="Ergebnis\Strombedarf_WP.csv" />
   </ItemGroup>
   <ItemGroup>

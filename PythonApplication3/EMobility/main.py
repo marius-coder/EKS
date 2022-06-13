@@ -18,7 +18,6 @@ distMinLadung = {
 
 scenarios = ["PV", "PV_max"]
 
-
 Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
 for Scen in scenarios:
 	DS.Scraper.__init__()
@@ -34,8 +33,6 @@ for Scen in scenarios:
 		DS.Scraper.resLast.append(resLast)
 		DS.Scraper.PV.append(pv)
 		DS.Scraper.demandBuilding.append(bedarf)
-		#print(f"Stunde: {hour}")
-		#print(f"Residuallast: {resLast} kWh")
 		Control.CheckTimestep(hour= hour,resLast= resLast)
 
 	DS.Scraper.ExtractData(Control.li_Autos[0])

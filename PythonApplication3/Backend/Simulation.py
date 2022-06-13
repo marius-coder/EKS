@@ -48,42 +48,42 @@ G1 = Building( wand = {"Fläche":262.69,"U-Wert":u_Wand},
 			  dach = {"Fläche":0,"U-Wert":u_Dach},
 			  boden = {"Fläche":1974,"U-Wert":u_Boden},
 			  gfa = 1974, volumen=5922,
-			  anzPersonen=100, stromVerbrauch = 106596)
+			  anzPersonen=152, stromVerbrauch = 106596)
 
 G2 = Building( wand = {"Fläche":386.28,"U-Wert":u_Wand},
 			  fenster = {"Fläche":257.52,"U-Wert":u_Fenster},
 			  dach = {"Fläche":1285,"U-Wert":u_Dach},
 			  boden = {"Fläche":2509,"U-Wert":u_Boden},
 			  gfa = 2509, volumen=15054,
-			  anzPersonen=100, stromVerbrauch = 135486)
+			  anzPersonen=193, stromVerbrauch = 135486)
 
 G3 = Building( wand = {"Fläche":634.8,"U-Wert":u_Wand},
 			  fenster = {"Fläche":423.2,"U-Wert":u_Fenster},
 			  dach = {"Fläche":962,"U-Wert":u_Dach},
 			  boden = {"Fläche":1600,"U-Wert":u_Boden},
 			  gfa = 3200, volumen=16000,
-			  anzPersonen=100, stromVerbrauch = 172800)
+			  anzPersonen=247, stromVerbrauch = 172800)
 
 G4 = Building( wand = {"Fläche":887.59,"U-Wert":u_Wand},
 			  fenster = {"Fläche":591.72,"U-Wert":u_Fenster},
 			  dach = {"Fläche":462,"U-Wert":u_Dach},
 			  boden = {"Fläche":462,"U-Wert":u_Boden},
 			  gfa = 1848, volumen=6930,
-			  anzPersonen=100, stromVerbrauch = 99792)
+			  anzPersonen=143, stromVerbrauch = 99792)
 
 S1 = Building( wand = {"Fläche":2571.95,"U-Wert":u_Wand},
 			  fenster = {"Fläche":1897.94,"U-Wert":u_Fenster},
 			  dach = {"Fläche":2329.3,"U-Wert":u_Dach},
 			  boden = {"Fläche":2948.67+2298.82,"U-Wert":u_Boden},
 			  gfa = 11566.78, volumen=37579.8,
-			  anzPersonen=100, stromVerbrauch = 231335)
+			  anzPersonen=122, stromVerbrauch = 231335)
 
 S2 = Building( wand = {"Fläche":1231.66,"U-Wert":u_Wand},
 			  fenster = {"Fläche":498.68,"U-Wert":u_Fenster},
 			  dach = {"Fläche":906.67,"U-Wert":u_Dach},
 			  boden = {"Fläche":912.67+454.89,"U-Wert":u_Boden},
 			  gfa = 3438.46, volumen=9966.3,
-			  anzPersonen=100, stromVerbrauch = 68769)
+			  anzPersonen=198, stromVerbrauch = 68769)
 
 
 
@@ -97,10 +97,11 @@ class Simulation():
 			item.InitHeizlast()
 
 		self.heating = True
-
 		self.ta = np.genfromtxt("./Data/climate.csv", delimiter=";", usecols = (1), skip_header = 1)
 
-		self.wwProfile = dict(pd.read_csv("./Data/Warmwasser.csv", decimal=",", sep=";"))
+		self.LuftwechselWohnen = 1 #Luftwechselrate in n^-1
+		self.LuftwechselGewerbe = 3 #Luftwechselrate in n^-1
+		self.LuftwechselSchule = 4 #Luftwechselrate in n^-1
 
 	def InitCoolingPeriod(self):
 		pass
@@ -214,6 +215,21 @@ class Simulation():
 		print(f"Ladestand Speicher Heizen: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
 		print("------------------")
 
+	def SetLuftwechsel(self, hour, building, key):
+		if "W" in key:
+			wechsel = self.LuftwechselWohnen
+		if "G" in key:
+			wechsel = self.LuftwechselGewerbe
+		if "S" in key:
+			wechsel = self.LuftwechselSchule
+		if self.heating == False:
+			if hour%24 > 20 or hour%24<7:
+				if building.ti > self.ta[hour]:
+					building.Luftwechsel = wechsel + 1.5
+
+		else:
+			building.Luftwechsel = wechsel
+
 	def Simulate(self):
 		self.InitSzenarioWP(self.dic_buildings)
 		for hour in range(8760):			
@@ -221,14 +237,14 @@ class Simulation():
 			dayType = DetermineDay(hour)
 
 			if DetermineMonth(hour) < 4 or DetermineMonth(hour) > 9:
-				self.heating == True
+				self.heating = True
 			else:
-				self.heating == False
+				self.heating = False
 
 			qHLSum = 0
 
 			for key,building in self.dic_buildings.items():
-				
+				self.SetLuftwechsel(hour, building, key)
 				#if key in ["W2","W3","W4"]:
 				#	continue
 
@@ -246,7 +262,10 @@ class Simulation():
 				#print(f"Heizlast: {round(qHLSum/1000,2)} MWh")
 				self.SimWP(building= building, qHLSum= qHLSum)
 
-				qWWSum = building.CalcWWEnergy(hour= hour, typ= dayType)
+				if "W" in key:
+					qWWSum = building.CalcWWEnergyWohnen(hour= hour, typ= dayType)
+				else:
+					qWWSum = building.CalcWWEnergyGewerbe(hour= hour, typ= dayType)
 				self.SimWPWW(building= building, qWWSum= qWWSum)
 				building.AddDataflows(qHL= qHLSum)
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")

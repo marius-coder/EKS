@@ -105,8 +105,7 @@ def PlotUseableCapacity(data, resLast):
         ax[i].set_ylabel('Kapazitat [kWh]')
         #ax[i].set_ylim(-100,200)
         ax[i].set_title(months[month-1])
-    fig.suptitle('Verwendbare Kapazitat der angeschlossenen Autos', fontsize=16)
-    
+    fig.suptitle('Verwendbare Kapazitat der angeschlossenen Autos', fontsize=16)    
     plt.show()
 
 def PlotPieDischarge(discharge, charge, car):
