@@ -28,8 +28,8 @@
     <Compile Include="Backend\Helper.py" />
     <Compile Include="Backend\HL_KL.py" />
     <Compile Include="Backend\PlotHeat.py" />
+    <Compile Include="Backend\PE_CO2.py" />
     <Compile Include="Backend\Simulation.py" />
-    <Compile Include="Backend\Simulation_alt.py" />
     <Compile Include="Backend\Warmwasser.py" />
     <Compile Include="Backend\Wärmepumpe_Speicher.py" />
     <Compile Include="EMobility\Auto_Person.py" />
