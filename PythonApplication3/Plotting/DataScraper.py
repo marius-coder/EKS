@@ -10,8 +10,6 @@ class DataScraper():
     def __init__(self) -> None:
         self.Init_eMobility()
 
-        
-
     def Init_eMobility(self):
         self.li_state = []			#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
         self.li_stateCars = []		#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
@@ -71,7 +69,6 @@ class DataScraper():
 
 
 Scraper = DataScraper()
-
 
 #@dataclass
 #class ScenarioData:

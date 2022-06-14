@@ -1,4 +1,14 @@
 
+
+class Person():
+
+	def __init__(self):
+		self.status = True #Status der Person True = Anwesend, False = Unterwegs
+		self.anzAutoWege = 0
+		self.wegMitAuto = 0
+		self.carID = None
+		self.waitingTime = 0 #gibt an wie lange die Person bereits wartet zu fahren
+
 class Auto():
 
 	def __init__(self, maxLadung, minLadung, counter):

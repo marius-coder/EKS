@@ -8,6 +8,8 @@ from LadeController_Main import LadeController
 
 import Plotting.DataScraper as DS
 
+
+
 #Key gibt an wie viele Prozent an Autos (Prozent mussen ganze Zahlen sein)
 #Item gibt die Mindestladung in Anteilen an	
 distMinLadung = {
@@ -34,6 +36,13 @@ for Scen in scenarios:
 		DS.Scraper.PV.append(pv)
 		DS.Scraper.demandBuilding.append(bedarf)
 		Control.CheckTimestep(hour= hour,resLast= resLast)
+
+	personenKilometer = 0
+	for person in Control.persons:
+		personenKilometer += person.wegMitAuto
+
+	print(f"Personenkilometer: {personenKilometer/len(Control.persons)}")
+
 
 	DS.Scraper.ExtractData(Control.li_Autos[0])
 	DS.ScenarioScraper.AppendData(DS.Scraper, Scen)

@@ -2,8 +2,7 @@
 import pandas as pd
 from math import ceil, floor
 from random import choice
-from Auto import Auto
-from miscellaneous import Person
+from Auto_Person import Auto, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 from Backend.Helper import DetermineHourofDay, DetermineDay
 
@@ -181,24 +180,7 @@ class LadeController(LadeController_Personen):
 		#print(f"Best Choice: {car.kapazitat}")
 		return car
 
-	def DriveAway(self, person):
-		"""Person fahrt weg. Es werden die finalen Kilometer generiert.
-		Es wird ein passendes Auto ausgesucht und zugewiesen.
-		Person und Auto werden auf abwesend gestellt"""
-		km = person.wegMitAuto + person.WaybackHome()
-		car = self.PickCar(km)
 
-		if not car:
-			return False
-
-		person.carID = car.ID
-		
-		
-		self.UpdateLadestand(car, km)
-
-		person.status = False
-		car.bCharging = False
-		return True
 
 	def CheckMinKap(self):
 		"""Kontrolliert alle Autos, welche an der Ladestation laden.

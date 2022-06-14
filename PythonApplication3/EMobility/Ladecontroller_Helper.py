@@ -1,7 +1,6 @@
 # -*- coding: <latin-1> -*-
 from itertools import count
 from random import seed, choices, uniform
-from miscellaneous import *
 from collections import Counter
 seed(10)
 def CalcMobilePersonen(day, personen) -> int:
