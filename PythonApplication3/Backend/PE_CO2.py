@@ -1,9 +1,5 @@
 # -*- coding: cp1252 -*-
 
-
-
-
-
 class Konversionsfaktoren():
 
 	def __init__(self) -> None:

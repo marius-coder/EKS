@@ -62,12 +62,12 @@ def PlotWochenVerbrauch(data):
                             "W2" : data["W2"].DF.qHL,
                             "W3" : data["W3"].DF.qHL,
                             "W4" : data["W4"].DF.qHL,
-                            "G1" : data["W1"].DF.qHL,
-                            "G2" : data["W2"].DF.qHL,
-                            "G3" : data["W3"].DF.qHL,
-                            "G4" : data["W4"].DF.qHL,
-                            "S1" : data["W1"].DF.qHL,
-                            "S2" : data["W2"].DF.qHL,
+                            "G1" : data["G1"].DF.qHL,
+                            "G2" : data["G2"].DF.qHL,
+                            "G3" : data["G3"].DF.qHL,
+                            "G4" : data["G4"].DF.qHL,
+                            "S1" : data["S1"].DF.qHL,
+                            "S2" : data["S2"].DF.qHL,
 
                             })
 
@@ -94,12 +94,12 @@ def PlotInnentemperatur(data):
                             "W2" : data["W2"].DF.tInnen,
                             "W3" : data["W3"].DF.tInnen,
                             "W4" : data["W4"].DF.tInnen,
-                            "G1" : data["W1"].DF.tInnen,
-                            "G2" : data["W2"].DF.tInnen,
-                            "G3" : data["W3"].DF.tInnen,
-                            "G4" : data["W4"].DF.tInnen,
-                            "S1" : data["W1"].DF.tInnen,
-                            "S2" : data["W2"].DF.tInnen,
+                            "G1" : data["G1"].DF.tInnen,
+                            "G2" : data["G2"].DF.tInnen,
+                            "G3" : data["G3"].DF.tInnen,
+                            "G4" : data["G4"].DF.tInnen,
+                            "S1" : data["S1"].DF.tInnen,
+                            "S2" : data["S2"].DF.tInnen,
                             })
 
     timePlot = time[0:len(data["W1"].DF.tInnen)]

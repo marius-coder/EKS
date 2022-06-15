@@ -13,7 +13,7 @@ class Dataflows():
         
         
     def InitSzenWP(self):
-        self.szen = "WP"
+        #self.szen = "WP"
         self.stromWP_HZG = [] #Liste mit dem verbrauchten Strom der Warmepumpe fur Heizen
         self.qWP_HZG = []     #Liste mit der erzeugten Wärme der Warmepumpe fur Heizen
 
@@ -21,6 +21,7 @@ class Dataflows():
         self.qWP_WW = []      #Liste mit der erzeugten Wärme der Warmepumpe fur Warmwasser
 
     def InitSzenFW(self):
-        self.szen = "FW"
-
+        #self.szen = "FW"
+        self.stromWP_HZG = [] #Liste mit dem verbrauchten Strom der Warmepumpe fur Heizen
+        self.qWP_HZG = []     #Liste mit der erzeugten Wärme der Warmepumpe fur Heizen
 
