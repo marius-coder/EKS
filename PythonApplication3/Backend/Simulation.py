@@ -185,9 +185,33 @@ class Simulation():
 		dic_buildings["W2"].DF.InitSzenFW()
 		dic_buildings["W3"].DF.InitSzenFW()
 		dic_buildings["W4"].DF.InitSzenFW()
+		#------------------------------------------------------------------------
+		speicherHZG_G1 = Speicher(1000)
+		WP_HZG_G1 = Wärmepumpe(speicherHZG_G1, COP_HZG= COP_HZG, Pel= 60)		
+		
+		dic_buildings["G1"].WP_HZG = WP_HZG_G1
+		dic_buildings["G1"].DF.InitSzenWP()
 		dic_buildings["G1"].DF.InitSzenFW()
+		#------------------------------------------------------------------------
+		speicherHZG_G2 = Speicher(1000)
+		WP_HZG_G2 = Wärmepumpe(speicherHZG_G2, COP_HZG= COP_HZG, Pel= 60)		
+		
+		dic_buildings["G2"].WP_HZG = WP_HZG_G2
+		dic_buildings["G2"].DF.InitSzenWP()
 		dic_buildings["G2"].DF.InitSzenFW()
+		#------------------------------------------------------------------------
+		speicherHZG_G3 = Speicher(1000)
+		WP_HZG_G3 = Wärmepumpe(speicherHZG_G3, COP_HZG= COP_HZG, Pel= 60)		
+		
+		dic_buildings["G3"].WP_HZG = WP_HZG_G3
+		dic_buildings["G3"].DF.InitSzenWP()
 		dic_buildings["G3"].DF.InitSzenFW()
+		#------------------------------------------------------------------------
+		speicherHZG_G4 = Speicher(1000)
+		WP_HZG_G4 = Wärmepumpe(speicherHZG_G4, COP_HZG= COP_HZG, Pel= 60)		
+		
+		dic_buildings["G4"].WP_HZG = WP_HZG_G4
+		dic_buildings["G4"].DF.InitSzenWP()
 		dic_buildings["G4"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_S1 = Speicher(1000)
@@ -235,7 +259,7 @@ class Simulation():
 		print("------------------")
 
 	def SimFW(self, key, building, qHLSum):
-		if "S" in key and building.ti >= building.TsSommer:			
+		if any(x in key for x in ["S","G"]) and building.ti >= building.TsSommer:
 			self.SimWP(building)
 		else:
 			if building.ti < building.TsWinter:
@@ -246,32 +270,31 @@ class Simulation():
 		if "W" in key:
 			wechsel = self.LuftwechselWohnen
 		elif "G" in key:			
-			if hour%24 > 7 and hour%24<20: #Luftwechsel nur unter Tags in der Schule
+			if hour%24 >= 7 and hour%24 <= 20: #Luftwechsel nur unter Tags in der Schule
 				wechsel = self.LuftwechselGewerbe
 			else:
 				wechsel = 0
 		elif "S" in key:
-			if hour%24 > 8 and hour%24<17: #Luftwechsel nur unter Tags in der Schule
+			if hour%24 >= 8 and hour%24 <= 17: #Luftwechsel nur unter Tags in der Schule
 				wechsel = self.LuftwechselSchule
 			else:
 				wechsel = 0		
-
 		return wechsel
 
 	def SetNachtLuftwechsel(self, hour, building, key):
 		if "W" in key:
 			wechsel = self.SetLuftwechsel(hour, building, key)
+			if self.heating == False: 
+				if hour%24 > 20 or hour%24<7: #Hoherer Luftwechsel nur in der Nacht
+					if building.ti > self.ta[hour]:
+						wechsel = wechsel + 3 #Offenes Fenster addiert 3 fachen Luftwechsel
+				
 		elif "G" in key:
 			wechsel = self.SetLuftwechsel(hour, building, key)
 		elif "S" in key:
-			wechsel = self.SetLuftwechsel(hour, building, key)
-		if self.heating == False: 
-			if hour%24 > 20 or hour%24<7: #Hoherer Luftwechsel nur in der Nacht
-				if building.ti > self.ta[hour]:
-					building.Luftwechsel = wechsel + 1.5 #Offenes Fenster addiert 1,5 fachen Luftwechsel
+			wechsel = self.SetLuftwechsel(hour, building, key)		
+		building.Luftwechsel = wechsel
 
-		else:
-			building.Luftwechsel = wechsel
 
 	def Simulate(self, szen):
 		if szen == "FW":
