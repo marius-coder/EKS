@@ -8,12 +8,13 @@ seed(10)
 
 class LadeController_Personen():
     
-	def __init__(self) -> None:
+	def __init__(self, personenKilometer) -> None:
 		self.awayPersons = []
 		self.anzPersonen = 1335
 		self.percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
 		self.persons = []
-		self.adjustKilometers = 1.117 #Faktor um die Kilometer anzahl zu korrigieren
+		self.basisPersonenKilometer = 5775.77 #Kilometeranzahl die eine Person in einem Jahr mit dem Auto zurücklegt
+		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer#Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
 
 	def InitPersonen(self):

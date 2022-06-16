@@ -3,8 +3,8 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 
 
-def DefinePV(name: str) -> DataFrame:
-    return pd.read_csv(f"./Data/PV.csv", usecols = [1], decimal=",", sep=";")["AC Production"].to_list()  #in kWh
+def DefinePV(name: str) -> DataFrame:    
+    return pd.read_csv(f"./Data/PV.csv", decimal=",", sep=";")[name].to_list()  #in kWh
 
 #Strombedarf ist auf 1 kWh genormt
 Strombedarf = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")
@@ -20,6 +20,4 @@ schule = 300104
 Strombedarf["Wohnen"] = Strombedarf["Wohnen"] * wohnen
 Strombedarf["Gewerbe"] = Strombedarf["Gewerbe"] * gewerbe
 Strombedarf["Schule"] = Strombedarf["Schule"] * schule
-
-
 

@@ -20,7 +20,7 @@ distMinLadung = {
 
 scenarios = ["PV", "PV_max"]
 
-Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41)
+Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527)
 for Scen in scenarios:
 	DS.Scraper.__init__()
 	PV = DefinePV(Scen)

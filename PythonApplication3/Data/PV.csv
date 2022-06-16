@@ -1,4 +1,4 @@
-﻿AC PROD HORIZONTAL [kWh];AC PROD BIPV [kWh];GESAMT[kWh]
+﻿PV;AC PROD BIPV [kWh];PV_max
 0;0;0
 0;0;0
 0;0;0

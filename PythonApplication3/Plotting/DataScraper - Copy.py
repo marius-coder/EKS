@@ -16,9 +16,10 @@ class DataScraper():
     #Indikatoren können auch Daten von anderen Gruppen enthalten
     #Indikatoren stellen die "Gesundheit" einer Variante dar
     indikatoren = {
-        "Fahrversuche [Anzahl]" : 0,
-        "fehlgeschlagene Fahrversuche [Anzahl]" : 0, 
-        "ungenutzte Ladung der E-Mobilität [kWh]" : 0
+        #"Fahrversuche [Anzahl]" : 0, 
+        "fehlgeschlagene Fahrversuche [%]" : 0, 
+        "ungenutzte Ladung der E-Mobilität [%]" : 0,
+        "erhöhung Eigenverbrauch [%]" : 0
         }
 
     #Verbrauch der E-Mobilität zum Fahren

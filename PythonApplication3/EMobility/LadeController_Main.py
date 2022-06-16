@@ -12,7 +12,7 @@ from LadeController_Personen import LadeController_Personen
 
 class LadeController(LadeController_Personen):
 
-	def __init__(self, anzAutos, distMinLadung, maxLadung):
+	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer):
 		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -23,7 +23,7 @@ class LadeController(LadeController_Personen):
 			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
 			Eingabe in kWh.
 		"""	
-		LadeController_Personen.__init__(self)
+		LadeController_Personen.__init__(self, personenKilometer= personenKilometer)
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 		self.anzAutos = anzAutos
