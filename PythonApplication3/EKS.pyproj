@@ -27,6 +27,7 @@
     <Compile Include="Backend\Dataflows.py" />
     <Compile Include="Backend\Helper.py" />
     <Compile Include="Backend\HL_KL.py" />
+    <Compile Include="Backend\main.py" />
     <Compile Include="Backend\PlotHeat.py" />
     <Compile Include="Backend\PE_CO2.py" />
     <Compile Include="Backend\Simulation.py" />

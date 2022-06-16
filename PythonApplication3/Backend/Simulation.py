@@ -103,9 +103,6 @@ class Simulation():
 		self.LuftwechselGewerbe = 3 #Luftwechselrate in n^-1
 		self.LuftwechselSchule = 4 #Luftwechselrate in n^-1
 
-	def InitCoolingPeriod(self):
-		pass
-
 	def InitSzenarioWP(self, dic_buildings):
 		COP_HZG = 4.5
 		COP_WW = 2.8
@@ -245,13 +242,29 @@ class Simulation():
 				qtoTake = building.CalcQtoTargetTemperature(self.heating) * building.gfa / 1000 #kWh
 				building.CalcNewTemperature(qtoTake / building.gfa)
 
-	def SetNachtLuftwechsel(self, hour, building, key):
+	def SetLuftwechsel(self, hour, building, key):
 		if "W" in key:
 			wechsel = self.LuftwechselWohnen
-		if "G" in key:
-			wechsel = self.LuftwechselGewerbe
-		if "S" in key:
-			wechsel = self.LuftwechselSchule
+		elif "G" in key:			
+			if hour%24 > 7 and hour%24<20: #Luftwechsel nur unter Tags in der Schule
+				wechsel = self.LuftwechselGewerbe
+			else:
+				wechsel = 0
+		elif "S" in key:
+			if hour%24 > 8 and hour%24<17: #Luftwechsel nur unter Tags in der Schule
+				wechsel = self.LuftwechselSchule
+			else:
+				wechsel = 0		
+
+		return wechsel
+
+	def SetNachtLuftwechsel(self, hour, building, key):
+		if "W" in key:
+			wechsel = self.SetLuftwechsel(hour, building, key)
+		elif "G" in key:
+			wechsel = self.SetLuftwechsel(hour, building, key)
+		elif "S" in key:
+			wechsel = self.SetLuftwechsel(hour, building, key)
 		if self.heating == False: 
 			if hour%24 > 20 or hour%24<7: #Hoherer Luftwechsel nur in der Nacht
 				if building.ti > self.ta[hour]:
@@ -304,12 +317,12 @@ class Simulation():
 				elif szen == "FW":
 					self.SimFW(key= key, building= building, qHLSum= qHLSum)
 
-				building.AddDataflows(qHL= qHLSum)
+				building.AddDataflows(qHL= qHLSum, qWW= qWWSum, szen= szen, key= key)
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 
 
-		PlotspezVerbrauch(self.dic_buildings)
-		PlotspezVerbrauchKWB(self.dic_buildings)
+		#PlotspezVerbrauch(self.dic_buildings)
+		#PlotspezVerbrauchKWB(self.dic_buildings)
 		PlotWochenVerbrauch(self.dic_buildings)
 		PlotInnentemperatur(self.dic_buildings)
 
@@ -341,17 +354,7 @@ class Simulation():
 		df.to_csv(f"./Ergebnis/Strombedarf_WP.csv", sep= ";", decimal= ",", encoding= "cp1252")
 
 		
-sim_WP = Simulation()
 
-
-sim_WP.Simulate("FW")
-sim_WP.GetStrombedarf()
-sim_WP.ExportData()
-
-print(f"Summe Stromverbrauch Wohnen: {sim_WP.summeWohnen} kWh")
-print(f"Summe Stromverbrauch Gewerbe: {sim_WP.summeGewerbe} kWh")
-print(f"Summe Stromverbrauch Schule: {sim_WP.summeSchule} kWh")
-print(f"Summe Stromverbrauch Gesamt: {sum(sim_WP.summeGesamt)} kWh")
 
 
 

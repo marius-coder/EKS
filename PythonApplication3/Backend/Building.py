@@ -27,7 +27,7 @@ class Building(HL,Dataflows,WW):
 
         self.stromVerbrauch = stromVerbrauch #Jährlicher Stromverbrauch in kWh/a
         self.stromVerbrauchBetrieb = 0
-        self.WRG = 75 #Wärmerückgewinnung der Lüftung in %
+        self.WRG = 85 #Wärmerückgewinnung der Lüftung in %
         self.Luftwechsel = 1 #Luftwechselrate in n^-1
 
         self.wand = {"Fläche" : wand["Fläche"],
@@ -59,18 +59,23 @@ class Building(HL,Dataflows,WW):
         except:
             return getattr(self, Bauteil)["Fläche"] * getattr(self, Bauteil)["U-Wert"]
 
-    def AddDataflows(self, qHL):
+    def AddDataflows(self, qHL, qWW, szen, key):
 
         self.DF.qHL.append(qHL)
-        self.DF.qWW.append(0)
+        self.DF.qWW.append(qWW)
         self.DF.stromBedarf.append(self.stromVerbrauchBetrieb)
         self.DF.tInnen.append(self.ti)
 
-        if self.DF.szen == "WP":
+        if szen == "WP":
             self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
             self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
             self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb)
             self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG)
+
+        elif szen == "FW":
+            if "S" in key:
+                self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
+                self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
 
 
 
