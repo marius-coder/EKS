@@ -3,6 +3,7 @@ from itertools import count
 from random import seed, choices, uniform
 from collections import Counter
 seed(10)
+
 def CalcMobilePersonen(day, personen) -> int:
     """Diese Funktion berechnet die Anzahl mobiler Personen pro Tag.
     personen: int
@@ -79,7 +80,7 @@ def GenerateKilometer() -> int:
     population = [[0,0.5],[0.5,1],[1,2.5],[2.5,5],[5,10],[10,20],[20,50],[50,70]]
     weights = [2,5,12,21,21,19,15,5] 
     bereich = GenerateWeightedItem(pop= population, weights= weights)
-    return round(uniform(bereich[0],bereich[1]),2)
+    return uniform(bereich[0],bereich[1])
 
 uberlauf = 0 #Uberlauf gibt an, ob ein Autoweg auf 2 aufgestockt werden soll.
 def CalcAutoWege(ways, day) -> int:

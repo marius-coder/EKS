@@ -22,9 +22,11 @@ distMinLadung = {
 
 scenarios = ["PV", "PV_max"]
 
-Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, gfa= 76417.24)
+
 for Scen in scenarios:
 	DS.scraper.__init__()
+	DS.ZV.__init__()
+	Control = LadeController(anzAutos= 120, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, gfa= 76417.24)
 	PV = DefinePV(Scen)
 
 	for hour in range(8760):
@@ -41,6 +43,7 @@ for Scen in scenarios:
 	personenKilometerElektrisch = 0
 	for person in Control.persons:
 		personenKilometerElektrisch += person.wegMitAuto 
+	print(personenKilometerElektrisch / len(Control.persons))
 	#Personenkilometer
 	DS.scraper.generell["personenKilometer Elektrisch durch. [km]"] = personenKilometerElektrisch / len(Control.persons)
 	DS.scraper.generell["personenKilometer Elektrisch [km]"] = personenKilometerElektrisch
@@ -69,16 +72,29 @@ for Scen in scenarios:
 
 	#Verbrauch der E-Mobilität zum Fahren
 	DS.scraper.eMobilitätFahren["Gesamt [kWh]"] = DS.ZV.verbrauchFahrenEmobilität
-	DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - DS.ZV.gridCharging
-	DS.scraper.eMobilitätFahren["Netz [kWh]"] = DS.ZV.gridCharging
+	DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - DS.ZV.gridCharging * Control.li_Autos[0].effizienz
+	DS.scraper.eMobilitätFahren["Netz [kWh]"] = DS.ZV.gridCharging * Control.li_Autos[0].effizienz
 
 	#Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
 	daten = CalcEMobilityBuildingEnergyFlows(sum(DS.ZV.eMobilityDischarge), sum(DS.ZV.eMobilityCharge), Control.li_Autos[0])
 	DS.scraper.eMobilitätGebäude["EMobilitätzuGebäude [kWh]"] = daten[0]
-	DS.scraper.eMobilitätGebäude["GebäudezuEMobilität [kWh]"] = daten[1]
+	DS.scraper.eMobilitätGebäude["Fahrverbrauch [kWh]"] = daten[1]
 	DS.scraper.eMobilitätGebäude["Lade/Entladeverluste [kWh]"] = daten[2]
+	DS.scraper.eMobilitätGebäude["GebäudezuEMobilität [kWh]"] = sum(DS.ZV.eMobilityCharge)
 	
-	print("")
+	#PV-Daten vor E-Mobilität
+	daten = CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastBeforeEMobility)
+	DS.scraper.pvVorEMobilität["Eigenverbrauch [kWh]"] = daten[0]
+	DS.scraper.pvVorEMobilität["Einspeisung [kWh]"] = daten[1]
+	DS.scraper.pvVorEMobilität["Netzbezug [kWh]"] = abs(sum([x for x in DS.ZV.resLastBeforeEMobility if x > 0])) 
+		
+	#PV-Daten nach E-Mobilität
+	daten = CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastAfterEMobility)
+	DS.scraper.pvNachEMobilität["Eigenverbrauch [kWh]"] = daten[0]
+	DS.scraper.pvNachEMobilität["Einspeisung [kWh]"] = daten[1]
+	DS.scraper.pvNachEMobilität["Netzbezug [kWh]"] = abs(sum([x for x in DS.ZV.resLastAfterDischarging if x > 0]))  
+
+	DS.scraper.Export(Scen)
 
 	#PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
 	#PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)

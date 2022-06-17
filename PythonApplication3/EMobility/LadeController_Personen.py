@@ -1,4 +1,5 @@
 # -*- coding: cp1252 -*-
+from numpy import round_
 from Auto_Person import Auto, Person
 from math import ceil, floor
 from Backend.Helper import DetermineHourofDay, DetermineDay
@@ -17,7 +18,7 @@ class LadeController_Personen():
 		self.persons = [] #Personen die beim Mobilitätsprogramm mitmachen
 		self.basisPersonenKilometer = 5775.77 #Kilometeranzahl die eine Person in einem Jahr mit dem Auto zurücklegt
 		self.personenKilometer = personenKilometer
-		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer#Faktor um die Kilometer anzahl zu korrigieren
+		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
 
 	def InitPersonen(self):
@@ -99,7 +100,6 @@ class LadeController_Personen():
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
 			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
-			print(f"Anzahl Leute die gerade weg sind: {len(self.awayPersons)}")
 			self.tooMany = len(self.awayPersons)
 		
 		
