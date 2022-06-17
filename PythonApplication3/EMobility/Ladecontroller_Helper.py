@@ -110,6 +110,19 @@ def CalcAutoWege(ways, day) -> int:
     else:
         return 0
 
+def CalcEMobilityBuildingEnergyFlows(discharge, charge, car):
+
+    verlustLaden = charge * (1-car.effizienz)
+    vorFahren = charge - verlustLaden
+
+    nachFahren = discharge / car.effizienz
+    verlustEntladen = nachFahren * (1-car.effizienz)
+    GebäudeVerbrauch = nachFahren - verlustEntladen
+    verlustGesamt = verlustEntladen + verlustLaden
+    Fahrverbrauch = vorFahren - nachFahren
+    return GebäudeVerbrauch, Fahrverbrauch, verlustGesamt
+
+
 def CalcEigenverbrauch(pv, resLast): 
     pv = pv[0:len(resLast)]
     Einspeisung = abs(sum([x for x in resLast if x < 0]))

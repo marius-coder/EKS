@@ -6,7 +6,7 @@ from Strom.PV import Strombedarf, DefinePV
 
 from LadeController_Main import LadeController
 
-from Ladecontroller_Helper import CalcEigenverbrauch
+from Ladecontroller_Helper import CalcEigenverbrauch, CalcEMobilityBuildingEnergyFlows
 
 import Plotting.DataScraper as DS
 
@@ -67,13 +67,26 @@ for Scen in scenarios:
 	DS.scraper.indikatoren["Ladevorgänge [Anzahl]"] = DS.ZV.counterCharging / Control.anzAutos
 	DS.scraper.indikatoren["Entladevorgänge [Anzahl]"] = DS.ZV.counterDischarging / Control.anzAutos
 
+	#Verbrauch der E-Mobilität zum Fahren
+	DS.scraper.eMobilitätFahren["Gesamt [kWh]"] = DS.ZV.verbrauchFahrenEmobilität
+	DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - DS.ZV.gridCharging
+	DS.scraper.eMobilitätFahren["Netz [kWh]"] = DS.ZV.gridCharging
+
+	#Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
+	daten = CalcEMobilityBuildingEnergyFlows(sum(DS.ZV.eMobilityDischarge), sum(DS.ZV.eMobilityCharge), Control.li_Autos[0])
+	DS.scraper.eMobilitätGebäude["EMobilitätzuGebäude [kWh]"] = daten[0]
+	DS.scraper.eMobilitätGebäude["GebäudezuEMobilität [kWh]"] = daten[1]
+	DS.scraper.eMobilitätGebäude["Lade/Entladeverluste [kWh]"] = daten[2]
+	
+	print("")
+
 	#PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
 	#PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
 	#PlotEigenverbrauch(PV,DS.Scraper.resLast)
 	#PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)
-	PlotPersonStatus(DS.Scraper.li_state)
-	PlotStatusCollection(DS.Scraper.li_stateCars)
+	#PlotPersonStatus(DS.Scraper.li_state)
+	#PlotStatusCollection(DS.Scraper.li_stateCars)
 	##PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
 
 	
