@@ -15,75 +15,7 @@ u_Boden = 0.25 #W/m²K
 u_Dach = 0.15 #W/m²K
 u_Fenster = 0.9 #W/m²K
 
-W1 = Building( wand = {"Fläche":1911.29,"U-Wert":u_Wand},
-			  fenster = {"Fläche":1274.19,"U-Wert":u_Fenster},
-			  dach = {"Fläche":1973.94,"U-Wert":u_Dach},
-			  boden = {"Fläche":0,"U-Wert":u_Boden}, 
-			  gfa = 9870, volumen=35532,
-			  anzPersonen=311, stromVerbrauch = 346885)
 
-W2 = Building( wand = {"Fläche":3556.8,"U-Wert":u_Wand},
-			  fenster = {"Fläche":2371.2,"U-Wert":u_Fenster},
-			  dach = {"Fläche":1224,"U-Wert":u_Dach},
-			  boden = {"Fläche":0,"U-Wert":u_Boden},
-			  gfa = 12852, volumen=42228,
-			  anzPersonen=405, stromVerbrauch = 451627)
-
-W3 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
-			  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
-			  dach = {"Fläche":748.52,"U-Wert":u_Dach},
-			  boden = {"Fläche":0,"U-Wert":u_Boden},
-			  gfa = 10500, volumen=33750,
-			  anzPersonen=331, stromVerbrauch = 368929)
-
-W4 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
-			  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
-			  dach = {"Fläche":652.8,"U-Wert":u_Dach},
-			  boden = {"Fläche":0,"U-Wert":u_Boden},
-			  gfa = 9128, volumen=29340,
-			  anzPersonen=288, stromVerbrauch = 321124)
-
-G1 = Building( wand = {"Fläche":262.69,"U-Wert":u_Wand},
-			  fenster = {"Fläche":175.13,"U-Wert":u_Fenster},
-			  dach = {"Fläche":0,"U-Wert":u_Dach},
-			  boden = {"Fläche":1974,"U-Wert":u_Boden},
-			  gfa = 1974, volumen=5922,
-			  anzPersonen=152, stromVerbrauch = 106596)
-
-G2 = Building( wand = {"Fläche":386.28,"U-Wert":u_Wand},
-			  fenster = {"Fläche":257.52,"U-Wert":u_Fenster},
-			  dach = {"Fläche":1285,"U-Wert":u_Dach},
-			  boden = {"Fläche":2509,"U-Wert":u_Boden},
-			  gfa = 2509, volumen=15054,
-			  anzPersonen=193, stromVerbrauch = 135486)
-
-G3 = Building( wand = {"Fläche":634.8,"U-Wert":u_Wand},
-			  fenster = {"Fläche":423.2,"U-Wert":u_Fenster},
-			  dach = {"Fläche":962,"U-Wert":u_Dach},
-			  boden = {"Fläche":1600,"U-Wert":u_Boden},
-			  gfa = 3200, volumen=16000,
-			  anzPersonen=247, stromVerbrauch = 172800)
-
-G4 = Building( wand = {"Fläche":887.59,"U-Wert":u_Wand},
-			  fenster = {"Fläche":591.72,"U-Wert":u_Fenster},
-			  dach = {"Fläche":462,"U-Wert":u_Dach},
-			  boden = {"Fläche":462,"U-Wert":u_Boden},
-			  gfa = 1848, volumen=6930,
-			  anzPersonen=143, stromVerbrauch = 99792)
-
-S1 = Building( wand = {"Fläche":2571.95,"U-Wert":u_Wand},
-			  fenster = {"Fläche":1897.94,"U-Wert":u_Fenster},
-			  dach = {"Fläche":2329.3,"U-Wert":u_Dach},
-			  boden = {"Fläche":2948.67+2298.82,"U-Wert":u_Boden},
-			  gfa = 11566.78, volumen=37579.8,
-			  anzPersonen=122, stromVerbrauch = 231335)
-
-S2 = Building( wand = {"Fläche":1231.66,"U-Wert":u_Wand},
-			  fenster = {"Fläche":498.68,"U-Wert":u_Fenster},
-			  dach = {"Fläche":906.67,"U-Wert":u_Dach},
-			  boden = {"Fläche":912.67+454.89,"U-Wert":u_Boden},
-			  gfa = 3438.46, volumen=9966.3,
-			  anzPersonen=198, stromVerbrauch = 68769)
 
 
 
@@ -92,6 +24,75 @@ stromKoeff = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";") #Jahres
 class Simulation():
 	def __init__(self):		
 		#Jedes Teilgebäude wird in einem Dictionary gesammelt
+		W1 = Building( wand = {"Fläche":1911.29,"U-Wert":u_Wand},
+			  fenster = {"Fläche":1274.19,"U-Wert":u_Fenster},
+			  dach = {"Fläche":1973.94,"U-Wert":u_Dach},
+			  boden = {"Fläche":0,"U-Wert":u_Boden}, 
+			  gfa = 9870, volumen=35532,
+			  anzPersonen=311, stromVerbrauch = 346885)
+
+		W2 = Building( wand = {"Fläche":3556.8,"U-Wert":u_Wand},
+					  fenster = {"Fläche":2371.2,"U-Wert":u_Fenster},
+					  dach = {"Fläche":1224,"U-Wert":u_Dach},
+					  boden = {"Fläche":0,"U-Wert":u_Boden},
+					  gfa = 12852, volumen=42228,
+					  anzPersonen=405, stromVerbrauch = 451627)
+
+		W3 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
+					  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
+					  dach = {"Fläche":748.52,"U-Wert":u_Dach},
+					  boden = {"Fläche":0,"U-Wert":u_Boden},
+					  gfa = 10500, volumen=33750,
+					  anzPersonen=331, stromVerbrauch = 368929)
+
+		W4 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
+					  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
+					  dach = {"Fläche":652.8,"U-Wert":u_Dach},
+					  boden = {"Fläche":0,"U-Wert":u_Boden},
+					  gfa = 9128, volumen=29340,
+					  anzPersonen=288, stromVerbrauch = 321124)
+
+		G1 = Building( wand = {"Fläche":262.69,"U-Wert":u_Wand},
+					  fenster = {"Fläche":175.13,"U-Wert":u_Fenster},
+					  dach = {"Fläche":0,"U-Wert":u_Dach},
+					  boden = {"Fläche":1974,"U-Wert":u_Boden},
+					  gfa = 1974, volumen=5922,
+					  anzPersonen=152, stromVerbrauch = 106596)
+
+		G2 = Building( wand = {"Fläche":386.28,"U-Wert":u_Wand},
+					  fenster = {"Fläche":257.52,"U-Wert":u_Fenster},
+					  dach = {"Fläche":1285,"U-Wert":u_Dach},
+					  boden = {"Fläche":2509,"U-Wert":u_Boden},
+					  gfa = 2509, volumen=15054,
+					  anzPersonen=193, stromVerbrauch = 135486)
+
+		G3 = Building( wand = {"Fläche":634.8,"U-Wert":u_Wand},
+					  fenster = {"Fläche":423.2,"U-Wert":u_Fenster},
+					  dach = {"Fläche":962,"U-Wert":u_Dach},
+					  boden = {"Fläche":1600,"U-Wert":u_Boden},
+					  gfa = 3200, volumen=16000,
+					  anzPersonen=247, stromVerbrauch = 172800)
+
+		G4 = Building( wand = {"Fläche":887.59,"U-Wert":u_Wand},
+					  fenster = {"Fläche":591.72,"U-Wert":u_Fenster},
+					  dach = {"Fläche":462,"U-Wert":u_Dach},
+					  boden = {"Fläche":462,"U-Wert":u_Boden},
+					  gfa = 1848, volumen=6930,
+					  anzPersonen=143, stromVerbrauch = 99792)
+
+		S1 = Building( wand = {"Fläche":2571.95,"U-Wert":u_Wand},
+					  fenster = {"Fläche":1897.94,"U-Wert":u_Fenster},
+					  dach = {"Fläche":2329.3,"U-Wert":u_Dach},
+					  boden = {"Fläche":2948.67+2298.82,"U-Wert":u_Boden},
+					  gfa = 11566.78, volumen=37579.8,
+					  anzPersonen=122, stromVerbrauch = 231335)
+
+		S2 = Building( wand = {"Fläche":1231.66,"U-Wert":u_Wand},
+					  fenster = {"Fläche":498.68,"U-Wert":u_Fenster},
+					  dach = {"Fläche":906.67,"U-Wert":u_Dach},
+					  boden = {"Fläche":912.67+454.89,"U-Wert":u_Boden},
+					  gfa = 3438.46, volumen=9966.3,
+					  anzPersonen=198, stromVerbrauch = 68769)
 		self.dic_buildings = {"W1":W1,"W2":W2,"W3":W3,"W4":W4,"G1":G1,"G2":G2,"G3":G3,"G4":G4,"S1":S1,"S2":S2}  
 		for key,item in self.dic_buildings.items():
 			item.InitHeizlast()
@@ -346,37 +347,69 @@ class Simulation():
 
 		#PlotspezVerbrauch(self.dic_buildings)
 		#PlotspezVerbrauchKWB(self.dic_buildings)
-		PlotWochenVerbrauch(self.dic_buildings)
-		PlotInnentemperatur(self.dic_buildings)
+		#PlotWochenVerbrauch(self.dic_buildings)
+		#PlotInnentemperatur(self.dic_buildings)
 
-	def GetStrombedarf(self):
+	def GetStrombedarf(self, szen):
 		self.summeWohnen = 0
 		self.summeGewerbe = 0
 		self.summeSchule = 0
 
 		self.summeGesamt = [0] * 8760
 
-		for key,building in self.dic_buildings.items():
-			if "W" in key:
-				self.summeWohnen += sum(building.DF.stromWP_WW)
-				self.summeWohnen += sum(building.DF.stromWP_HZG)
-			elif "G" in key:
-				self.summeGewerbe += sum(building.DF.stromWP_WW)
-				self.summeGewerbe += sum(building.DF.stromWP_HZG)
-			elif "S" in key:
-				self.summeSchule += sum(building.DF.stromWP_WW)
-				self.summeSchule += sum(building.DF.stromWP_HZG)
+		if szen == "WP":
+			for key,building in self.dic_buildings.items():
+				if "W" in key:
+					self.summeWohnen += sum(building.DF.stromWP_HZG)
+					self.summeWohnen += sum(building.DF.stromWP_WW)				
+				elif "G" in key:
+					self.summeGewerbe += sum(building.DF.stromWP_WW)
+					self.summeGewerbe += sum(building.DF.stromWP_HZG)
+				elif "S" in key:
+					self.summeSchule += sum(building.DF.stromWP_WW)
+					self.summeSchule += sum(building.DF.stromWP_HZG)
 
-			temp = [a + b for a, b in zip(building.DF.stromWP_HZG, building.DF.stromWP_WW)]
-			self.summeGesamt = [a + b for a, b in zip(temp, self.summeGesamt)]
+				temp = [a + b for a, b in zip(building.DF.stromWP_HZG, building.DF.stromWP_WW)]
+				self.summeGesamt = [a + b for a, b in zip(temp, self.summeGesamt)]
+		else:
+			for key,building in self.dic_buildings.items():			
+				if "G" in key:
+					self.summeGewerbe += sum(building.DF.stromWP_HZG)
+				elif "S" in key:
+					self.summeSchule += sum(building.DF.stromWP_HZG)
 
-	def ExportData(self):
+				self.summeGesamt = [a + b for a, b in zip(building.DF.stromWP_HZG, self.summeGesamt)]
+
+	def ExportData(self, szen):
 
 		df = pd.DataFrame()
 		df["Strombedarf_WP"] = self.summeGesamt
-		df.to_csv(f"./Ergebnis/Strombedarf_WP.csv", sep= ";", decimal= ",", encoding= "cp1252")
+		df.to_csv(f"./Ergebnis/Strombedarf_"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
 
-		
+		df = pd.DataFrame()
+
+		for key, building in self.dic_buildings.items():
+
+
+			attributes = [a for a in dir(building.DF) if not a.startswith('__') and not callable(getattr(building.DF, a))]
+			for attr in attributes:	
+				try:
+					iter(getattr(building.DF,attr))
+				except TypeError:
+					continue
+				if any(x in attr for x in ["q","strom"]):
+					einheit = "[kWh]"
+				elif any(x in attr for x in ["tinnen"]):
+					einheit = "[°C]"
+				elif any(x in attr for x in ["co2"]):
+					einheit = "[kgCO2]"
+
+				if len(getattr(building.DF,attr)) > 0:
+					df[key+"_"+attr] = getattr(building.DF,attr)
+
+		df.to_csv(f"./Ergebnis/Ergebnis_Gebäude"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
+			
+
 
 
 

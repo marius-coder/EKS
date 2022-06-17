@@ -6,12 +6,18 @@ from PE_CO2 import konversionsfaktoren
 
 
 
-sim_WP = Simulation()
 
 
-sim_WP.Simulate("FW")
-sim_WP.GetStrombedarf()
-sim_WP.ExportData()
+for szen in ["FW","WP"]:
+	sim = Simulation()
+	sim.Simulate(szen)
+	sim.GetStrombedarf(szen)
+	sim.ExportData(szen)
+
+
+
+
+
 
 print(f"Summe Stromverbrauch Wohnen: {sim_WP.summeWohnen} kWh")
 print(f"Summe Stromverbrauch Gewerbe: {sim_WP.summeGewerbe} kWh")
