@@ -1,4 +1,4 @@
-# -*- coding: <latin-1> -*-
+# -*- coding: cp1252 -*-
 import pandas as pd
 from math import ceil, floor
 from random import choice
@@ -12,7 +12,7 @@ from LadeController_Personen import LadeController_Personen
 
 class LadeController(LadeController_Personen):
 
-	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer):
+	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer, gfa):
 		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -28,7 +28,8 @@ class LadeController(LadeController_Personen):
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 		self.anzAutos = anzAutos
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
-		
+		self.gfa= gfa #Bruttogeschossfläche
+
 		self.tooMany = 0
 		self.safety = 1.2 #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
 
@@ -48,7 +49,7 @@ class LadeController(LadeController_Personen):
 
 		li_Autos = [] #Halt die finale Liste an Auto Objekten
 		checksum = anzAutos #Checksum 
-
+		DS.ZV.maxLadung = maxLadung
 		#Keys mussen aufsteigend sortiert sein fur spateres Egde-Case Handling
 		keys = sorted(distMinLadung.keys()) 
 		counter = 0
@@ -81,6 +82,9 @@ class LadeController(LadeController_Personen):
 			Auto, welches seinen Ladestand reduziert bekommt
 		kilometer: float
 			Kilometer welches das Auto fahrt"""
+		#Fahrverbrauch tracken
+		DS.ZV.verbrauchFahrenEmobilität += kilometer * auto.spezVerbrauch
+		DS.ZV.counterDischarging += 1
 		auto.kapazitat -= kilometer * auto.spezVerbrauch
 		if auto.kapazitat < 0:
 			auto.kapazitat = 0
@@ -101,20 +105,18 @@ class LadeController(LadeController_Personen):
 		li_interPersons = []
 		
 		if resLast > 0:
-		#Autos entladen
-			#Data Gathering
+			#Autos entladen
 			resLastAfterDischarging = self.DischargeCars(resLast)
-			DS.Scraper.resLastDifferenceAfterDischarge[hour] =  resLast - resLastAfterDischarging
-			DS.Scraper.resLastAfterDischarging[hour] = resLastAfterDischarging
+			DS.ZV.eMobilityDischarge[hour] =  resLast - resLastAfterDischarging
+			DS.ZV.counterDischarging += 1
 		else:
-		#Autos laden
+			#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl			
 
-			#Data Gathering
 			resLastAfterCharging = self.ChargeCars(resLast)
-			DS.Scraper.resLastAfterCharging[hour] = resLastAfterCharging
-			DS.Scraper.resLastDifference[hour] =  resLast - resLastAfterCharging
-			
+			DS.ZV.eMobilityCharge[hour] =  resLast - resLastAfterCharging
+			DS.ZV.resLastAfterEMobility[hour] = DS.ZV.resLastBeforeEMobility[hour] + DS.ZV.eMobilityCharge[hour]
+			DS.ZV.counterCharging += 1
 		#Autos aus dem Netz auf Mindestladung laden
 		self.CheckMinKap()
 
@@ -126,10 +128,10 @@ class LadeController(LadeController_Personen):
 		for car in self.li_Autos:
 			li_interCars.append(car.bCharging)				
 		
-		DS.Scraper.SOC.append(self.GetChargingCars())
+		#DS.Scraper.SOC.append(self.GetChargingCars())
 
-		DS.Scraper.li_state.append(li_interPersons)
-		DS.Scraper.li_stateCars.append(li_interCars)
+		#DS.Scraper.li_state.append(li_interPersons)
+		#DS.Scraper.li_stateCars.append(li_interCars)
 
 		#Laufvariable der bereits geladenen Energie zurücksetzen
 		self.ResetAlreadyLoaded()
@@ -145,6 +147,9 @@ class LadeController(LadeController_Personen):
 			ladung = min([car.leistung_MAX, last, space]) #Die niedrigste Zahl davon kann geladen werden
 			car.Laden(ladung)
 			last -= ladung
+			#Daten Tracken
+			if car.kapazitat > DS.ZV.aktuelleLadung:
+				DS.ZV.aktuelleLadung = car.kapazitat
 		return last
 
 	def DischargeCars(self, last):
@@ -171,13 +176,10 @@ class LadeController(LadeController_Personen):
 
 		demand = km * cars[-1].spezVerbrauch * self.safety
 
-		DS.Scraper.demandDriven += demand / self.safety
-
 		if cars[-1].kapazitat < demand:
 			return cars[-1]
 
 		car = next(x for x in cars if x.kapazitat >= demand)
-		#print(f"Best Choice: {car.kapazitat}")
 		return car
 
 
@@ -191,7 +193,8 @@ class LadeController(LadeController_Personen):
 				space = (car.minLadung * car.maxLadung - car.kapazitat)
 				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
 				car.Laden(toLoad)
-				DS.Scraper.gridCharging += toLoad
+				DS.ZV.gridCharging += toLoad
+				DS.ZV.counterCharging += 1
 
 	def ResetAlreadyLoaded(self):
 		cars = self.GetChargingCars()

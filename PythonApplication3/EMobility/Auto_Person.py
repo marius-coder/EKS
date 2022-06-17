@@ -5,6 +5,7 @@ class Person():
 	def __init__(self):
 		self.status = True #Status der Person True = Anwesend, False = Unterwegs
 		self.anzAutoWege = 0
+		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben
 		self.wegMitAuto = 0
 		self.carID = None
 		self.waitingTime = 0 #gibt an wie lange die Person bereits wartet zu fahren

@@ -1,8 +1,10 @@
+# -*- coding: cp1252 -*-
 from Auto_Person import Auto, Person
 from math import ceil, floor
 from Backend.Helper import DetermineHourofDay, DetermineDay
 from random import choice, shuffle, seed
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
+import Plotting.DataScraper as DS
 
 seed(10)
 
@@ -12,8 +14,9 @@ class LadeController_Personen():
 		self.awayPersons = []
 		self.anzPersonen = 1335
 		self.percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
-		self.persons = []
+		self.persons = [] #Personen die beim Mobilitätsprogramm mitmachen
 		self.basisPersonenKilometer = 5775.77 #Kilometeranzahl die eine Person in einem Jahr mit dem Auto zurücklegt
+		self.personenKilometer = personenKilometer
 		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer#Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
 
@@ -41,20 +44,21 @@ class LadeController_Personen():
 		self.anzPers = 0 #Anzahl an Personen die bereits losgefahren sind zurucksetzen
 		self.anzPers2 = 0 #Anzahl an Personen die bereits losgefahren sind vom letzten Zeitschritt zurucksetzen
 		
-		mobilePersons = ceil(CalcMobilePersonen(day, self.anzPersonen))
+		mobilePersons = ceil(CalcMobilePersonen(day, len(self.persons)))
 		
-		limit = ceil(mobilePersons * self.percent)
 		shuffle(self.persons) #Shuffle the person list to equalize km driven
-		personsCarSharing = self.persons[0:limit]
+		personsCarSharing = self.persons[0:mobilePersons]
 		drivingPersons = []
 			
 		for person in personsCarSharing:
+			person.km = 0
 			ways = CalcNumberofWays(day) 
 			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)
 			if person.anzAutoWege >= 2:
 				for _ in range(person.anzAutoWege):
 					km = GenerateKilometer()
 					person.wegMitAuto += km * self.adjustKilometers #Fur den Verbrauch des Autos
+					person.km += km * self.adjustKilometers
 				drivingPersons.append(person)
 
 		self.lendrivingPersons = len(drivingPersons)	
@@ -75,10 +79,11 @@ class LadeController_Personen():
 		"""Person fahrt weg. Es werden die finalen Kilometer generiert.
 		Es wird ein passendes Auto ausgesucht und zugewiesen.
 		Person und Auto werden auf abwesend gestellt"""
-		km= person.wegMitAuto
+		km= person.km
 		car = self.PickCar(km=km)
-		
+		DS.ZV.fahrversuche += 1
 		if not car:
+			DS.ZV.fehlgeschlageneFahrversuche += 1
 			return False
 
 		person.carID = car.ID		

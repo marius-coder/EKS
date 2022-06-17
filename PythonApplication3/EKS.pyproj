@@ -41,8 +41,8 @@
     <Compile Include="EMobility\PlotScenarios.py" />
     <Compile Include="EMobility\PlotMobility.py" />
     <Compile Include="main.py" />
-    <Compile Include="Plotting\DataScraper - Copy.py" />
     <Compile Include="Plotting\DataScraper.py" />
+    <Compile Include="Plotting\DataScraper_OLD.py" />
     <Compile Include="Strom\PV.py" />
   </ItemGroup>
   <ItemGroup>

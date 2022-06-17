@@ -1,119 +1,85 @@
 # -*- coding: cp1252 -*-
-import dataclasses as dataclass
+from dataclasses import dataclass, field
 import seaborn as sns
 import matplotlib.pyplot as plt
 import bokeh
 import pandas as pd
 
-class DataScraper():
-
-    def __init__(self) -> None:
-        self.Init_eMobility()
-
-    def Init_eMobility(self):
-        self.li_state = []			#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
-        self.li_stateCars = []		#Liste in denen der Status der Autos gesammelt wird (Wird spater geplottet)
-        self.useableCapacity = []	#Liste in der die verwendbare Kapazitat gespeichert wird zum plotten
-        self.demandBuilding = []	#Liste in der der Bedarf des Gebäudes gespeichert wird
-        self.demandDriving = []		#Liste in der der Bedarf der Autos zum Fahren gespeichert wird
-        self.demandcovered = []		#Liste in der der Bedarf der durch die E-Autos gedeckt wird gespeichert wird
-        self.PV = []		        #Liste in der die von auserhalb produzierte Leistung gespeichert wird
-        self.generationloaded = []  #Liste die speichert, wie viel Energie in den Autos gespeichert wurde
-        self.resLast = []           #Liste in der die Residuallast gespeichert wird
-        self.demandDriven = 0       #Variable in der die zum Fahren verbrauchte Energie hochsummiert wird
-        self.gridCharging = 0       #Variable in der die zum Fahren aus dem Netz bezogene Energie hochsummiert wird
-
-        self.resLastDifferenceAfterDischarge = [0] * 8760
-        self.resLastDifference = [0] * 8760
-        self.resLastAfterDischarging = [0] * 8760
-        self.resLastAfterCharging = [0] * 8760
-        self.SOC = [] #Liste in der der SOC aller anwesenden Autos gespeichert wird
-
-
-    def ExtractData(self, car):
-        self.EGV = self.CalcEigenverbrauchmitAutoeinspeisung()
-        self.plot2 = self.CalcFahrverbrauch(car)
+@dataclass
+class Scraper:
+    #Generelle Daten
+    generell = {
+        "personenKilometer Elektrisch durch. [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto elektrisch zurücklegt (km)
+        "personenKilometer Elektrisch [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto elektrisch zurücklegt (km)
+        "personenKilometer Fossil [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto fossil zurücklegt (km)
+        "stromverbrauch Wohnen [kWh]" : 0, #Verbrauch der Wohngebäude (kWh)
+        "stromverbrauch Gewerbe [kWh]" : 0, #Verbrauch des Gewerbes (kWh)
+        "stromverbrauch Schule [kWh]" : 0, #Verbrauch der Bildungsgebäude (kWh)
+        "stromverbrauch WP [kWh]" : 0, #Verbrauch der Wärmepumpen (kWh)
+        "stromverbrauch E-Mobilität [kWh]" : 0, #Verbrauch der E-Mobilität (kWh)
+        "pvProduktion [kWh]" : 0, #Wie viel die PV-Anlage insgesamt produziert hat (kWh)
+        "pvProduktionGfa [kWh]" : 0 #Wie viel PV Produktion pro m² gfa (kWh/m²gfa a)
+        }
     
-    def CalcEigenverbrauch(self, pv, reslast): 
-        pv = pv[0:len(reslast)]
-        Einspeisung = abs(sum([x for x in reslast if x < 0]))
+    #Indikatoren können auch Daten von anderen Gruppen enthalten
+    #Indikatoren stellen die "Gesundheit" einer Variante dar
+    indikatoren = {
+        #"Fahrversuche [Anzahl]" : 0, 
+        "fehlgeschlagene Fahrversuche [%]" : 0, 
+        "ungenutzte Ladung der E-Mobilität [%]" : 0,
+        "erhöhung Eigenverbrauch [%]" : 0,
+        "LadeEntlade_Zyklen ohne EMobilität pro Auto [Anzahl]" : 0,
+        "LadeEntlade_Zyklen mit EMobilität pro Auto [Anzahl]" : 0,
+        "Ladevorgänge [Anzahl]" : 0,
+        "Entladevorgänge [Anzahl]" : 0,        
+        }
 
-        Eigenverbrauchsanteil = 1 - Einspeisung/sum(pv)
-        Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil)# / 1000
-        Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil)# / 1000
-        return Eigenverbrauch, Überschuss
+    #Verbrauch der E-Mobilität zum Fahren
+    eMobilitätFahren = {
+        "Gesamt [kWh]" : 0,
+        "Lokal [kWh]" : 0,
+        "Netz [kWh]" : 0
+        }
 
-    def CalcFahrverbrauch(self, car):
-        discharge = sum(self.resLastDifferenceAfterDischarge)
-        charge = sum(self.resLastDifference)
-        verlustLaden = charge * (1-car.effizienz)
-        vorFahren = charge - verlustLaden
+    #Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
+    eMobilitätGebäude = {
+        "Lade/Entladeverluste [kWh]" : 0,
+        "GebäudezuEMobilität [kWh]" : 0, #Ohne Verluste
+        "EMobilitätzuGebäude [kWh]" : 0  #Ohne Verluste                 
+        }
 
-        nachFahren = discharge / car.effizienz
-        verlustEntladen = nachFahren * (1-car.effizienz)
-        nachFahrenEntladen = nachFahren - verlustEntladen
-        verlustGesamt = verlustEntladen + verlustLaden
-        Fahrverbrauch = vorFahren - nachFahren
-        ret = {"Fahrverbrauch" : Fahrverbrauch,"verlustGesamt" : verlustGesamt
-               ,"nachFahrenEntladen" : nachFahrenEntladen}
-        return ret
+    #PV-Daten vor E-Mobilität
+    pvVorEMobilität = {
+        "Eigenverbrauch [kWh]" : 0,
+        "Einspeisung [kWh]" : 0,
+        "Netzbezug [kWh]" : 0,
+        }
+    #PV-Daten nach E-Mobilität        
+    pvNachEMobilität = {
+        "Eigenverbrauch [kWh]" : 0,
+        "Einspeisung [kWh]" : 0,
+        "Netzbezug [kWh]" : 0,
+        }
+scraper = Scraper()
 
+@dataclass
+class Zwischenvariablen:
+    verbrauchFahrenEmobilität : float = 0
 
-    def CalcEigenverbrauchmitAutoeinspeisung(self):   
-        Eigenverbrauch, Überschuss = self.CalcEigenverbrauch(self.PV,self.resLast)
-        newResLast = [x + y for (x, y) in zip(self.resLast, self.resLastDifference)]
-        EigenverbrauchAfterCharging, ÜberschussAfterCharging = self.CalcEigenverbrauch(self.PV,newResLast)
-        ret = {"Eigenverbrauch" : Eigenverbrauch,"Überschuss" : Überschuss
-               ,"EigenverbrauchAfterCharging" : EigenverbrauchAfterCharging,"ÜberschussAfterCharging" : ÜberschussAfterCharging}
-        return ret
+    fahrversuche : int = 0
+    fehlgeschlageneFahrversuche : int = 0
 
+    maxLadung : float = 0
+    aktuelleLadung : float = 0
 
-Scraper = DataScraper()
+    eMobilityCharge : list[list] = field(default_factory=lambda: [0]*8760)
+    eMobilityDischarge : list[list] = field(default_factory=lambda: [0]*8760)
+    counterCharging : int = 0
+    counterDischarging : int = 0
 
-#@dataclass
-#class ScenarioData:
-#    demandDriven = 0         
-#    gridCharging = 0
-#    energyPvToCar = 0
-#    CarToBuilding = 0
-#    Pv = 0
-#    demandBuilding = 0
+    resLastBeforeEMobility : list[list] = field(default_factory=lambda: [0]*8760)
+    resLastAfterEMobility : list[list] = field(default_factory=lambda: [0]*8760)
 
+    gridCharging : float = 0
 
-
-class ScenarioData:
-    def __init__(self) -> None:
-        self.scenarioData = {}
-
-
-
-    def AppendData(self, DS, scenarioName: str):
-        data = {}
-
-        data["demandDriven"] = DS.demandDriven
-        data["gridCharging"] = DS.gridCharging
-        data["energyPvToCar"] = sum(DS.resLastDifference)
-        data["CarToBuilding"] = sum(DS.resLastDifferenceAfterDischarge)
-        data["Pv"] = sum(DS.PV)
-        data["demandBuilding"] = sum(DS.demandBuilding)
-        data["Residuallast"] = sum(DS.resLast)
-
-        data["01_Eigenverbrauch"] = DS.EGV["Eigenverbrauch"]
-        data["01_Überschuss"] = DS.EGV["Überschuss"]
-        data["01_EigenverbrauchAfterCharging"] = DS.EGV["EigenverbrauchAfterCharging"]
-        data["01_ÜberschussAfterCharging"] = DS.EGV["ÜberschussAfterCharging"]
-
-        data["02_Fahrverbrauch"] = DS.plot2["Fahrverbrauch"]
-        data["02_verlustGesamt"] = DS.plot2["verlustGesamt"]
-        data["02_nachFahrenEntladen"] = DS.plot2["nachFahrenEntladen"]
-
-        self.scenarioData[scenarioName] = data
-
-    def ExportData(self):
-
-        for key,val in self.scenarioData.items():
-            df = pd.DataFrame(val, index= range(1))
-            df.to_csv(f"./Ergebnis/Ergebnis_{key}.csv", sep= ";", decimal= ",", encoding= "cp1252")
-
-
-ScenarioScraper = ScenarioData()
+ZV = Zwischenvariablen()

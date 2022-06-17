@@ -1,4 +1,4 @@
-# -*- coding: <latin-1> -*-
+# -*- coding: cp1252 -*-
 from itertools import count
 from random import seed, choices, uniform
 from collections import Counter
@@ -109,3 +109,12 @@ def CalcAutoWege(ways, day) -> int:
             return ret["AutolenkerIn"]
     else:
         return 0
+
+def CalcEigenverbrauch(pv, resLast): 
+    pv = pv[0:len(resLast)]
+    Einspeisung = abs(sum([x for x in resLast if x < 0]))
+
+    Eigenverbrauchsanteil = 1 - Einspeisung/sum(pv)
+    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil) / 1000
+    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil) / 1000
+    return Eigenverbrauch, Überschuss
