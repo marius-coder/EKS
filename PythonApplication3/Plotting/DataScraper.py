@@ -95,3 +95,11 @@ class Zwischenvariablen:
         self.gridCharging = 0
 
 ZV = Zwischenvariablen()
+
+class Zwischenvariablen:
+
+    def __init__(self):   
+
+        self.StateofDrivingPersons = [[]*8760]
+        self.StateofCars = [[]*8760]
+        self.LadeLeistung = [0]*8760

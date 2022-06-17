@@ -1,4 +1,4 @@
-
+# -*- coding: cp1252 -*-
 
 
 class Dataflows():
@@ -10,6 +10,11 @@ class Dataflows():
         self.qWW = []  #Liste mit dem Warmwasserverbrauch des Gebaudes
         self.stromBedarf = [] #Liste die den Strombedarf aller Nutzer enthalt (Wohnen+Gewerbe)
         
+        self.interneGewinne = [0] * 8760 #Interne Wärmegewinne (Personen,Licht,Maschinen)
+        self.solareGewinne = [0] * 8760 #Solare Gewinne
+        self.ventilationVerluste = [0] * 8760 #Ventilationswärmeverluste
+        self.infiltrationVerluste = [0] * 8760 #Infiltrationswärmeverluste
+        self.transmissionVerluste = [0] * 8760 #Transmissionswärmeverluste
 
         
     def InitSzenWP(self):

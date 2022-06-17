@@ -20,22 +20,25 @@ class HL():
         return t_Abl * WRG + ta * (1 - WRG)
 
     def calc_QV(self, ta, hour):
-    		"""Ventilationswärmeverlust nach ÖNORM H 7500-1:2015"""
+        """Ventilationswärmeverlust nach ÖNORM H 7500-1:2015"""
 
-            #Hygienischer Lüftungswechsel
-    		V_hyg_min = self.volumen * self.Luftwechsel
+        #Hygienischer Lüftungswechsel
+        V_hyg_min = self.volumen * self.Luftwechsel
     		 
-    		Hv = self.cp_air * V_hyg_min  # W/K
-            #Gesamtlüftungsverluste in Watt
-    		qv = Hv * (self.calc_t_Zul(ta) - self.ti) # Watt
+        Hv = self.cp_air * V_hyg_min  # W/K
+        #Gesamtlüftungsverluste in Watt
+        qv = Hv * (self.calc_t_Zul(ta) - self.ti) # Watt
 
-    		V_inf =  self.infiltration[hour] * self.volumen
+        V_inf =  self.infiltration[hour] * self.volumen
 
-    		Hinf = self.cp_air * V_inf  # W/K
-    		#Gesamtlüftungsverluste in Watt
-    		qinf = Hinf * (ta - self.ti) # Watt
-    		qGes = qv + qinf
-    		return qGes / self.gfa
+        Hinf = self.cp_air * V_inf  # W/K
+        #Gesamtlüftungsverluste in Watt
+        qinf = Hinf * (ta - self.ti) # Watt
+
+        self.DF.ventilationVerluste[hour] = qv / 1000
+        self.DF.infiltrationVerluste[hour] = qinf / 1000
+        qGes = qv + qinf
+        return qGes / self.gfa
     	 
     def calc_QT_Wand(self, ta):
         #Transmisisonsverlust von beheizten Raum an die Außenluft eg. Wand und Dach
@@ -83,12 +86,16 @@ class HL():
         Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
             eines Gebäudes zu berechnen."""
         qT = self.calc_QT_Sum(ta) 
+        self.DF.transmissionVerluste[hour] = qT * self.gfa / 1000
         qV = self.calc_QV(ta, hour)
+        
         #print(f"spez. Heizlast: {(qT+qV)/self.gfa} W/m²")
-        qI = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
+        qP = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
         qM = self.calc_Maschinen(strom) * 1000
+        self.DF.interneGewinne[hour] = (qP+qM) * self.gfa / 1000
         qS = (self.qsolar[hour] * self.fenster["Fläche"])/self.gfa
-        qSum = qT+qV+qI+qS+qM
+        self.DF.solareGewinne[hour] = qS * self.gfa / 1000
+        qSum = qT+qV+qP+qS+qM
         #print(f"spez. Heizlast: {(qSum)/self.gfa} W/m²")
         return qSum
 
