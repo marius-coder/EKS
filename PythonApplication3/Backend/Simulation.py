@@ -403,9 +403,11 @@ class Simulation():
 					einheit = "[°C]"
 				elif any(x in attr for x in ["co2"]):
 					einheit = "[kgCO2]"
+				else:
+					einheit = ""
 
 				if len(getattr(building.DF,attr)) > 0:
-					df[key+"_"+attr] = getattr(building.DF,attr)
+					df[key+"_"+attr+" " + einheit] = getattr(building.DF,attr)
 
 		df.to_csv(f"./Ergebnis/Ergebnis_Gebäude"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
 			
