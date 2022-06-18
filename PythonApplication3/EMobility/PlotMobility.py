@@ -102,9 +102,11 @@ def PlotLadegang(data):
 
     maxY = max(df["data"])
     li_Wochentage = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"]
+    labelsTage = ["Werktag", "Samstag", "Sonntag"]
+
     #Lastgang aufgeteilt nach Quartalen
     for quart in range(1,5):            
-        liDays = [] 
+        liDays = [[],[],[]] 
         for day in range(7):
             liHours = []
             for hour in range(24):      
@@ -112,21 +114,21 @@ def PlotLadegang(data):
                 df_inter=df_inter[df_inter.index.dayofweek == day]["data"]
                 df_inter=df_inter[df_inter.index.hour == hour]
                 liHours.append(df_inter)
-            liDays.append(liHours)
+            if day == 5:
+                liDays[1].extend(liHours)
+            if day == 6:
+                liDays[2].extend(liHours)
+            else:
+                liDays[0].extend(liHours)
         
-        fig, ax = plt.subplots(3,3, figsize=(30,15))
+        fig, ax = plt.subplots(1,3)
         fig.suptitle("Lastgang an verschiedenen Tagen im Quartal: "+str(quart), fontsize = 30)
-        test = 0
         for l in range(3):
-            for r in range(3):   
-                if test > 6:
-                    break
-                sns.boxplot(data=liDays[test], ax = ax[l][r])   
-                ax[l][r].set_ylim(0,maxY)
-                ax[l][r].set_xlabel("Stunde", fontsize = 15)
-                ax[l][r].set_ylabel("Last [kW]", fontsize = 15)      
-                ax[l][r].set_title("Lastgang am Tag: " + li_Wochentage[test], fontsize = 20)
-                test += 1
+            sns.boxplot(data=liDays[l], ax = ax[l])   
+            ax[l].set_ylim(0,maxY)
+            ax[l].set_xlabel("Stunde", fontsize = 15)
+            ax[l].set_ylabel("Last [kW]", fontsize = 15)      
+            ax[l].set_title("Lastgang am Tag: " + labelsTage[l], fontsize = 20)
         plt.tight_layout()
         fig.savefig("Lastgang Quartal_"+str(quart)+".png") 
 
