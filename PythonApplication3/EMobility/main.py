@@ -26,7 +26,7 @@ scenarios = ["PV", "PV_max"]
 for Scen in scenarios:
 	DS.scraper.__init__()
 	DS.ZV.__init__()
-	Control = LadeController(anzAutos= 80, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, gfa= 76417.24)
+	Control = LadeController(anzAutos= 200, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, gfa= 76417.24)
 	PV = DefinePV(Scen)
 
 	for hour in range(8760):

@@ -9,7 +9,7 @@ class Person():
 		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben
 		self.wegMitAuto = 0
 		self.carID = None
-		self.waitingTime = 0 #gibt an wie lange die Person bereits wartet zu fahren
+		self.minTimeAway = 0 #gibt an wie lange ein Auto mindestens weg sein muss
 
 class Auto():
 

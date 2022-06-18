@@ -21,6 +21,8 @@ class LadeController_Personen():
 		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
 		self.drivingPersons = []
+		self.readytoComeBack = [] #Liste in der die Personen gesammelt werden, die bereit sind zurückzukommen
+		self.averageSpeed = 50 #km/h
 
 	def InitPersonen(self):
 		idPerson = 0
@@ -63,7 +65,8 @@ class LadeController_Personen():
 					person.wegMitAuto += km * self.adjustKilometers #Fur den Verbrauch des Autos
 					person.km += km * self.adjustKilometers
 				drivingPersons.append(person)
-				self.persons.remove(person)
+				
+		print(len(self.GetChargingCars()))
 
 		self.lendrivingPersons = len(drivingPersons)	
 		return drivingPersons
@@ -84,6 +87,7 @@ class LadeController_Personen():
 		Es wird ein passendes Auto ausgesucht und zugewiesen.
 		Person und Auto werden auf abwesend gestellt"""
 		km= person.km
+		person.minTimeAway = int(round(km / self.averageSpeed,0))
 		car = self.PickCar(km=km)
 		DS.ZV.fahrversuche += 1
 		if not car:
@@ -102,7 +106,7 @@ class LadeController_Personen():
 		day = DetermineDay(hour)
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
-			self.drivingPersons.extend(self.InitDay(day)) #Neue Personen generieren und Laufvariablen setzen
+			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
 			self.tooMany = len(self.awayPersons)
 		
 		
@@ -119,15 +123,32 @@ class LadeController_Personen():
 			self.drivingPersons.remove(person)			
 			if self.DriveAway(person= person):
 				self.awayPersons.append(person)
+		
+		test = 0
+		test2 = len(self.awayPersons)
+		for person in self.awayPersons:
+			test += 1
+			print(f"test: {test}")
+			if person.minTimeAway == 0:
+				
+				self.readytoComeBack.append(person)
+				self.awayPersons.remove(person)
+			else:
+				person.minTimeAway -= 1
+
+		if test != test2:
+			raise ValueError("")
 
 		pers = self.travelData["Ankommen"][hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
 		comingBack, t = self.Control(pers,0)
 
 		for _ in range(comingBack):
-			if len(self.awayPersons) > 0: #Ask for permission
-				person = choice(self.awayPersons)
+			if len(self.readytoComeBack) > 0: #Ask for permission
+				person = choice(self.readytoComeBack)
 				car = next((x for x in self.li_Autos if x.ID == person.carID), None)
+				if car == None:
+					raise TypeError("Keine Auto gefunden")
 				person.status = True
 				car.bCharging = True
-				self.awayPersons.remove(person)
-				self.persons.append(person)
+				self.readytoComeBack.remove(person)
+				
