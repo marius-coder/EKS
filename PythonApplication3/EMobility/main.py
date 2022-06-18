@@ -1,6 +1,6 @@
 # -*- coding: cp1252 -*-
 
-from PlotMobility import PlotStatusCollection, PlotSample, PlotUseableCapacity, PlotSOC, PlotPersonStatus, PlotResiduallast, PlotEigenverbrauch, PlotEigenverbrauchmitAutoeinspeisung, PlotPieDischarge
+from PlotMobility import PlotLadegang, PlotStatusCollection, PlotPersonStatus
 
 from Strom.PV import Strombedarf, DefinePV
 
@@ -26,6 +26,7 @@ scenarios = ["PV", "PV_max"]
 for Scen in scenarios:
 	DS.scraper.__init__()
 	DS.ZV.__init__()
+	DS.zeitVar.__init__()
 	Control = LadeController(anzAutos= 90, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, gfa= 76417.24, percentAbweichung= 0.25)
 	PV = DefinePV(Scen)
 
@@ -94,13 +95,20 @@ for Scen in scenarios:
 	DS.scraper.pvNachEMobilität["Einspeisung [kWh]"] = daten[1]
 	DS.scraper.pvNachEMobilität["Netzbezug [kWh]"] = abs(sum([x for x in DS.ZV.resLastAfterDischarging if x > 0]))  
 
+	#Export Data
 	DS.scraper.Export(Scen)
+
+	#Zeitvariablen
+	DS.zeitVar.LadeLeistung = DS.ZV.eMobilityCharge
+	DS.zeitVar.EntladeLeistung = DS.ZV.eMobilityDischarge
+	
 
 	#PlotPieDischarge(sum(DS.Scraper.resLastDifferenceAfterDischarge), sum(DS.Scraper.resLastDifference), Control.li_Autos[0])
 	#PlotEigenverbrauchmitAutoeinspeisung(PV,DS.Scraper.resLast, DS.Scraper.resLastDifference)
 
 	#PlotEigenverbrauch(PV,DS.Scraper.resLast)
 	#PlotResiduallast(PV,Strombedarf["Wohnen"].tolist(),DS.Scraper.resLast)	
+	PlotLadegang(DS.zeitVar.LadeLeistung)
 	PlotStatusCollection(DS.zeitVar.StateofCars)
 	PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
 	##PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)

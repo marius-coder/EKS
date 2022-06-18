@@ -102,6 +102,7 @@ class Zeitvariablen:
 
         self.StateofDrivingPersons = []
         self.StateofCars = []
-        self.LadeLeistung = [0]*8760
+        self.LadeLeistung = []
+        self.EntladeLeistung = []
 
 zeitVar = Zeitvariablen()
