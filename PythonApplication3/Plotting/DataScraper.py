@@ -96,10 +96,12 @@ class Zwischenvariablen:
 
 ZV = Zwischenvariablen()
 
-class Zwischenvariablen:
+class Zeitvariablen:
 
     def __init__(self):   
 
-        self.StateofDrivingPersons = [[]*8760]
-        self.StateofCars = [[]*8760]
+        self.StateofDrivingPersons = []
+        self.StateofCars = []
         self.LadeLeistung = [0]*8760
+
+zeitVar = Zeitvariablen()

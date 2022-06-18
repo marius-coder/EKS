@@ -2,6 +2,10 @@
 from itertools import count
 from random import seed, choices, uniform
 from collections import Counter
+from numpy.random import default_rng, Generator, PCG64
+import numpy as np
+
+rng = Generator(PCG64(10))
 seed(10)
 
 def CalcMobilePersonen(day, personen) -> int:
@@ -81,6 +85,32 @@ def GenerateKilometer() -> int:
     weights = [2,5,12,21,21,19,15,5] 
     bereich = GenerateWeightedItem(pop= population, weights= weights)
     return uniform(bereich[0],bereich[1])
+
+def GenerateNormalNumber(mean:int ,std:float) -> float:
+    std = std/3
+    val = rng.normal(loc= mean, scale= std, size= 1)
+
+    if mean - val < 3*std:
+        return float(val)
+    else:
+        GenerateNormalNumber(mean,std)
+        return float(val)
+
+
+
+def GenerateReiseProfil(profil, prozent) -> list:
+    ret = []
+    for i in range(len(profil)):
+        mean = profil[i]
+        std = mean * prozent
+        ret.append(GenerateNormalNumber(mean= mean, std= std))
+
+    factor = 100/sum(ret)
+    ret = [x*factor for x in ret]
+    return ret
+       
+
+
 
 uberlauf = 0 #Uberlauf gibt an, ob ein Autoweg auf 2 aufgestockt werden soll.
 def CalcAutoWege(ways, day) -> int:

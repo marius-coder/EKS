@@ -4,14 +4,14 @@ from Auto_Person import Auto, Person
 from math import ceil, floor
 from Backend.Helper import DetermineHourofDay, DetermineDay
 from random import choice, shuffle, seed
-from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
+from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege, GenerateReiseProfil
 import Plotting.DataScraper as DS
 
 seed(10)
 
 class LadeController_Personen():
     
-	def __init__(self, personenKilometer) -> None:
+	def __init__(self, personenKilometer, percentAbweichung) -> None:
 		self.awayPersons = []
 		self.anzPersonen = 1335
 		self.percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
@@ -23,6 +23,10 @@ class LadeController_Personen():
 		self.drivingPersons = []
 		self.readytoComeBack = [] #Liste in der die Personen gesammelt werden, die bereit sind zurückzukommen
 		self.averageSpeed = 50 #km/h
+		self.percentAbweichung = percentAbweichung
+
+		self.wegfahren = []
+		self.ankommen = []
 
 	def InitPersonen(self):
 		idPerson = 0
@@ -52,21 +56,23 @@ class LadeController_Personen():
 		mobilePersons = ceil(CalcMobilePersonen(day, len(self.persons)))
 		
 		shuffle(self.persons) #Shuffle the person list to equalize km driven
-		personsCarSharing = self.persons[0:mobilePersons]
+
+		personstoPick = [person for person in self.persons if person.status == True]
+		personsCarSharing = personstoPick[0:mobilePersons]
 		drivingPersons = []
 			
 		for person in personsCarSharing:
+
 			person.km = 0
 			ways = CalcNumberofWays(day) 
-			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)
+			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)			
+
 			if person.anzAutoWege >= 2:
 				for _ in range(person.anzAutoWege):
 					km = GenerateKilometer()
-					person.wegMitAuto += km * self.adjustKilometers #Fur den Verbrauch des Autos
+					person.wegMitAuto += km * self.adjustKilometers #Für den Verbrauch des Autos
 					person.km += km * self.adjustKilometers
-				drivingPersons.append(person)
-				
-		print(len(self.GetChargingCars()))
+				drivingPersons.append(person)		
 
 		self.lendrivingPersons = len(drivingPersons)	
 		return drivingPersons
@@ -74,9 +80,9 @@ class LadeController_Personen():
 	def Control(self, losZahl2, conZahl):
 		"""Berechnet die Zahl der Personen, welche in einer Stunde wegfahren/zuruckkommen
 		losZahl2: float
-			Personenzahl, die fahren/zuruckgekommt (inkl. jetziger Stunde)
+			Personenzahl, die fahren/zurückgekommt (inkl. jetziger Stunde)
 		conZahl: float
-			Personenzahl, die bereits gefahren/zuruckgekommen sein muss"""
+			Personenzahl, die bereits gefahren/zurückgekommen sein muss"""
 		b = int(round(losZahl2,0))
 		r = b - conZahl
 		conZahl = b
@@ -97,6 +103,9 @@ class LadeController_Personen():
 		person.carID = car.ID		
 		self.UpdateLadestand(auto= car, kilometer= km)
 
+		if person.status == False or car.bCharging == False:
+			raise TypeError("Person oder Auto sind schon weggefahren")
+
 		person.status = False
 		car.bCharging = False
 		return True
@@ -107,14 +116,12 @@ class LadeController_Personen():
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
 			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
-			self.tooMany = len(self.awayPersons)
-		
-		
-
-
+			self.tooMany = len(self.readytoComeBack + self.awayPersons)
+			self.wegfahren = GenerateReiseProfil(self.travelData["Losfahren"], self.percentAbweichung)
+			self.ankommen = GenerateReiseProfil(self.travelData["Ankommen"], self.percentAbweichung)
 
 		#Anzahl an Personen die Losgefahren sollen
-		self.anzPers += self.travelData["Losfahren"][hourIndex] / 100 * self.lendrivingPersons
+		self.anzPers += self.wegfahren[hourIndex] / 100 * self.lendrivingPersons
 
 		#Anzahl an Personen die zu dieser Stunde losfahren sollen
 		driveAway, self.anzPers2 = self.Control(self.anzPers, self.anzPers2)
@@ -124,22 +131,15 @@ class LadeController_Personen():
 			if self.DriveAway(person= person):
 				self.awayPersons.append(person)
 		
-		test = 0
-		test2 = len(self.awayPersons)
-		for person in self.awayPersons:
-			test += 1
-			print(f"test: {test}")
-			if person.minTimeAway == 0:
-				
+
+		for person in self.awayPersons[:]:
+			if person.minTimeAway == 0:	
 				self.readytoComeBack.append(person)
 				self.awayPersons.remove(person)
 			else:
 				person.minTimeAway -= 1
 
-		if test != test2:
-			raise ValueError("")
-
-		pers = self.travelData["Ankommen"][hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
+		pers = self.ankommen[hourIndex] / 100 * (self.lendrivingPersons + self.tooMany)
 		comingBack, t = self.Control(pers,0)
 
 		for _ in range(comingBack):
@@ -148,7 +148,19 @@ class LadeController_Personen():
 				car = next((x for x in self.li_Autos if x.ID == person.carID), None)
 				if car == None:
 					raise TypeError("Keine Auto gefunden")
+				if person.status == True or car.bCharging == True:
+					raise TypeError("Person oder Auto sind schon zurück")
 				person.status = True
 				car.bCharging = True
 				self.readytoComeBack.remove(person)
+
+		statePersons = []
+		for person in self.drivingPersons:
+			statePersons.append(True)
+		for person in self.awayPersons:
+			statePersons.append(False)
+		for person in self.readytoComeBack:
+			statePersons.append(False)
+
+		DS.zeitVar.StateofDrivingPersons.append(statePersons)
 				

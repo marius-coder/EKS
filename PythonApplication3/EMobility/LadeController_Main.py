@@ -13,7 +13,7 @@ from LadeController_Personen import LadeController_Personen
 
 class LadeController(LadeController_Personen):
 
-	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer, gfa):
+	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer, gfa, percentAbweichung):
 		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -24,7 +24,7 @@ class LadeController(LadeController_Personen):
 			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
 			Eingabe in kWh.
 		"""	
-		LadeController_Personen.__init__(self, personenKilometer= personenKilometer)
+		LadeController_Personen.__init__(self, personenKilometer= personenKilometer, percentAbweichung= percentAbweichung)
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 		self.anzAutos = anzAutos
@@ -127,23 +127,24 @@ class LadeController(LadeController_Personen):
 		DS.ZV.resLastAfterDischarging[hour] = DS.ZV.resLastBeforeEMobility[hour] - DS.ZV.eMobilityDischarge[hour]
 		DS.ZV.resLastAfterEMobility[hour] = DS.ZV.resLastBeforeEMobility[hour] + DS.ZV.eMobilityCharge[hour]
 		#Autos aus dem Netz auf Mindestladung laden
-		self.CheckMinKap()
-
-		#Bookkeeping zum Plotten
-		inter = self.drivingPersons.copy()
-		inter.extend(self.awayPersons)
-		for person in inter:
-			li_interPersons.append(person.status)
-		for car in self.li_Autos:
-			li_interCars.append(car.bCharging)				
-		
-		#DS.Scraper.SOC.append(self.GetChargingCars())
-
-		#DS.Scraper.li_state.append(li_interPersons)
-		#DS.Scraper.li_stateCars.append(li_interCars)
-
+		self.CheckMinKap()		
 		#Laufvariable der bereits geladenen Energie zurücksetzen
 		self.ResetAlreadyLoaded()
+
+		statusCars = []
+		for car in self.li_Autos:
+			if car.bCharging == False:
+				statusCars.append("Fahren")
+			elif car.kapazitat > car.maxLadung * 0.999:
+				statusCars.append("Vollgeladen")
+			elif car.kapazitat < car.maxLadung * car.minLadung:
+				statusCars.append("Laden und nicht bereit")
+			elif car.kapazitat >= car.maxLadung * car.minLadung:
+				statusCars.append("Laden und bereit")
+
+		if len(statusCars) != len(self.li_Autos):
+			raise ValueError("")
+		DS.zeitVar.StateofCars.append(statusCars)
 
 	def ChargeCars(self, last):
 		cars = self.GetChargingCars()

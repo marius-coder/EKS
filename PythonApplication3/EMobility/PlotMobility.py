@@ -13,25 +13,31 @@ time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
 time = pd.to_datetime(time)
 
 def PlotStatusCollection(data):
-    cars_Charging = []
-    cars_Away = []
+    carsFahren = []
+    carsVollgeladen = []
+    carsLadenNichtBereit = []
+    carsLadenBereit = []
     fig, ax = plt.subplots()
 
     
     for subData in data:
-        cars_Charging.append(subData.count(True))
-        cars_Away.append(subData.count(False))
+        carsFahren.append(subData.count("Fahren"))
+        carsVollgeladen.append(subData.count("Vollgeladen"))
+        carsLadenNichtBereit.append(subData.count("Laden und nicht bereit"))
+        carsLadenBereit.append(subData.count("Laden und bereit"))
 
-    toPlot = pd.DataFrame({ "Laden" : cars_Charging,
-                            "Fahren" : cars_Away
+    toPlot = pd.DataFrame({ "Fahren" : carsFahren,
+                            "Vollgeladen" : carsVollgeladen,
+                            "Laden und nicht bereit" : carsLadenNichtBereit,
+                            "Laden und bereit" : carsLadenBereit
                             })
 
-    timePlot = time[0:len(cars_Charging)]
+    timePlot = time[0:len(carsVollgeladen)]
     toPlot = toPlot.set_index(timePlot)
 
-    ax.stackplot(toPlot.index,toPlot["Laden"], toPlot["Fahren"],
-        labels=['Laden', 'Fahren'],
-        colors= ["green", "red"])
+    ax.stackplot(toPlot.index, toPlot["Fahren"], toPlot["Laden und nicht bereit"], toPlot["Laden und bereit"],toPlot["Vollgeladen"],
+        labels=['Fahren','Laden und Mindestladung nicht erreicht', 'Laden und Mindestladung erreicht','Vollgeladen'],
+        colors= [ "red", "blue", "orange", "green"])
 
     fig.suptitle('Gesammelter Status aller Autos', fontsize=16)
     ax.legend(loc='upper left')
@@ -43,8 +49,7 @@ def PlotPersonStatus(data):
     cars_Charging = []
     cars_Away = []
     fig, ax = plt.subplots()
-
-
+    
     for subData in data:
         cars_Charging.append(subData.count(True))
         cars_Away.append(subData.count(False))

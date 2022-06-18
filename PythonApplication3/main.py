@@ -1,9 +1,17 @@
 
-import pandas as pd
+from numpy.random import default_rng, Generator, PCG64
+import numpy as np
+rng = Generator(PCG64(10))
 
+mean = 4
+std = 1
 
+std = std/3
 
-df = pd.DataFrame()
-df["test"] = 1
+for i in range(100):
+    val = rng.normal(loc= mean, scale= std, size= 1)
 
-print(df.info())
+    if mean - val < 1*std:
+        print(val)
+    else:
+        print("Nochmal")
