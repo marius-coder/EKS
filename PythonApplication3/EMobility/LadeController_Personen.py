@@ -20,10 +20,12 @@ class LadeController_Personen():
 		self.personenKilometer = personenKilometer
 		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
+		self.drivingPersons = []
 
 	def InitPersonen(self):
+		idPerson = 0
 		for _ in range(int(self.anzPersonen * self.percent)):
-			self.persons.append(Person()) #Neue Person generieren
+			self.persons.append(Person(idPerson)) #Neue Person mit einer ID generieren
 
 	def FindCarID(self, ID) -> Auto:
 		"""sucht Auto in Liste und gibt das gefundene Auto zuruck
@@ -61,6 +63,7 @@ class LadeController_Personen():
 					person.wegMitAuto += km * self.adjustKilometers #Fur den Verbrauch des Autos
 					person.km += km * self.adjustKilometers
 				drivingPersons.append(person)
+				self.persons.remove(person)
 
 		self.lendrivingPersons = len(drivingPersons)	
 		return drivingPersons
@@ -99,7 +102,7 @@ class LadeController_Personen():
 		day = DetermineDay(hour)
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
-			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
+			self.drivingPersons.extend(self.InitDay(day)) #Neue Personen generieren und Laufvariablen setzen
 			self.tooMany = len(self.awayPersons)
 		
 		
@@ -127,3 +130,4 @@ class LadeController_Personen():
 				person.status = True
 				car.bCharging = True
 				self.awayPersons.remove(person)
+				self.persons.append(person)

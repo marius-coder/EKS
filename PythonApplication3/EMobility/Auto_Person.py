@@ -2,7 +2,8 @@
 
 class Person():
 
-	def __init__(self):
+	def __init__(self, idPerson):
+		self.id = idPerson #ID damit Personen eindeutig identifiziert werden können
 		self.status = True #Status der Person True = Anwesend, False = Unterwegs
 		self.anzAutoWege = 0
 		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben
