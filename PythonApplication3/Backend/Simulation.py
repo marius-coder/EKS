@@ -109,9 +109,9 @@ class Simulation():
 		COP_WW = 2.8
 
 		speicherHZG_B1 = Speicher(1000)
-		WP_HZG_B1 = Wärmepumpe(speicherHZG_B1, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_B1 = Wärmepumpe(speicherHZG_B1, COP_HZG= COP_HZG, Pel= 15)		
 		speicherWW_W1 = Speicher(600)
-		WP_WW_B1 = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 40)
+		WP_WW_B1 = Wärmepumpe(speicherWW_W1, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["W1"].WP_HZG = WP_HZG_B1
 		dic_buildings["W1"].WP_WW = WP_WW_B1
@@ -122,9 +122,9 @@ class Simulation():
 		dic_buildings["G1"].DF.InitSzenWP()
 		#------------------------------------------------------------------------
 		speicherHZG_B2 = Speicher(1000)
-		WP_HZG_B2 = Wärmepumpe(speicherHZG_B2, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_B2 = Wärmepumpe(speicherHZG_B2, COP_HZG= COP_HZG, Pel= 15)		
 		speicherWW_W2 = Speicher(600)
-		WP_WW_B2 = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 40)
+		WP_WW_B2 = Wärmepumpe(speicherWW_W2, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["W2"].WP_HZG = WP_HZG_B2
 		dic_buildings["W2"].WP_WW = WP_WW_B2
@@ -135,9 +135,9 @@ class Simulation():
 		dic_buildings["G2"].DF.InitSzenWP()
 		#------------------------------------------------------------------------
 		speicherHZG_B3 = Speicher(1000)
-		WP_HZG_B3 = Wärmepumpe(speicherHZG_B3, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_B3 = Wärmepumpe(speicherHZG_B3, COP_HZG= COP_HZG, Pel= 15)		
 		speicherWW_W3 = Speicher(600)
-		WP_WW_B3 = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 40)
+		WP_WW_B3 = Wärmepumpe(speicherWW_W3, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["W3"].WP_HZG = WP_HZG_B3
 		dic_buildings["W3"].WP_WW = WP_WW_B3
@@ -148,9 +148,9 @@ class Simulation():
 		dic_buildings["G3"].DF.InitSzenWP()
 		#------------------------------------------------------------------------
 		speicherHZG_B4 = Speicher(1000)
-		WP_HZG_B4 = Wärmepumpe(speicherHZG_B4, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_B4 = Wärmepumpe(speicherHZG_B4, COP_HZG= COP_HZG, Pel= 15)		
 		speicherWW_W4 = Speicher(600)
-		WP_WW_B4 = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 40)
+		WP_WW_B4 = Wärmepumpe(speicherWW_W4, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["W4"].WP_HZG = WP_HZG_B4
 		dic_buildings["W4"].WP_WW = WP_WW_B4
@@ -161,18 +161,18 @@ class Simulation():
 		dic_buildings["G4"].DF.InitSzenWP()
 		#------------------------------------------------------------------------
 		speicherHZG_S1 = Speicher(1000)
-		WP_HZG_S1 = Wärmepumpe(speicherHZG_S1, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_S1 = Wärmepumpe(speicherHZG_S1, COP_HZG= COP_HZG, Pel= 40)		
 		speicherWW_S1 = Speicher(600)
-		WP_WW_S1 = Wärmepumpe(speicherWW_S1, COP_WW= COP_WW, Pel= 40)
+		WP_WW_S1 = Wärmepumpe(speicherWW_S1, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["S1"].WP_HZG = WP_HZG_S1
 		dic_buildings["S1"].WP_WW = WP_WW_S1
 		dic_buildings["S1"].DF.InitSzenWP()
 		#------------------------------------------------------------------------
 		speicherHZG_S2 = Speicher(1000)
-		WP_HZG_S2 = Wärmepumpe(speicherHZG_S2, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_S2 = Wärmepumpe(speicherHZG_S2, COP_HZG= COP_HZG, Pel= 25)		
 		speicherWW_S2 = Speicher(600)
-		WP_WW_S2 = Wärmepumpe(speicherWW_S2, COP_WW= COP_WW, Pel= 40)
+		WP_WW_S2 = Wärmepumpe(speicherWW_S2, COP_WW= COP_WW, Pel= 20)
 
 		dic_buildings["S2"].WP_HZG = WP_HZG_S2
 		dic_buildings["S2"].WP_WW = WP_WW_S2
@@ -188,42 +188,42 @@ class Simulation():
 		dic_buildings["W4"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_G1 = Speicher(1000)
-		WP_HZG_G1 = Wärmepumpe(speicherHZG_G1, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_G1 = Wärmepumpe(speicherHZG_G1, COP_HZG= COP_HZG, Pel= 15)		
 		
 		dic_buildings["G1"].WP_HZG = WP_HZG_G1
 		dic_buildings["G1"].DF.InitSzenWP()
 		dic_buildings["G1"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_G2 = Speicher(1000)
-		WP_HZG_G2 = Wärmepumpe(speicherHZG_G2, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_G2 = Wärmepumpe(speicherHZG_G2, COP_HZG= COP_HZG, Pel= 15)		
 		
 		dic_buildings["G2"].WP_HZG = WP_HZG_G2
 		dic_buildings["G2"].DF.InitSzenWP()
 		dic_buildings["G2"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_G3 = Speicher(1000)
-		WP_HZG_G3 = Wärmepumpe(speicherHZG_G3, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_G3 = Wärmepumpe(speicherHZG_G3, COP_HZG= COP_HZG, Pel= 15)		
 		
 		dic_buildings["G3"].WP_HZG = WP_HZG_G3
 		dic_buildings["G3"].DF.InitSzenWP()
 		dic_buildings["G3"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_G4 = Speicher(1000)
-		WP_HZG_G4 = Wärmepumpe(speicherHZG_G4, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_G4 = Wärmepumpe(speicherHZG_G4, COP_HZG= COP_HZG, Pel= 15)		
 		
 		dic_buildings["G4"].WP_HZG = WP_HZG_G4
 		dic_buildings["G4"].DF.InitSzenWP()
 		dic_buildings["G4"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_S1 = Speicher(1000)
-		WP_HZG_S1 = Wärmepumpe(speicherHZG_S1, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_S1 = Wärmepumpe(speicherHZG_S1, COP_HZG= COP_HZG, Pel= 15)		
 		
 		dic_buildings["S1"].WP_HZG = WP_HZG_S1
 		dic_buildings["S1"].DF.InitSzenWP()
 		dic_buildings["S1"].DF.InitSzenFW()
 		#------------------------------------------------------------------------
 		speicherHZG_S2 = Speicher(1000)
-		WP_HZG_S2 = Wärmepumpe(speicherHZG_S2, COP_HZG= COP_HZG, Pel= 20)		
+		WP_HZG_S2 = Wärmepumpe(speicherHZG_S2, COP_HZG= COP_HZG, Pel= 15)		
 
 		dic_buildings["S2"].WP_HZG = WP_HZG_S2
 		dic_buildings["S2"].DF.InitSzenWP()

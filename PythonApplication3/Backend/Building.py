@@ -16,7 +16,7 @@ class Building(HL,Dataflows,WW):
         self.gfa = gfa #Bruttogeschossfläche in m²
         self.anzPersonen = anzPersonen #Anzahl Personen
         self.heat_capacity = 150 #cp des Gebäudes in Wh/m³
-        self.TsWinter = 20 #Solltemperatur im Winter in °C
+        self.TsWinter = 22 #Solltemperatur im Winter in °C
         self.TsSommer = 26 #Solltemperatur im Sommer in °C
         self.volumen = volumen * 0.8 #Beheiztes Volumen
         self.ABSCHIRMUNGSKOEFF = 0.04 #Abschirmungskoeffizient
