@@ -35,6 +35,7 @@
     <Compile Include="Backend\Wärmepumpe_Speicher.py" />
     <Compile Include="EMobility\Auto_Person.py" />
     <Compile Include="EMobility\LadeController_Personen.py" />
+    <Compile Include="EMobility\Lehrer_Gewerbe.py" />
     <Compile Include="EMobility\main.py" />
     <Compile Include="EMobility\LadeController_Main.py" />
     <Compile Include="EMobility\Ladecontroller_Helper.py" />

@@ -60,6 +60,11 @@ class Scraper():
             "Netzbezug [kWh]" : 0,
             }
 
+        #Daten der Auﬂenstehenden     
+        self.auﬂenstehende = {
+            "Ladung [kWH]" : 0,
+        }
+
     def Export(self, szen):
         df = pd.DataFrame()
         attributes = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))]
@@ -103,6 +108,7 @@ class Zeitvariablen:
         self.StateofDrivingPersons = []
         self.StateofCars = []
         self.LadeLeistung = []
+        self.LadeLeistungAuﬂenstehende = [0]*8760
         self.EntladeLeistung = []
 
 zeitVar = Zeitvariablen()

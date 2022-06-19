@@ -13,7 +13,7 @@ class Person():
 
 class Auto():
 
-	def __init__(self, maxLadung, minLadung, counter):
+	def __init__(self, maxLadung, minLadung, counter = 0):
 		self.leistung_MAX = 15 #kW Maximale Lade-/Entladeleistung der Station
 		self.effizienz = 0.95 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
 		self.maxLadung = maxLadung #Ladekapazitat des Autos in kWh

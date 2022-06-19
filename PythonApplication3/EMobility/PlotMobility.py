@@ -130,6 +130,7 @@ def PlotLadegang(data):
             ax[l].set_ylabel("Last [kW]", fontsize = 15)      
             ax[l].set_title("Lastgang am Tag: " + labelsTage[l], fontsize = 20)
         plt.tight_layout()
+        plt.show()
         fig.savefig("Lastgang Quartal_"+str(quart)+".png") 
 
 def PlotSOC(data, anzAuto):

@@ -74,6 +74,10 @@ class LadeController_Personen():
 					person.km += km * self.adjustKilometers
 				drivingPersons.append(person)		
 
+		#Auﬂenstehende Entladen
+		for car in self.Auﬂenstehende:
+			car.Fahren()
+
 		self.lendrivingPersons = len(drivingPersons)	
 		return drivingPersons
 

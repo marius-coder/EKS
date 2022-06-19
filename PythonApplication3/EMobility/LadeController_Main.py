@@ -5,6 +5,7 @@ from random import choice, seed
 from Auto_Person import Auto, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 from Backend.Helper import DetermineHourofDay, DetermineDay
+from Lehrer_Gewerbe import InitAuﬂenstehende
 seed(10)
 
 import Plotting.DataScraper as DS
@@ -29,6 +30,7 @@ class LadeController(LadeController_Personen):
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
 		self.anzAutos = anzAutos
 		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
+		self.Auﬂenstehende, checksum = InitAuﬂenstehende(maxLadung= 100, km= 20, anzAutos= 1, bLehrer= True)
 		self.gfa= gfa #Bruttogeschossfl‰che
 
 		self.tooMany = 0
@@ -99,11 +101,11 @@ class LadeController(LadeController_Personen):
 		chargingCars = self.GetChargingCars() #first get all charging cars
 		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]	
 
+	def GetAuﬂenstehendeCars(self, hour):
+		return [car for car in self.Auﬂenstehende if car.ankommen <= hour%24 <= car.losfahren]
+
 	def CheckTimestep(self, hour, resLast):
 		self.CheckPersonsHourly(hour)
-		
-		li_interCars = []
-		li_interPersons = []
 		
 		if resLast > 0:
 			#Autos entladen
@@ -117,7 +119,12 @@ class LadeController(LadeController_Personen):
 			#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl			
 
-			resLastAfterCharging = self.ChargeCars(resLast)
+			cars = self.GetChargingCars()
+			resLastAfterCharging = self.ChargeCars(cars= cars, last= resLast, bTrack= True)
+			cars = self.GetAuﬂenstehendeCars(hour)
+			if resLastAfterCharging > 0:
+				resLastAfterChargingAuﬂen = self.ChargeCars(cars= cars, last= resLastAfterCharging)
+				DS.zeitVar.LadeLeistungAuﬂenstehende[hour] = resLastAfterCharging - resLastAfterChargingAuﬂen
 
 			if resLast - resLastAfterCharging < 0:
 				raise ValueError("eMobilityCharge darf nicht negativ sein")
@@ -127,7 +134,11 @@ class LadeController(LadeController_Personen):
 		DS.ZV.resLastAfterDischarging[hour] = DS.ZV.resLastBeforeEMobility[hour] - DS.ZV.eMobilityDischarge[hour]
 		DS.ZV.resLastAfterEMobility[hour] = DS.ZV.resLastBeforeEMobility[hour] + DS.ZV.eMobilityCharge[hour]
 		#Autos aus dem Netz auf Mindestladung laden
-		self.CheckMinKap()		
+		cars = self.GetChargingCars()
+		self.CheckMinKap(cars= cars, bTrack= True)		
+		#Autos aus dem Netz auf Mindestladung laden
+		cars = self.GetAuﬂenstehendeCars(hour= hour)
+		self.CheckMinKap(cars= cars)		
 		#Laufvariable der bereits geladenen Energie zur¸cksetzen
 		self.ResetAlreadyLoaded()
 
@@ -146,8 +157,9 @@ class LadeController(LadeController_Personen):
 			raise ValueError("")
 		DS.zeitVar.StateofCars.append(statusCars)
 
-	def ChargeCars(self, last):
-		cars = self.GetChargingCars()
+
+
+	def ChargeCars(self, cars, last, bTrack=False):
 		cars.sort(key=lambda x: x.kapazitat, reverse=True)
 
 		for car in cars:
@@ -156,13 +168,13 @@ class LadeController(LadeController_Personen):
 			space = car.maxLadung - car.kapazitat
 			ladung = min([car.leistung_MAX, last, space]) #Die niedrigste Zahl davon kann geladen werden
 			rest = car.Laden(ladung)
-			if rest > 0:
+			if rest > 0.00001:
 				raise ValueError("Ladung ist nicht 0")
 			last -= ladung
 			if car.kapazitat > car.maxLadung:
 				raise ValueError("Auto ist zu voll geladen")
 			#Daten Tracken
-			if car.kapazitat > DS.ZV.aktuelleLadung:
+			if car.kapazitat > DS.ZV.aktuelleLadung and bTrack == True:
 				DS.ZV.aktuelleLadung = car.kapazitat
 		return last
 
@@ -201,21 +213,21 @@ class LadeController(LadeController_Personen):
 
 
 
-	def CheckMinKap(self):
+	def CheckMinKap(self, cars, bTrack= False):
 		"""Kontrolliert alle Autos, welche an der Ladestation laden.
 		Falls Autos unter der Mindestladegrenze sind, werden diese aus dem Netz geladen"""
-		cars = self.GetChargingCars()
+		
 		for car in cars:
 			if car.kapazitat < car.minLadung * car.maxLadung:
 				space = (car.minLadung * car.maxLadung - car.kapazitat)
 				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
-				car.Laden(toLoad)
+				car.Laden(toLoad/ car.effizienz)
 
 				if car.kapazitat > car.minLadung * car.maxLadung:
 					raise ValueError("Kapazit‰t ist zu Hoch")
-
-				DS.ZV.gridCharging += toLoad
-				DS.ZV.counterCharging += 1
+				if bTrack:
+					DS.ZV.gridCharging += toLoad
+					DS.ZV.counterCharging += 1
 
 	def ResetAlreadyLoaded(self):
 		cars = self.GetChargingCars()

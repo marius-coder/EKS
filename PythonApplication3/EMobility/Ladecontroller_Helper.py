@@ -2,7 +2,7 @@
 from itertools import count
 from random import seed, choices, uniform
 from collections import Counter
-from numpy.random import default_rng, Generator, PCG64
+from numpy.random import Generator, PCG64
 import numpy as np
 
 rng = Generator(PCG64(10))
@@ -159,6 +159,6 @@ def CalcEigenverbrauch(pv, resLast):
     Einspeisung = abs(sum([x for x in resLast if x < 0]))
 
     Eigenverbrauchsanteil = 1 - Einspeisung/sum(pv)
-    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil) / 1000
-    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil) / 1000
+    Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil)
+    Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil)
     return Eigenverbrauch, Überschuss
