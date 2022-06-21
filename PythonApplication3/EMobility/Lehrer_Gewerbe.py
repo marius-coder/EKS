@@ -91,7 +91,7 @@ class Außenstehende(Auto):
 			return False
 
 	def Fahren(self):
-		std = self.km * 0.15
+		std = self.km * 0.5  #50% Abweichung in der gefahrenen Strecke
 		val = GenerateNormalNumber(self.km, std)
 		self.kapazitat = self.maxLadung - val * self.spezVerbrauch #Laufvariable in kWh
 

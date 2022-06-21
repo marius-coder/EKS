@@ -133,20 +133,47 @@ def PlotLadegang(data):
         plt.show()
         fig.savefig("Lastgang Quartal_"+str(quart)+".png") 
 
-def PlotVerteilungen(data):
+def PlotVerteilungen(data, name):
+    fig, ax = plt.subplots()
+    hours = np.linspace(0,8759,8760)
 
-    hours = np.linspace(0,8760,8760)
-
-    toPlot = pd.DataFrame({ "Laden" : data.LadeLeistung,
-                            "Entladen" : data.EntladeLeistung,
-                            "Laden Zureisende" : data.LadeLeistungAuﬂenstehende,
+    toPlot = pd.DataFrame({ 
+                            name : data                            
                             })
+    toPlot["Stunde"] = [int(hour % 24) for hour in hours]
     sns.set_theme(style="white")
 
     # Plot miles per gallon against horsepower with other semantics
-    sns.relplot(x="horsepower", y="mpg", hue="origin", size="weight",
-                sizes=(40, 400), alpha=.5, palette="muted",
-                height=6, data=mpg)
+    sns.boxplot(x="Stunde",y= name, palette="muted", data=toPlot, ax= ax)
+    plt.show()
+
+def PlotEinflussLDC(Verbrauch, PV, Endladung):
+    fig, ax = plt.subplots()
+    hours = np.linspace(0,8759,8760)
+    toPlot = pd.DataFrame({ 
+                            "Geb‰udeverbrauch" : Verbrauch,
+                            "Geb‰udeverbrauch mit PV" : [a-b for a,b in zip(Verbrauch,PV)],
+                            "Geb‰udeverbrauch mit PV/LC" : [a-b-c for a,b,c in zip(Verbrauch,PV,Endladung)]
+                            })
+    toPlot["Stunde"] = [int(hour % 24) for hour in hours]
+    line1= sns.lineplot(x="Stunde",y= "Geb‰udeverbrauch", data=toPlot, ax= ax, color= "blue")
+    line2= sns.lineplot(x="Stunde",y= "Geb‰udeverbrauch mit PV", data=toPlot, ax= ax, color= "orange")
+    line3= sns.lineplot(x="Stunde",y= "Geb‰udeverbrauch mit PV/LC", data=toPlot, ax= ax, color= "green")
+    ax.set_title("Vergleich Geb‰udeverbrauch")
+    ax.set_ylabel("Verbrauch [kWh]")
+    ax.set_xlabel("Stunde Autos")  
+    leg = ax.legend(labels = ['Geb‰udeverbrauch', 'Geb‰udeverbrauch mit PV', 'Geb‰udeverbrauch mit PV/LC'], prop={'size': 7},                  
+           ncol = 3,facecolor='#f5f5f5', framealpha=1, loc= "lower center")
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(5)
+    leg.legendHandles[0].set_color('blue')
+    leg.legendHandles[1].set_color('orange')
+    leg.legendHandles[2].set_color('green')
+    plt.gca().set_ylim(bottom=0)
+
+    plt.show()
+
+
 
 
 def PlotSOC(data, anzAuto):

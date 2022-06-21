@@ -1,6 +1,6 @@
 # -*- coding: cp1252 -*-
 
-from PlotMobility import PlotLadegang, PlotStatusCollection, PlotPersonStatus
+from PlotMobility import PlotLadegang, PlotStatusCollection, PlotPersonStatus, PlotVerteilungen, PlotEinflussLDC
 
 from Strom.PV import Strombedarf, DefinePV
 
@@ -28,6 +28,8 @@ for scen in scenarios:
 		Control = LadeController(AutoDaten= AutoDaten, distMinLadung= LadeDaten, PersonenDaten= PersonenDaten,
 						   infoLehrpersonal= ExterneDaten["Info Lehrpersonal"], infoGewerbepersonal= ExterneDaten["Info Sonstiges Personal"])
 		PV = DefinePV(scen)
+
+		gesamtBedarf = [a + b + c + d for a,b,c,d in zip(Strombedarf["Wohnen"], Strombedarf["Gewerbe"],Strombedarf["Schule"],scenWärme)]
 
 		for hour in range(8760):
 
@@ -109,8 +111,12 @@ for scen in scenarios:
 		#PlotLadegang(DS.zeitVar.LadeLeistung)
 		#PlotStatusCollection(DS.zeitVar.StateofCars)
 		#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
+		PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.EntladeLeistung)
+		PlotVerteilungen(DS.zeitVar.LadeLeistung, "Ladeleistung")
+		PlotVerteilungen(gesamtBedarf, "Gebäudebedarf")
 
 
+		
 		##PlotSOC(DS.Scraper.SOC, anzAuto= Control.anzAutos)
 
 	
