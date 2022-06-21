@@ -5,6 +5,8 @@ from collections import Counter
 from numpy.random import Generator, PCG64
 import numpy as np
 
+from Auto_Person import Auto
+
 rng = Generator(PCG64(10))
 seed(10)
 
@@ -86,7 +88,13 @@ def GenerateKilometer() -> int:
     bereich = GenerateWeightedItem(pop= population, weights= weights)
     return uniform(bereich[0],bereich[1])
 
-def GenerateNormalNumber(mean:int ,std:float) -> float:
+def GenerateNormalNumber(mean:float ,std:float) -> float:
+    """Generiert eine zufällige normalverteilte Zahl.
+        Falls die generierte Zahl außerhalb der dreifachen std liegt, wird nochmal generiert
+        mean: int
+            Mittelpunkt der Normalverteilung
+        std: float
+            Gewünschte Abweichung der zurälligen Zahl"""
     std = std/3
     val = rng.normal(loc= mean, scale= std, size= 1)
 
@@ -98,7 +106,14 @@ def GenerateNormalNumber(mean:int ,std:float) -> float:
 
 
 
-def GenerateReiseProfil(profil, prozent) -> list:
+def GenerateReiseProfil(profil : list, prozent : int) -> list:
+    """ Generiert ein zufälliges Profil mit einer gegebenen Abweichung
+    Im Anschluss wird das Profil auf 100% korrigiert
+    profil: list
+        profil welches randomized werden soll
+    prozent: int
+        Abweichung, welche auf jeden Punkt angewandt wird
+    """
     if prozent != 0:
         ret = []
         for i in range(len(profil)):
@@ -117,7 +132,9 @@ def GenerateReiseProfil(profil, prozent) -> list:
 
 uberlauf = 0 #Uberlauf gibt an, ob ein Autoweg auf 2 aufgestockt werden soll.
 def CalcAutoWege(ways, day) -> int:
-    """ways: int
+    """Berechnet die Anzahl der Autowege. 
+    Autowege mit Anzahl eins werden korrigiert
+    ways: int
             Anzahl der Wege
     day: string
         Typ des Tages"""
@@ -144,20 +161,31 @@ def CalcAutoWege(ways, day) -> int:
     else:
         return 0
 
-def CalcEMobilityBuildingEnergyFlows(discharge, charge, car):
+def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, car:Auto):
+    """
+    Berechnet diverse Energieflüsse zwischen dem Gebäude und der Ladestation
+    discharge: float
+        Energie die aus den Autos entladen wurde (Verluste schon miteinberechnet)
+    charge: float
+        Energie mit der die Autos geladen worden sind (Keine Verluste einberechnet)
+    """
+    verlustLaden = charge * (1-car.effizienz)  #Verlust durch laden der Autos
+    vorFahren = charge - verlustLaden  #Energie die nach dem Laden den Autos zum Fahren zur Verfügung steht
 
-    verlustLaden = charge * (1-car.effizienz)
-    vorFahren = charge - verlustLaden
-
-    nachFahren = discharge / car.effizienz
-    verlustEntladen = nachFahren * (1-car.effizienz)
-    GebäudeVerbrauch = nachFahren - verlustEntladen
-    verlustGesamt = verlustEntladen + verlustLaden
-    Fahrverbrauch = vorFahren - nachFahren
+    nachFahren = discharge / car.effizienz #Energie die nach dem Fahren dem Gebäude zur Verfügung steht
+    verlustEntladen = nachFahren * (1-car.effizienz) #Verlust durch Entladen der Autos
+    GebäudeVerbrauch = nachFahren - verlustEntladen #Energie die nach den Verlusten dem Gebäude zugeführt wird
+    verlustGesamt = verlustEntladen + verlustLaden #Insgesamte Verluste
+    Fahrverbrauch = vorFahren - nachFahren #Energie die durch Fahren verbraucht wurde
     return GebäudeVerbrauch, Fahrverbrauch, verlustGesamt
 
 
-def CalcEigenverbrauch(pv, resLast): 
+def CalcEigenverbrauch(pv:list, resLast:list): 
+    """Berechnet den Eigenverbrauch
+    pv: list
+        Liste mit PV-Erzeugung
+    resLast: list
+        Liste mit der Residuallast"""
     pv = pv[0:len(resLast)]
     Einspeisung = abs(sum([x for x in resLast if x < 0]))
 

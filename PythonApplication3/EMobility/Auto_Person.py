@@ -1,19 +1,19 @@
-
+# -*- coding: cp1252 -*-
 
 class Person():
 
 	def __init__(self, idPerson):
 		self.id = idPerson #ID damit Personen eindeutig identifiziert werden können
 		self.status = True #Status der Person True = Anwesend, False = Unterwegs
-		self.anzAutoWege = 0
+		self.anzAutoWege = 0 #Anzahl der Wege die mit dem Auto zurückgelegt werden
 		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben
-		self.wegMitAuto = 0
+		self.wegMitAuto = 0 #Weg der insgesamt mit dem Auto zurückgelegt wurde
 		self.carID = None
 		self.minTimeAway = 0 #gibt an wie lange ein Auto mindestens weg sein muss
 
 class Auto():
 
-	def __init__(self,AutoDaten, minLadung, counter = 0):
+	def __init__(self,AutoDaten : dict, minLadung : dict, counter = 0):
 		self.leistung_MAX = AutoDaten["Lade/Entladeleistung"] #kW Maximale Lade-/Entladeleistung der Station
 		self.effizienz = AutoDaten["Effizienz"] / 100 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
 		self.maxLadung = AutoDaten["maxLadung"] #Ladekapazitat des Autos in kWh
