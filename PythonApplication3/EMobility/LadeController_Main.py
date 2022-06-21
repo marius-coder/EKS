@@ -14,7 +14,7 @@ from LadeController_Personen import LadeController_Personen
 
 class LadeController(LadeController_Personen):
 
-	def __init__(self, anzAutos, distMinLadung, maxLadung, personenKilometer, gfa, percentAbweichung):
+	def __init__(self, AutoDaten, distMinLadung, PersonenDaten, infoLehrpersonal= None,infoGewerbepersonal= None):
 		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -25,19 +25,24 @@ class LadeController(LadeController_Personen):
 			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
 			Eingabe in kWh.
 		"""	
-		LadeController_Personen.__init__(self, personenKilometer= personenKilometer, percentAbweichung= percentAbweichung)
+		LadeController_Personen.__init__(self, PersonenDaten= PersonenDaten)
 
 		self.travelData = pd.read_csv("./Data/Profile_Travel.csv", usecols=[1,2,3,4], decimal=",", sep=";")
-		self.anzAutos = anzAutos
-		self.li_Autos, checksum = self.InitAutos(anzAutos= anzAutos, distMinLadung= distMinLadung, maxLadung= maxLadung)
-		self.Außenstehende, checksum = InitAußenstehende(maxLadung= 100, km= 20, anzAutos= 1, bLehrer= True)
-		self.gfa= gfa #Bruttogeschossfläche
+		
+		self.anzAutos = AutoDaten["Anzahl Autos"]
+		self.li_Autos, checksum = self.InitAutos(AutoDaten= AutoDaten, distMinLadung= distMinLadung)
+
+		self.Außenstehende = InitAußenstehende(AutoDaten= AutoDaten,maxLadung= infoLehrpersonal["Ladung"], percent= infoLehrpersonal["Prozent Mitmachende"]
+										,km= infoLehrpersonal["gefahrene km"], anzAutos= infoLehrpersonal["Anzahl"], bLehrer= True)[0]
+		self.Außenstehende.extend(InitAußenstehende(AutoDaten= AutoDaten,maxLadung= infoGewerbepersonal["Ladung"], percent= infoGewerbepersonal["Prozent Mitmachende"]
+											 ,km= infoGewerbepersonal["gefahrene km"], anzAutos= infoGewerbepersonal["Anzahl"], bLehrer= False)[0])
+		self.gfa= PersonenDaten["gfa"] #Bruttogeschossfläche
 
 		self.tooMany = 0
-		self.safety = 1.2 #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
+		self.safety = PersonenDaten["Safety"] #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
 
 
-	def InitAutos(self,anzAutos, distMinLadung, maxLadung) -> list:
+	def InitAutos(self,AutoDaten, distMinLadung) -> list:
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
@@ -51,27 +56,27 @@ class LadeController(LadeController_Personen):
 			Gibt eine Liste an 'Auto' Objekten zuruck"""
 
 		li_Autos = [] #Halt die finale Liste an Auto Objekten
-		checksum = anzAutos #Checksum 
-		DS.ZV.maxLadung = maxLadung
+		checksum = AutoDaten["Anzahl Autos"] #Checksum 
+		DS.ZV.maxLadung = AutoDaten["maxLadung"]
 		#Keys mussen aufsteigend sortiert sein fur spateres Egde-Case Handling
 		keys = sorted(distMinLadung.keys()) 
 		counter = 0
 
 		for percent in keys:
-			minLadung = distMinLadung[percent]
-			anzInter = int(round(int(percent) * anzAutos / 100 ,0))
+			minLadung = distMinLadung[percent] / 100 #Prozent in Anteile wandeln
+			anzInter = int(round(int(percent) * AutoDaten["Anzahl Autos"] / 100 ,0))
 			if anzInter == 0 and checksum != 0:
 				anzInter = 1
 			for _ in range(anzInter):
 				if checksum == 0:
 					return li_Autos, checksum
-				li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung, counter= counter))
+				li_Autos.append(Auto(AutoDaten, minLadung= minLadung, counter= counter))
 				counter += 1
 				checksum -= 1
 
 		#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 		for _ in range(checksum):
-			li_Autos.append(Auto(maxLadung= maxLadung, minLadung= minLadung, counter= counter))
+			li_Autos.append(Auto(AutoDaten, minLadung= minLadung, counter= counter))
 			checksum -= 1
 
 		for i in range(int(len(li_Autos)/2)):

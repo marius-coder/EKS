@@ -13,17 +13,17 @@ class Person():
 
 class Auto():
 
-	def __init__(self, maxLadung, minLadung, counter = 0):
-		self.leistung_MAX = 15 #kW Maximale Lade-/Entladeleistung der Station
-		self.effizienz = 0.95 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
-		self.maxLadung = maxLadung #Ladekapazitat des Autos in kWh
+	def __init__(self,AutoDaten, minLadung, counter = 0):
+		self.leistung_MAX = AutoDaten["Lade/Entladeleistung"] #kW Maximale Lade-/Entladeleistung der Station
+		self.effizienz = AutoDaten["Effizienz"] / 100 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
+		self.maxLadung = AutoDaten["maxLadung"] #Ladekapazitat des Autos in kWh
 		self.minLadung = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
-		self.kapazitat = maxLadung * minLadung #Laufvariable in kWh
+		self.kapazitat = self.maxLadung * self.minLadung #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
 		self.verlust = 0 #Verlust von Lade/Entladevorgangen in kWh
 		self.ID = counter #Unique ID die jedem Auto gegeben wird
-		self.spezVerbrauch = 0.170 #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
+		self.spezVerbrauch = AutoDaten["Verbrauch"] #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
 		self.alreadyLoaded = self.leistung_MAX	#Laufvariable die angibt wie viel nach der PV noch geladen werden darf
 
 	def Laden(self, qtoLoad):

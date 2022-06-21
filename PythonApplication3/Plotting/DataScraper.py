@@ -5,7 +5,7 @@ import pandas as pd
 
 class Scraper():
     def __init__(self):
-     
+
         #Generelle Daten
         self.generell = {
             "personenKilometer Elektrisch durch. [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto elektrisch zurücklegt (km)
@@ -71,7 +71,7 @@ class Scraper():
         for attr in attributes:
             for key, value in getattr(self,attr).items():
                 df[f"{attr}_{key}"] = [value]
-        df.to_csv(f"./Ergebnis/Ergebnis_Szenario"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
+        df.to_csv(f"./Ergebnis/Indikatoren/Ergebnis_Szenario"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
         
 
 scraper = Scraper()
@@ -110,5 +110,14 @@ class Zeitvariablen:
         self.LadeLeistung = []
         self.LadeLeistungAußenstehende = [0]*8760
         self.EntladeLeistung = []
+
+    def Export(self, szen):
+        df = pd.DataFrame()
+        attributes = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))]
+        for attr in attributes:    
+            data = getattr(self, attr)
+            if type(data[0]) != list:
+                df[f"{attr}"] = getattr(self, attr)
+        df.to_csv(f"./Ergebnis/ZeitVar/Ergebnis_ZeitVar_Szenario"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
 
 zeitVar = Zeitvariablen()

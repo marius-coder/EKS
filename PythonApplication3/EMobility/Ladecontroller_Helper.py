@@ -99,15 +99,18 @@ def GenerateNormalNumber(mean:int ,std:float) -> float:
 
 
 def GenerateReiseProfil(profil, prozent) -> list:
-    ret = []
-    for i in range(len(profil)):
-        mean = profil[i]
-        std = mean * prozent
-        ret.append(GenerateNormalNumber(mean= mean, std= std))
+    if prozent != 0:
+        ret = []
+        for i in range(len(profil)):
+            mean = profil[i]
+            std = mean * prozent
+            ret.append(GenerateNormalNumber(mean= mean, std= std))
 
-    factor = 100/sum(ret)
-    ret = [x*factor for x in ret]
-    return ret
+        factor = 100/sum(ret)
+        ret = [x*factor for x in ret]
+        return ret
+    else:
+        return profil
        
 
 

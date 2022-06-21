@@ -11,19 +11,19 @@ seed(10)
 
 class LadeController_Personen():
     
-	def __init__(self, personenKilometer, percentAbweichung) -> None:
+	def __init__(self, PersonenDaten) -> None:
 		self.awayPersons = []
-		self.anzPersonen = 1335
-		self.percent = 0.3 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
+		self.anzPersonen = PersonenDaten["anzPersonen"]
+		self.percent = PersonenDaten["percentMobilität"] / 100 #Anteil an Personen die beim Mobilitatsprogramm mitmachen
 		self.persons = [] #Personen die beim Mobilitätsprogramm mitmachen
 		self.basisPersonenKilometer = 5775.77 #Kilometeranzahl die eine Person in einem Jahr mit dem Auto zurücklegt
-		self.personenKilometer = personenKilometer
-		self.adjustKilometers = personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
+		self.personenKilometer = PersonenDaten["personenKilometer"]
+		self.adjustKilometers = self.personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
 		self.InitPersonen()
 		self.drivingPersons = []
 		self.readytoComeBack = [] #Liste in der die Personen gesammelt werden, die bereit sind zurückzukommen
 		self.averageSpeed = 50 #km/h
-		self.percentAbweichung = percentAbweichung
+		self.percentAbweichung = PersonenDaten["percentAbweichung"] / 100 #Prozentwert in Anteile umrechnen
 
 		self.wegfahren = []
 		self.ankommen = []

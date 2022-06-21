@@ -8,19 +8,14 @@ from LadeController_Main import LadeController
 
 from Ladecontroller_Helper import CalcEigenverbrauch, CalcEMobilityBuildingEnergyFlows
 
-
+from ReadInput import inputData
 
 import Plotting.DataScraper as DS
 
-
-
-#Key gibt an wie viele Prozent an Autos (Prozent mussen ganze Zahlen sein)
-#Item gibt die Mindestladung in Anteilen an	
-distMinLadung = {
-	"10" : 1,		#10% müssen voll geladen sein
-	"60" : 0.75,	#60% müssen 75% geladen sein
-	"30" : 0.5		#30% müssen 50% geladen sein
-	}
+AutoDaten = inputData["AutoDaten"]
+PersonenDaten = inputData["PersonenDaten"]
+ExterneDaten = inputData["ExterneDaten"]
+LadeDaten = inputData["LadeDaten"]["distMinLadung"]
 
 scenarios = ["PV", "PV_max"]
 dataWärme = [[0]*8760,Strombedarf["WP"]]
@@ -30,8 +25,8 @@ for scen in scenarios:
 		DS.scraper.__init__()
 		DS.ZV.__init__()
 		DS.zeitVar.__init__()
-		Control = LadeController(anzAutos= 90, distMinLadung= distMinLadung, maxLadung = 41, personenKilometer= 5527, 
-						   gfa= 76417.24, percentAbweichung= 0.25)
+		Control = LadeController(AutoDaten= AutoDaten, distMinLadung= LadeDaten, PersonenDaten= PersonenDaten,
+						   infoLehrpersonal= ExterneDaten["Info Lehrpersonal"], infoGewerbepersonal= ExterneDaten["Info Sonstiges Personal"])
 		PV = DefinePV(scen)
 
 		for hour in range(8760):
@@ -110,7 +105,7 @@ for scen in scenarios:
 		DS.zeitVar.EntladeLeistung = DS.ZV.eMobilityDischarge
 	
 
-
+		DS.zeitVar.Export(f"{scen}_{scenariosWärme[i]}")
 		#PlotLadegang(DS.zeitVar.LadeLeistung)
 		#PlotStatusCollection(DS.zeitVar.StateofCars)
 		#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)

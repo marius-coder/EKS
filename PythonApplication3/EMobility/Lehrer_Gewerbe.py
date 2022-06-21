@@ -1,4 +1,5 @@
 # -*- coding: cp1252 -*-
+from math import ceil
 from Auto_Person import Auto
 import numpy as np
 import pandas as pd
@@ -34,13 +35,12 @@ uhrzeitLosfahren = {
 	"10" : 19,
 	}
 
-
-
-
-def InitAußenstehende(maxLadung, km, anzAutos, bLehrer) -> list:
+def InitAußenstehende(AutoDaten, maxLadung, km, anzAutos, percent, bLehrer) -> list:
 	ret = [] #Halt die finale Liste an Auto Objekten
+	anzAutos = ceil(anzAutos*percent/100)
 	checksum = anzAutos #Checksum 
 	#Keys mussen aufsteigend sortiert sein fur spateres Egde-Case Handling
+
 	keys = uhrzeitAnkommen.keys()
 
 	for percent in keys:
@@ -50,13 +50,13 @@ def InitAußenstehende(maxLadung, km, anzAutos, bLehrer) -> list:
 		for _ in range(anzInter):
 			if checksum == 0:
 				return ret, checksum
-			ret.append(Außenstehende(maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
+			ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 			checksum -= 1
 
 	#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 	for _ in range(checksum):
-		ret.append(Außenstehende(maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
+		ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 		checksum -= 1
 
@@ -65,13 +65,13 @@ def InitAußenstehende(maxLadung, km, anzAutos, bLehrer) -> list:
 
 class Außenstehende(Auto):
 
-	def __init__(self, km, maxLadung, minLadung, ankommen, losfahren, bLehrer= False) -> None:
-		Auto.__init__(self, maxLadung= maxLadung, minLadung= minLadung)
+	def __init__(self, km,AutoDaten, maxLadung, minLadung, ankommen, losfahren, bLehrer= False) -> None:
+		Auto.__init__(self, AutoDaten= AutoDaten, minLadung= minLadung)
 		self.km = km
 		self.ankommen = ankommen  #Wann das Auto ankommt
 		self.losfahren = losfahren #Wann das Auto losfährt
 		self.bCharging = False
-		self.bLehrer = bLehrer
+		self.bLehrer = bLehrer #Bool ob der Außenstehende ein Lehrer ist
 		self.maxLadung = maxLadung
 		self.minLadung = minLadung
 		self.kapazitat = maxLadung
