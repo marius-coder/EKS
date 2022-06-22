@@ -111,9 +111,9 @@ for scen in scenarios:
 		#PlotLadegang(DS.zeitVar.LadeLeistung)
 		#PlotStatusCollection(DS.zeitVar.StateofCars)
 		#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
-		PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.EntladeLeistung)
-		PlotVerteilungen(DS.zeitVar.LadeLeistung, "Ladeleistung")
-		PlotVerteilungen(gesamtBedarf, "Gebäudebedarf")
+		#PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.EntladeLeistung)
+		#PlotVerteilungen(DS.zeitVar.LadeLeistung, "Ladeleistung")
+		#PlotVerteilungen(gesamtBedarf, "Gebäudebedarf")
 
 
 		

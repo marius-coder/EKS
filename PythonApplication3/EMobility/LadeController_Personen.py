@@ -62,7 +62,7 @@ class LadeController_Personen():
 		drivingPersons = []
 			
 		for person in personsCarSharing:
-			person.km = 0
+			person.km = []
 			ways = CalcNumberofWays(day) 
 			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)			
 
@@ -70,7 +70,7 @@ class LadeController_Personen():
 				for _ in range(person.anzAutoWege):
 					km = GenerateKilometer()
 					person.wegMitAuto += km * self.adjustKilometers #Für den Verbrauch des Autos
-					person.km += km * self.adjustKilometers
+					person.km.append(km * self.adjustKilometers)
 				drivingPersons.append(person)		
 
 		#zugereiste Autos entladen
@@ -98,7 +98,7 @@ class LadeController_Personen():
 		"""Person fahrt weg. Es werden die finalen Kilometer generiert.
 		Es wird ein passendes Auto ausgesucht und zugewiesen.
 		Person und Auto werden auf abwesend gestellt"""
-		km= person.km
+		km= sum(person.km)
 		person.minTimeAway = int(round(km / self.averageSpeed,0))
 		car = self.PickCar(km=km)
 		DS.ZV.fahrversuche += 1
@@ -107,7 +107,7 @@ class LadeController_Personen():
 			return False
 
 		person.carID = car.ID		
-		self.UpdateLadestand(auto= car, kilometer= km)
+		self.UpdateLadestand(auto= car, kilometer= person.km)
 
 		if person.status == False or car.bCharging == False:
 			raise TypeError("Person oder Auto sind schon weggefahren")

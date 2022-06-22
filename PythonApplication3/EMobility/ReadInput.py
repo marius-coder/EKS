@@ -20,6 +20,7 @@ inputData = {
 		"gfa" : 0,
 		"percentAbweichung" : 0,
 		"Safety" : 0,
+		"Verbreitung externe Ladestationen" : 0
 		},
 	"ExterneDaten" : {
 		"Info Lehrpersonal" : {

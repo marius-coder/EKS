@@ -1,7 +1,7 @@
 # -*- coding: cp1252 -*-
 import pandas as pd
 from math import ceil, floor
-from random import choice, seed
+from random import choice, seed, uniform
 from Auto_Person import Auto, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 from Backend.Helper import DetermineHourofDay, DetermineDay
@@ -41,7 +41,7 @@ class LadeController(LadeController_Personen):
 
 		self.tooMany = 0 #Überhang an Personen von einem Tag auf den nächsten
 		self.safety = PersonenDaten["Safety"] #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
-
+		self.anteilExterneLadestationen = PersonenDaten["Verbreitung externe Ladestationen"]
 
 	def InitAutos(self,AutoDaten:dict, distMinLadung:dict) -> list:
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
@@ -176,16 +176,30 @@ class LadeController(LadeController_Personen):
 		car = next(x for x in cars if x.kapazitat >= demand) #Es wird das Auto gesucht, welche den Bedarf gerade noch decken kann
 		return car
 
-	def UpdateLadestand(self, auto:Auto, kilometer:float) -> None:
+	def UpdateLadestand(self, auto:Auto, kilometer:list) -> None:
 		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
 		auto: Auto
 			Auto, welches seinen Ladestand reduziert bekommt
 		kilometer: float
 			Kilometer welches das Auto fahrt"""
 		#Fahrverbrauch tracken
-		DS.ZV.verbrauchFahrenEmobilität += kilometer * auto.spezVerbrauch
+		DS.ZV.verbrauchFahrenEmobilität += sum(kilometer) * auto.spezVerbrauch
 		DS.ZV.counterDischarging += 1
-		auto.kapazitat -= kilometer * auto.spezVerbrauch
+		
+
+		if self.anteilExterneLadestationen > uniform(0,100):
+			driveHome = choice(kilometer) #Es wird ein zufälliger Weg als Rückweg gewählt
+			kilometer.remove(driveHome)
+			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch #Erste Strecke fahren
+			space = auto.kapazitat - auto.maxLadung
+			auto.kapazitat = auto.maxLadung #Auto vollladen
+			DS.ZV.gridCharging += space
+			DS.ZV.counterCharging += 1
+			auto.kapazitat -= driveHome * auto.spezVerbrauch #Letzte Strecke fahren
+		else:
+			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch
+
+
 		if auto.kapazitat < 0:
 			raise ValueError("Auto hat negative Ladung")
 

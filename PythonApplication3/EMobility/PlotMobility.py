@@ -143,8 +143,9 @@ def PlotVerteilungen(data, name):
     toPlot["Stunde"] = [int(hour % 24) for hour in hours]
     sns.set_theme(style="white")
 
-    # Plot miles per gallon against horsepower with other semantics
     sns.boxplot(x="Stunde",y= name, palette="muted", data=toPlot, ax= ax)
+    ax.set_title(f"Tagesverteilung: {name}")
+    ax.set_ylabel("Energie [kWh]")
     plt.show()
 
 def PlotEinflussLDC(Verbrauch, PV, Endladung):
@@ -156,9 +157,9 @@ def PlotEinflussLDC(Verbrauch, PV, Endladung):
                             "Gebäudeverbrauch mit PV/LC" : [a-b-c for a,b,c in zip(Verbrauch,PV,Endladung)]
                             })
     toPlot["Stunde"] = [int(hour % 24) for hour in hours]
-    line1= sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=toPlot, ax= ax, color= "blue")
-    line2= sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=toPlot, ax= ax, color= "orange")
-    line3= sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=toPlot, ax= ax, color= "green")
+    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=toPlot, ax= ax, color= "blue")
+    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=toPlot, ax= ax, color= "orange")
+    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=toPlot, ax= ax, color= "green")
     ax.set_title("Vergleich Gebäudeverbrauch")
     ax.set_ylabel("Verbrauch [kWh]")
     ax.set_xlabel("Stunde Autos")  

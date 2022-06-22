@@ -8,7 +8,7 @@ class Person():
 	def __init__(self):
 		self.status = True #Status der Person True = Anwesend, False = Unterwegs
 		self.anzAutoWege = 0 #Anzahl der Wege die mit dem Auto zurückgelegt werden
-		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben
+		self.km = [] #Laufvariable die die km für den derzeitigen Weg angeben
 		self.wegMitAuto = 0 #Weg der insgesamt mit dem Auto zurückgelegt wurde
 		self.carID = None
 		self.minTimeAway = 0 #gibt an wie lange ein Auto mindestens weg sein muss
@@ -21,7 +21,7 @@ class Auto():
 		self.maxLadung = AutoDaten["maxLadung"] #Ladekapazitat des Autos in kWh
 		self.minLadung = minLadung * self.maxLadung #minimale Ladung die eingehalten werden muss in kWh
 		self.minLadungAbs = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
-		self.kapazitat = self.maxLadung * self.minLadung #Laufvariable in kWh
+		self.kapazitat = self.maxLadung * self.minLadungAbs #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
 		self.verlust = 0 #Verlust von Lade/Entladevorgangen in kWh
