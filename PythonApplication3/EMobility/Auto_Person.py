@@ -1,5 +1,8 @@
 # -*- coding: cp1252 -*-
 
+
+from Ladecontroller_Helper import set_unit
+
 class Person():
 
 	def __init__(self, idPerson):
@@ -13,11 +16,12 @@ class Person():
 
 class Auto():
 
-	def __init__(self,AutoDaten : dict, minLadung : dict, counter = 0):
+	def __init__(self,AutoDaten : dict, minLadung : float, counter = 0):
 		self.leistung_MAX = AutoDaten["Lade/Entladeleistung"] #kW Maximale Lade-/Entladeleistung der Station
 		self.effizienz = AutoDaten["Effizienz"] / 100 #Effizienz des Lade und Entladevorganges in Prozent (von 0-1)
 		self.maxLadung = AutoDaten["maxLadung"] #Ladekapazitat des Autos in kWh
-		self.minLadung = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
+		self.minLadung = minLadung * self.maxLadung #minimale Ladung die eingehalten werden muss in kWh
+		self.minLadungAbs = minLadung #minimale Ladung die eingehalten werden muss in Anteilen (von 0-1)
 		self.kapazitat = self.maxLadung * self.minLadung #Laufvariable in kWh
 		self.bCharging = True #Wenn True dann ist das Auto an der Ladestation angeschlossen (True/False)
 		self.bAvailable = True #Wenn True dann darf das Auto entnommen werden (True/False)
@@ -26,6 +30,7 @@ class Auto():
 		self.spezVerbrauch = AutoDaten["Verbrauch"] #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
 		self.alreadyLoaded = self.leistung_MAX	#Laufvariable die angibt wie viel nach der PV noch geladen werden darf
 
+	@set_unit("kWh")
 	def Laden(self, qtoLoad):
 		"""Ladet das Auto mit einer gegebenen Ladung
 		qtoLoad: float,  
@@ -55,6 +60,7 @@ class Auto():
 
 		return qtoLoad
 
+	@set_unit("kWh")
 	def Entladen(self, qtoTake):
 		"""Entladet das Auto mit einer gegebenen Ladung
 		qtoTake: float,  
@@ -78,10 +84,10 @@ class Auto():
 			self.verlust = self.kapazitat * (1-self.effizienz)
 			self.leistung = self.kapazitat - self.verlust
 
-		if self.kapazitat - (self.leistung + self.verlust) < self.minLadung * self.maxLadung:
+		if self.kapazitat - (self.leistung + self.verlust) < self.minLadung:
 			#Wenn die mindestladung unterschritten wird die Leistung gekappt
-			self.verlust = (self.kapazitat - self.minLadung * self.maxLadung) * (1-self.effizienz)
-			self.leistung = (self.kapazitat - self.minLadung * self.maxLadung) - self.verlust
+			self.verlust = (self.kapazitat - self.minLadung) * (1-self.effizienz)
+			self.leistung = (self.kapazitat - self.minLadung) - self.verlust
 
 		#Ausfuhren des Entladevorgangs
 		self.kapazitat -= self.leistung + self.verlust
@@ -89,8 +95,12 @@ class Auto():
 
 		return qtoTake
 
+
 	def Speicherstand(self):
 		"""Gibt den aktuellen Speicherstand in Anteilen (0-1) zuruck"""
 		return abs(self.kapazitat) / self.maxLadung
+
+
+
 
 

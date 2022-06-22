@@ -5,7 +5,7 @@ from collections import Counter
 from numpy.random import Generator, PCG64
 import numpy as np
 
-from Auto_Person import Auto
+#from Auto_Person import Auto
 
 rng = Generator(PCG64(10))
 seed(10)
@@ -161,7 +161,7 @@ def CalcAutoWege(ways, day) -> int:
     else:
         return 0
 
-def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, car:Auto):
+def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, car):
     """
     Berechnet diverse Energieflüsse zwischen dem Gebäude und der Ladestation
     discharge: float
@@ -193,3 +193,10 @@ def CalcEigenverbrauch(pv:list, resLast:list):
     Eigenverbrauch = int(sum(pv) * Eigenverbrauchsanteil)
     Überschuss = int(sum(pv) - sum(pv) * Eigenverbrauchsanteil)
     return Eigenverbrauch, Überschuss
+
+def set_unit(unit):
+    """Register a unit on a function"""
+    def decorator_set_unit(func):
+        func.unit = unit
+        return func
+    return decorator_set_unit

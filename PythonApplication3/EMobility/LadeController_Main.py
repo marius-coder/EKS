@@ -16,14 +16,16 @@ class LadeController(LadeController_Personen):
 
 	def __init__(self, AutoDaten, distMinLadung, PersonenDaten, infoLehrpersonal= None,infoGewerbepersonal= None):
 		"""
-		anzAutos: int,  
-			Anzahl an Autos die der Controller managed 
-		distMinLadung: dic,
-			Dictionary welches die Aufteilung der Mindestladestande enthalt
-		maxLadung: int,
-			Maximale Ladekapazitat der Autos. 
-			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
-			Eingabe in kWh.
+		AutoDaten: dict,  
+			Dictionary in dem die Autodaten enthalten sind (Anzahl, Verbrauch, Kapazität, Effizienz etc.)
+		distMinLadung: dict,
+			Dictionary welches die Aufteilung der Mindestladestande der E-Autos enthalt
+		PersonenDaten: dict
+			Dictionary in dem Daten zu den Personen enthalten sind (Anzahl, jährliche Personenkilometer, Anteil beim Mobilitätsprogramm etc.)
+		infoLehrpersonal: dict
+			Dictionary in dem die Daten zum zureisenden Lehrpersonal enthalten sind (Anzahl, Anteil mitmachende, gefahrene Kilometer, Autokapazität etc.)
+		infoGewerbepersonal: dict
+			Dictionary in dem die Daten zum zureisenden Gewerbepersonal enthalten sind (Anzahl, Anteil mitmachende, gefahrene Kilometer, Autokapazität etc.)
 		"""	
 		LadeController_Personen.__init__(self, PersonenDaten= PersonenDaten)
 
@@ -31,27 +33,22 @@ class LadeController(LadeController_Personen):
 		
 		self.anzAutos = AutoDaten["Anzahl Autos"]
 		self.li_Autos, checksum = self.InitAutos(AutoDaten= AutoDaten, distMinLadung= distMinLadung)
-
 		self.Außenstehende = InitAußenstehende(AutoDaten= AutoDaten,maxLadung= infoLehrpersonal["Ladung"], percent= infoLehrpersonal["Prozent Mitmachende"]
 										,km= infoLehrpersonal["gefahrene km"], anzAutos= infoLehrpersonal["Anzahl"], bLehrer= True)[0]
 		self.Außenstehende.extend(InitAußenstehende(AutoDaten= AutoDaten,maxLadung= infoGewerbepersonal["Ladung"], percent= infoGewerbepersonal["Prozent Mitmachende"]
 											 ,km= infoGewerbepersonal["gefahrene km"], anzAutos= infoGewerbepersonal["Anzahl"], bLehrer= False)[0])
 		self.gfa= PersonenDaten["gfa"] #Bruttogeschossfläche
 
-		self.tooMany = 0
+		self.tooMany = 0 #Überhang an Personen von einem Tag auf den nächsten
 		self.safety = PersonenDaten["Safety"] #Sicherheitsfaktor in Anteil die auf den Verbrauch aufgeschlagen wird.
 
 
-	def InitAutos(self,AutoDaten, distMinLadung) -> list:
+	def InitAutos(self,AutoDaten:dict, distMinLadung:dict) -> list:
 		"""Initialisiert die Autos mit den angegebenen Mindestladungen
-		anzAutos: int,  
-			Anzahl an Autos die der Controller managed 
+		AutoDaten: dict,  
+			Dictionary in dem die Autodaten enthalten sind (Anzahl, Verbrauch, Kapazität, Effizienz etc.)
 		distMinLadung: dic,
 			Dictionary welches die Aufteilung der Mindestladestande enthalt
-		maxLadung: int,
-			Maximale Ladekapazitat der Autos. 
-			Es wird davon ausgegangen dass nur baugleiche Autos verwendet werden.
-			Eingabe in kWh.
 		li_Autos: list,
 			Gibt eine Liste an 'Auto' Objekten zuruck"""
 
@@ -83,19 +80,6 @@ class LadeController(LadeController_Personen):
 			li_Autos[i].bCharging = True
 
 		return li_Autos, checksum
-	
-	def UpdateLadestand(self, auto, kilometer) -> None:
-		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
-		auto: auto
-			Auto, welches seinen Ladestand reduziert bekommt
-		kilometer: float
-			Kilometer welches das Auto fahrt"""
-		#Fahrverbrauch tracken
-		DS.ZV.verbrauchFahrenEmobilität += kilometer * auto.spezVerbrauch
-		DS.ZV.counterDischarging += 1
-		auto.kapazitat -= kilometer * auto.spezVerbrauch
-		if auto.kapazitat < 0:
-			raise ValueError("Auto hat negative Ladung")
 
 	def GetChargingCars(self) -> list:
 		"""Gibt jedes Auto zuruck, welches gerade an der Ladestation hangt"""
@@ -104,12 +88,21 @@ class LadeController(LadeController_Personen):
 	def GetAvailableCars(self) -> list:
 		"""Gibt liste an Autos zuruck welche entladbar sind"""
 		chargingCars = self.GetChargingCars() #first get all charging cars
-		return [car for car in chargingCars if car.Speicherstand() > car.minLadung]	
+		return [car for car in chargingCars if car.Speicherstand() > car.minLadungAbs]	
 
-	def GetAußenstehendeCars(self, hour):
+	def GetAußenstehendeCars(self, hour:int):
+		"""Gibt alle anwesenden Autos von zureisenden Personen zurück"""
 		return [car for car in self.Außenstehende if car.ankommen <= hour%24 <= car.losfahren]
 
-	def CheckTimestep(self, hour, resLast):
+	def CheckTimestep(self, hour:int, resLast:float):
+		"""Checktimestep wird jede Stunde ausgeführt und kontrolliert/steuert die notwendigen Events
+		hour: int
+			Derzeitge Stunde der simulation
+		resLast: float
+			Residuallast der Stunde (positive Zahlen bedeuten Bedarf>Ertrag)
+		"""
+
+		#Mobile Personen berechnen / Personen losfahren und zurückkommen managen
 		self.CheckPersonsHourly(hour)
 		
 		if resLast > 0:
@@ -124,8 +117,9 @@ class LadeController(LadeController_Personen):
 			#Autos laden
 			resLast = abs(resLast) #Folgende Funktionen rechnen mit einer positiven zahl			
 
-			cars = self.GetChargingCars()
+			cars = self.GetChargingCars() #Es können nur anwesende Autos laden
 			resLastAfterCharging = self.ChargeCars(cars= cars, last= resLast, bTrack= True)
+			#Nachdem die Quartiersautos geladen haben, werden die zureisenden geladen
 			cars = self.GetAußenstehendeCars(hour)
 			if resLastAfterCharging > 0:
 				resLastAfterChargingAußen = self.ChargeCars(cars= cars, last= resLastAfterCharging)
@@ -153,18 +147,56 @@ class LadeController(LadeController_Personen):
 				statusCars.append("Fahren")
 			elif car.kapazitat > car.maxLadung * 0.999:
 				statusCars.append("Vollgeladen")
-			elif car.kapazitat < car.maxLadung * car.minLadung:
+			elif car.kapazitat < car.minLadung:
 				statusCars.append("Laden und nicht bereit")
-			elif car.kapazitat >= car.maxLadung * car.minLadung:
+			elif car.kapazitat >= car.minLadung:
 				statusCars.append("Laden und bereit")
 
 		if len(statusCars) != len(self.li_Autos):
 			raise ValueError("")
 		DS.zeitVar.StateofCars.append(statusCars)
 
+	def PickCar(self, km:float):
+		"""Funktion die ein passendes Auto aussucht. Dabei wird auf den Bedarf noch ein Sicherheitsfaktor aufgeschlagen
+		km: float
+			Kilometer welche gefahren werden sollen
+		"""
 
+		cars = self.GetChargingCars()
+		if not cars: #Falls es keine verfügbare Autos gibt wird abgebrochen
+			return None
 
-	def ChargeCars(self, cars, last, bTrack=False):
+		cars.sort(key=lambda x: x.kapazitat, reverse=False) #Autos sortieren nach Kapazität
+
+		demand = km * cars[0].spezVerbrauch * self.safety
+
+		if cars[-1].kapazitat < demand: #Falls kein Auto den Bedarf decken kann wird abgebrochen
+			return None
+
+		car = next(x for x in cars if x.kapazitat >= demand) #Es wird das Auto gesucht, welche den Bedarf gerade noch decken kann
+		return car
+
+	def UpdateLadestand(self, auto:Auto, kilometer:float) -> None:
+		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
+		auto: Auto
+			Auto, welches seinen Ladestand reduziert bekommt
+		kilometer: float
+			Kilometer welches das Auto fahrt"""
+		#Fahrverbrauch tracken
+		DS.ZV.verbrauchFahrenEmobilität += kilometer * auto.spezVerbrauch
+		DS.ZV.counterDischarging += 1
+		auto.kapazitat -= kilometer * auto.spezVerbrauch
+		if auto.kapazitat < 0:
+			raise ValueError("Auto hat negative Ladung")
+
+	def ChargeCars(self, cars:list, last:float, bTrack=False):
+		"""Diese Funktion kümmert sich um das Laden der Autos. Es wird dabei nicht mit Netzstrom geladen
+		cars: list
+			Liste an Auto Objekten, welche geladen werden sollen
+		last: float
+			Residuallast die in die Autos geladen werden soll
+		bTrack: bool
+			bool der kontrolliert ob die maximale Ladung getrackt werden soll (das soll nur bei den eigenen Autos passieren)"""
 		cars.sort(key=lambda x: x.kapazitat, reverse=True)
 
 		for car in cars:
@@ -183,12 +215,16 @@ class LadeController(LadeController_Personen):
 				DS.ZV.aktuelleLadung = car.kapazitat
 		return last
 
-	def DischargeCars(self, last):
+	def DischargeCars(self, last:float):
+		"""Diese Funktion kümmert sich um das Entladen der Autos um die Gebäudelast abzudecken
+		last: float
+			Residuallast, welche abgedeckt werden soll
+		"""
 		cars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
 		for car in cars:
-			car.diff = car.kapazitat - car.maxLadung * car.minLadung
+			car.diff = car.kapazitat - car.minLadung #Potenzielle entladbare Energie berechnen
 
-		cars.sort(key=lambda x: x.diff, reverse= True)
+		cars.sort(key=lambda x: x.diff, reverse= True) #Autos werden nach der größten entladbaren Kapazität sortiert
 		if cars:
 			for car in cars:
 				if last == 0: #Wenn die Last abgedeckt werden konnte, konnen wir früher abbrechen
@@ -196,45 +232,30 @@ class LadeController(LadeController_Personen):
 				qtoTake = min([car.leistung_MAX, last, car.diff]) #Die niedrigste Zahl davon kann entladen werden
 				qtoTake -= car.Entladen(qtoTake)
 				last -= qtoTake
-				if car.kapazitat < car.minLadung * car.maxLadung:
+				if car.kapazitat < car.minLadung:
 					raise ValueError("Auto zu niedrig entladen")
 
 		return last
-			
-	def PickCar(self, km):
-		cars = self.GetChargingCars()
-		if not cars:
-			return None
-
-		cars.sort(key=lambda x: x.kapazitat, reverse=False)
-
-		demand = km * cars[-1].spezVerbrauch * self.safety
-
-		if cars[-1].kapazitat < demand:
-			return None
-
-		car = next(x for x in cars if x.kapazitat >= demand)
-		return car
-
-
 
 	def CheckMinKap(self, cars, bTrack= False):
 		"""Kontrolliert alle Autos, welche an der Ladestation laden.
 		Falls Autos unter der Mindestladegrenze sind, werden diese aus dem Netz geladen"""
 		
 		for car in cars:
-			if car.kapazitat < car.minLadung * car.maxLadung:
-				space = (car.minLadung * car.maxLadung - car.kapazitat)
+			if car.kapazitat < car.minLadung:
+				space = (car.minLadung - car.kapazitat)
 				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
 				car.Laden(toLoad/ car.effizienz)
 
-				if car.kapazitat > car.minLadung * car.maxLadung:
+				if car.kapazitat > car.minLadung:
 					raise ValueError("Kapazität ist zu Hoch")
 				if bTrack:
 					DS.ZV.gridCharging += toLoad
 					DS.ZV.counterCharging += 1
 
+
 	def ResetAlreadyLoaded(self):
+		"""Hilfsfunktion die eine Laufvariable zurücksetzt"""
 		cars = self.GetChargingCars()
 		for car in cars:
 			car.alreadyLoaded = car.leistung_MAX
