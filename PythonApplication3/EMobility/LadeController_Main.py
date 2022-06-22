@@ -15,7 +15,7 @@ from LadeController_Personen import LadeController_Personen
 class LadeController(LadeController_Personen):
 
 	def __init__(self, AutoDaten, distMinLadung, PersonenDaten, infoLehrpersonal= None,infoGewerbepersonal= None):
-		"""Die Anzahl an Autos und die prozentuale Aufteilung sollte am besten keine Kommazahlen ergeben
+		"""
 		anzAutos: int,  
 			Anzahl an Autos die der Controller managed 
 		distMinLadung: dic,
