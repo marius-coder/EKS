@@ -5,8 +5,7 @@ from Ladecontroller_Helper import set_unit
 
 class Person():
 
-	def __init__(self, idPerson):
-		self.id = idPerson #ID damit Personen eindeutig identifiziert werden können
+	def __init__(self):
 		self.status = True #Status der Person True = Anwesend, False = Unterwegs
 		self.anzAutoWege = 0 #Anzahl der Wege die mit dem Auto zurückgelegt werden
 		self.km = 0 #Laufvariable die die km für den derzeitigen Weg angeben

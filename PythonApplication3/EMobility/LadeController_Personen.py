@@ -28,12 +28,12 @@ class LadeController_Personen():
 		self.wegfahren = []
 		self.ankommen = []
 
-	def InitPersonen(self):
-		idPerson = 0
+	def InitPersonen(self) -> list:
+		"""Initialisiert alle Personen im Quartier, die beim Mibilitätsprogramm mitmachen"""
 		for _ in range(int(self.anzPersonen * self.percent)):
-			self.persons.append(Person(idPerson)) #Neue Person mit einer ID generieren
+			self.persons.append(Person()) #Neue Person mit einer ID generieren
 
-	def FindCarID(self, ID) -> Auto:
+	def FindCarID(self, ID:str) -> Auto:
 		"""sucht Auto in Liste und gibt das gefundene Auto zuruck
 		ID: str
 			ID des Autos, welches gesucht wird"""
@@ -41,7 +41,7 @@ class LadeController_Personen():
 			if car.ID == ID:
 				return car
 
-	def InitDay(self, day) -> list:
+	def InitDay(self, day:str) -> list:
 		"""InitDay wird einmal am Tag aufgerufen und initialisiert den Tag.
 		Dabei werden verschiedene Variablen fur den kommenden tag gesetzt.
 		Die Personen, welche an diesen tag mit dem Auto fahren und beim Mobilitatsprogramm
@@ -53,16 +53,15 @@ class LadeController_Personen():
 		self.anzPers = 0 #Anzahl an Personen die bereits losgefahren sind zurucksetzen
 		self.anzPers2 = 0 #Anzahl an Personen die bereits losgefahren sind vom letzten Zeitschritt zurucksetzen
 		
-		mobilePersons = ceil(CalcMobilePersonen(day, len(self.persons)))
-		
+		mobilePersons = ceil(CalcMobilePersonen(day, len(self.persons)))		
 		shuffle(self.persons) #Shuffle the person list to equalize km driven
 
+		#es können nur Personen wegfahren, die anwesend sind
 		personstoPick = [person for person in self.persons if person.status == True]
 		personsCarSharing = personstoPick[0:mobilePersons]
 		drivingPersons = []
 			
 		for person in personsCarSharing:
-
 			person.km = 0
 			ways = CalcNumberofWays(day) 
 			person.anzAutoWege = CalcAutoWege(ways= ways, day= day)			
@@ -74,11 +73,14 @@ class LadeController_Personen():
 					person.km += km * self.adjustKilometers
 				drivingPersons.append(person)		
 
-		#Außenstehende Entladen
+		#zugereiste Autos entladen
 		for car in self.Außenstehende:
 			car.Fahren()
 
 		self.lendrivingPersons = len(drivingPersons)	
+		self.tooMany = len(self.readytoComeBack + self.awayPersons)
+		self.wegfahren = GenerateReiseProfil(self.travelData["Losfahren"], self.percentAbweichung)
+		self.ankommen = GenerateReiseProfil(self.travelData["Ankommen"], self.percentAbweichung)
 		return drivingPersons
 
 	def Control(self, losZahl2, conZahl):
@@ -115,14 +117,14 @@ class LadeController_Personen():
 		return True
 
 
-	def CheckPersonsHourly(self, hour):
+	def CheckPersonsHourly(self, hour:int):
+		"""Setzt jede Stunde alle Personen die losfahren und zurückkommen sollen
+		Zu Tagesbeginn werden alle mobile Personen ausgewählt"""
 		day = DetermineDay(hour)
 		hourIndex = DetermineHourofDay(hour)
 		if hourIndex == 0:			
 			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
-			self.tooMany = len(self.readytoComeBack + self.awayPersons)
-			self.wegfahren = GenerateReiseProfil(self.travelData["Losfahren"], self.percentAbweichung)
-			self.ankommen = GenerateReiseProfil(self.travelData["Ankommen"], self.percentAbweichung)
+			
 
 		#Anzahl an Personen die Losgefahren sollen
 		self.anzPers += self.wegfahren[hourIndex] / 100 * self.lendrivingPersons

@@ -81,7 +81,7 @@ def GenerateTransportmittel(zweck) -> str:
         weights = [17,6,47,15,14,1] 
     return GenerateWeightedItem(pop= population, weights= weights)
 
-def GenerateKilometer() -> int:
+def GenerateKilometer() -> float:
     """Gibt zuruckgelegte km zuruck. Der Bereich der km wird zuerst mit einer Warscheinlichkeit festgelegt"""
     population = [[0,0.5],[0.5,1],[1,2.5],[2.5,5],[5,10],[10,20],[20,50],[50,70]]
     weights = [2,5,12,21,21,19,15,5] 

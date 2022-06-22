@@ -23,26 +23,25 @@ class Scraper():
         #Indikatoren können auch Daten von anderen Gruppen enthalten
         #Indikatoren stellen die "Gesundheit" einer Variante dar
         self.indikatoren  = {
-            #"Fahrversuche [Anzahl]" : 0, 
-            "fehlgeschlagene Fahrversuche [%]" : 0, 
-            "ungenutzte Ladung der E-Mobilität [%]" : 0,
-            "erhöhung Eigenverbrauch [%]" : 0,
+            "fehlgeschlagene Fahrversuche [%]" : 0, #Anteil an Fahrversuchen der fehlgeschlagen ist
+            "ungenutzte Ladung der E-Mobilität [%]" : 0, #Anteil der Ladung der E-Autos, welcher nicht benutzt worden ist (fürs Laden)
+            "erhöhung Eigenverbrauch [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch im Verlgiech ohne Ladecontroller erhöht werden konnte
             "LadeEntlade_Zyklen ohne EMobilität pro Auto [Anzahl]" : 0,
             "LadeEntlade_Zyklen mit EMobilität pro Auto [Anzahl]" : 0,
-            "Ladevorgänge [Anzahl]" : 0,
-            "Entladevorgänge [Anzahl]" : 0,        
+            "Ladevorgänge [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Ladevorgängen
+            "Entladevorgänge [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Entladevorgängen
             }
 
         #Verbrauch der E-Mobilität zum Fahren
         self.eMobilitätFahren = {
-            "Gesamt [kWh]" : 0,
-            "Lokal [kWh]" : 0,
-            "Netz [kWh]" : 0
+            "Gesamt [kWh]" : 0, #Wie viel Energie wurde insgesamt durch das Fahren verbraucht
+            "Lokal [kWh]" : 0, #Wie viel von der gefahrenen Energie wurde lokal erzeugt
+            "Netz [kWh]" : 0 #Wie viel von der gefahrenen Energie wurde vom Netz bereitgestellt
             }
 
         #Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
         self.eMobilitätGebäude = {
-            "Lade/Entladeverluste [kWh]" : 0,
+            "Lade/Entladeverluste [kWh]" : 0, #Lade
             "GebäudezuEMobilität [kWh]" : 0, #Ohne Verluste
             "EMobilitätzuGebäude [kWh]" : 0  #Ohne Verluste                 
             }

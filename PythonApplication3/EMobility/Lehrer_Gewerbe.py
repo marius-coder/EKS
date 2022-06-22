@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-from Ladecontroller_Helper import GenerateNormalNumber
+from Ladecontroller_Helper import GenerateNormalNumber,GenerateKilometer
 
 
 time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
@@ -19,6 +19,7 @@ ferien = {
 	"Winterferien_Ende" : ["24.12.2022", "31.12.2022"],
 	}
 
+#Uhrzeiten (item) zu denen ein Anteil (key) an Personen ankommen
 uhrzeitAnkommen = {
 	"15" : 6,
 	"35" : 7,
@@ -27,6 +28,7 @@ uhrzeitAnkommen = {
 	"10" : 10,
 	}
 
+#Uhrzeiten (item) zu denen ein Anteil (key) an Personen losfahren
 uhrzeitLosfahren = {
 	"15" : 15,
 	"35" : 16,
@@ -35,12 +37,25 @@ uhrzeitLosfahren = {
 	"10" : 19,
 	}
 
-def InitAußenstehende(AutoDaten, maxLadung, km, anzAutos, percent, bLehrer) -> list:
+def InitAußenstehende(AutoDaten:dict, maxLadung:float, km:float, anzAutos:int, percent:float, bLehrer:bool) -> list:
+	"""Initialisiert die zureisenden Perseonen mit den gewünschten Attributen
+	AutoDaten: dict
+		Dicitionary, das die gesammelten AutoDaten enthält
+	maxLadung: float
+		Maximale Ladung der zugereisten Autos
+	km: float
+		Durchschnittliche Entfernung die die zugereisten Personen zurücklegen
+	anzAutos: int
+		Anzahl an Personen/Autos die insgesamt zureisen
+	percent: float
+		Anteil der zugereisten Personen, die ein E-Autos besitzen mitmachen
+	bLehrer:
+		Gibt an ob die Person zu einer Bildungseinrichtung gehört (Wichtig für Ferien)	
+		"""
 	ret = [] #Halt die finale Liste an Auto Objekten
 	anzAutos = ceil(anzAutos*percent/100)
 	checksum = anzAutos #Checksum 
 	#Keys mussen aufsteigend sortiert sein fur spateres Egde-Case Handling
-
 	keys = uhrzeitAnkommen.keys()
 
 	for percent in keys:
@@ -70,13 +85,17 @@ class Außenstehende(Auto):
 		self.km = km
 		self.ankommen = ankommen  #Wann das Auto ankommt
 		self.losfahren = losfahren #Wann das Auto losfährt
-		self.bCharging = False
+		self.bCharging = False #Autos starten nicht anwesend
 		self.bLehrer = bLehrer #Bool ob der Außenstehende ein Lehrer ist
-		self.maxLadung = maxLadung
-		self.minLadung = minLadung
-		self.kapazitat = maxLadung
+		self.maxLadung = maxLadung #Maximale Ladung des Autos in kWh
+		self.minLadungAbs = minLadung #Minimale Ladung die eingehalten werden muss in kWh
+		self.minLadung = self.maxLadung * self.minLadungAbs #Minimale Ladung die eingehalten werden muss in Anteilen
+		self.kapazitat = maxLadung #Laufvariable die die aktuelle Kapazität angibt
 
-	def CheckFerien(self, hour):
+	def CheckFerien(self, hour:int) -> bool:
+		"""Diese Funktion kontrolliert ob sich eine gegebene Stunde innerhalb des Ferienzeitraumes befindet
+		hour: int
+			Stunde des Jahres"""
 		datum = time[hour]
 		date_format = "%d.%m.%Y"
 		ret = []
@@ -91,8 +110,8 @@ class Außenstehende(Auto):
 			return False
 
 	def Fahren(self):
-		std = self.km * 0.5  #50% Abweichung in der gefahrenen Strecke
-		val = GenerateNormalNumber(self.km, std)
-		self.kapazitat = self.maxLadung - val * self.spezVerbrauch #Laufvariable in kWh
+		"""Simuliert eine Wegstrecke die die zureisenden fahren und passt die Kapazität dementsprechend an"""
+		km = GenerateKilometer()
+		self.kapazitat = self.maxLadung - km * self.spezVerbrauch #Laufvariable in kWh
 
 
