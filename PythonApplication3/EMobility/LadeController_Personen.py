@@ -94,7 +94,7 @@ class LadeController_Personen():
 		conZahl = b
 		return r, conZahl
 
-	def DriveAway(self, person):
+	def DriveAway(self, person, hour):
 		"""Person fahrt weg. Es werden die finalen Kilometer generiert.
 		Es wird ein passendes Auto ausgesucht und zugewiesen.
 		Person und Auto werden auf abwesend gestellt"""
@@ -107,7 +107,7 @@ class LadeController_Personen():
 			return False
 
 		person.carID = car.ID		
-		self.UpdateLadestand(auto= car, kilometer= person.km)
+		self.UpdateLadestand(auto= car, kilometer= person.km, hour= hour)
 
 		if person.status == False or car.bCharging == False:
 			raise TypeError("Person oder Auto sind schon weggefahren")
@@ -134,7 +134,7 @@ class LadeController_Personen():
 		for _ in range(driveAway):			
 			person = choice(self.drivingPersons)
 			self.drivingPersons.remove(person)			
-			if self.DriveAway(person= person):
+			if self.DriveAway(person= person, hour= hour):
 				self.awayPersons.append(person)
 		
 

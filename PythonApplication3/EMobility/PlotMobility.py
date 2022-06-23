@@ -146,6 +146,7 @@ def PlotVerteilungen(data, name):
     sns.boxplot(x="Stunde",y= name, palette="muted", data=toPlot, ax= ax)
     ax.set_title(f"Tagesverteilung: {name}")
     ax.set_ylabel("Energie [kWh]")
+    ax.yaxis.grid(True)
     plt.show()
 
 def PlotEinflussLDC(Verbrauch, PV, Endladung):
@@ -160,9 +161,9 @@ def PlotEinflussLDC(Verbrauch, PV, Endladung):
     sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=toPlot, ax= ax, color= "blue")
     sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=toPlot, ax= ax, color= "orange")
     sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=toPlot, ax= ax, color= "green")
-    ax.set_title("Vergleich Gebäudeverbrauch")
+    ax.set_title("Einfluss des Ladecontrollers auf den stündlichen Gebäudebedarf")
     ax.set_ylabel("Verbrauch [kWh]")
-    ax.set_xlabel("Stunde Autos")  
+    ax.set_xlabel("Stunde")  
     leg = ax.legend(labels = ['Gebäudeverbrauch', 'Gebäudeverbrauch mit PV', 'Gebäudeverbrauch mit PV/LC'], prop={'size': 7},                  
            ncol = 3,facecolor='#f5f5f5', framealpha=1, loc= "lower center")
     for legobj in leg.legendHandles:
@@ -171,7 +172,7 @@ def PlotEinflussLDC(Verbrauch, PV, Endladung):
     leg.legendHandles[1].set_color('orange')
     leg.legendHandles[2].set_color('green')
     plt.gca().set_ylim(bottom=0)
-
+    plt.grid()  
     plt.show()
 
 

@@ -76,9 +76,11 @@ for scen in scenarios:
 		DS.scraper.eMobilitätFahren["Gesamt [kWh]"] = DS.ZV.verbrauchFahrenEmobilität
 		DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - DS.ZV.gridCharging * Control.li_Autos[0].effizienz
 		DS.scraper.eMobilitätFahren["Netz [kWh]"] = DS.ZV.gridCharging * Control.li_Autos[0].effizienz
+		DS.scraper.eMobilitätFahren["externe Ladung [kWh]"] = sum(DS.zeitVar.LadeLeistungExterneStationen)
 
 		#Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
-		daten = CalcEMobilityBuildingEnergyFlows(sum(DS.ZV.eMobilityDischarge), sum(DS.ZV.eMobilityCharge), Control.li_Autos[0])
+		daten = CalcEMobilityBuildingEnergyFlows(discharge= sum(DS.ZV.eMobilityDischarge), charge= sum(DS.ZV.eMobilityCharge),
+										  car= Control.li_Autos[0],externCharge= sum(DS.zeitVar.LadeLeistungExterneStationen))
 		DS.scraper.eMobilitätGebäude["EMobilitätzuGebäude [kWh]"] = daten[0]
 		DS.scraper.eMobilitätGebäude["Fahrverbrauch [kWh]"] = daten[1]
 		DS.scraper.eMobilitätGebäude["Lade/Entladeverluste [kWh]"] = daten[2]
@@ -108,11 +110,12 @@ for scen in scenarios:
 	
 
 		DS.zeitVar.Export(f"{scen}_{scenariosWärme[i]}")
-		#PlotLadegang(DS.zeitVar.LadeLeistung)
 		#PlotStatusCollection(DS.zeitVar.StateofCars)
 		#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
 		#PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.EntladeLeistung)
 		#PlotVerteilungen(DS.zeitVar.LadeLeistung, "Ladeleistung")
+		#PlotVerteilungen(DS.zeitVar.EntladeLeistung, "EntladeLeistung")
+		#PlotVerteilungen(DS.zeitVar.LadeLeistungAußenstehende, "LadeLeistung Zureisende")
 		#PlotVerteilungen(gesamtBedarf, "Gebäudebedarf")
 
 

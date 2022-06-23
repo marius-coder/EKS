@@ -161,13 +161,15 @@ def CalcAutoWege(ways, day) -> int:
     else:
         return 0
 
-def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, car):
+def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, externCharge:float, car):
     """
     Berechnet diverse Energieflüsse zwischen dem Gebäude und der Ladestation
     discharge: float
         Energie die aus den Autos entladen wurde (Verluste schon miteinberechnet)
     charge: float
         Energie mit der die Autos geladen worden sind (Keine Verluste einberechnet)
+    externCharge: float
+        Energie die durch externe Ladestationen zugeführt worden ist
     """
     verlustLaden = charge * (1-car.effizienz)  #Verlust durch laden der Autos
     vorFahren = charge - verlustLaden  #Energie die nach dem Laden den Autos zum Fahren zur Verfügung steht
@@ -175,8 +177,9 @@ def CalcEMobilityBuildingEnergyFlows(discharge:float, charge:float, car):
     nachFahren = discharge / car.effizienz #Energie die nach dem Fahren dem Gebäude zur Verfügung steht
     verlustEntladen = nachFahren * (1-car.effizienz) #Verlust durch Entladen der Autos
     GebäudeVerbrauch = nachFahren - verlustEntladen #Energie die nach den Verlusten dem Gebäude zugeführt wird
-    verlustGesamt = verlustEntladen + verlustLaden #Insgesamte Verluste
-    Fahrverbrauch = vorFahren - nachFahren #Energie die durch Fahren verbraucht wurde
+    verlustGesamt = verlustEntladen + verlustLaden #Insgesamte Verluste    
+    Fahrverbrauch = vorFahren - (nachFahren - externCharge) #Energie die durch Fahren verbraucht wurde
+
     return GebäudeVerbrauch, Fahrverbrauch, verlustGesamt
 
 

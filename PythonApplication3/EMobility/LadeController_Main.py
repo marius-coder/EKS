@@ -176,24 +176,29 @@ class LadeController(LadeController_Personen):
 		car = next(x for x in cars if x.kapazitat >= demand) #Es wird das Auto gesucht, welche den Bedarf gerade noch decken kann
 		return car
 
-	def UpdateLadestand(self, auto:Auto, kilometer:list) -> None:
+	def UpdateLadestand(self, auto:Auto, kilometer:list, hour:int) -> None:
 		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
 		auto: Auto
 			Auto, welches seinen Ladestand reduziert bekommt
 		kilometer: float
-			Kilometer welches das Auto fahrt"""
+			Kilometer welches das Auto fahrt
+		hour: int
+			Stunde des Jahres
+			"""
+
 		#Fahrverbrauch tracken
 		DS.ZV.verbrauchFahrenEmobilität += sum(kilometer) * auto.spezVerbrauch
 		DS.ZV.counterDischarging += 1
 		
 
-		if self.anteilExterneLadestationen > uniform(0,100):
+		if self.anteilExterneLadestationen > uniform(0,99):
 			driveHome = choice(kilometer) #Es wird ein zufälliger Weg als Rückweg gewählt
 			kilometer.remove(driveHome)
 			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch #Erste Strecke fahren
-			space = auto.kapazitat - auto.maxLadung
+			space = auto.maxLadung - auto.kapazitat
 			auto.kapazitat = auto.maxLadung #Auto vollladen
 			DS.ZV.gridCharging += space
+			DS.zeitVar.LadeLeistungExterneStationen[hour] += space
 			DS.ZV.counterCharging += 1
 			auto.kapazitat -= driveHome * auto.spezVerbrauch #Letzte Strecke fahren
 		else:

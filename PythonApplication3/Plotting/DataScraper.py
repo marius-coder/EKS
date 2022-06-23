@@ -36,7 +36,8 @@ class Scraper():
         self.eMobilitätFahren = {
             "Gesamt [kWh]" : 0, #Wie viel Energie wurde insgesamt durch das Fahren verbraucht
             "Lokal [kWh]" : 0, #Wie viel von der gefahrenen Energie wurde lokal erzeugt
-            "Netz [kWh]" : 0 #Wie viel von der gefahrenen Energie wurde vom Netz bereitgestellt
+            "Netz [kWh]" : 0, #Wie viel von der gefahrenen Energie wurde vom Netz bereitgestellt
+            "externe Ladung [kWh]" : 0 #Energie die durch externe Ladestationen zugefühgrt worden ist
             }
 
         #Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude
@@ -109,6 +110,7 @@ class Zeitvariablen:
         self.LadeLeistung = []
         self.LadeLeistungAußenstehende = [0]*8760
         self.EntladeLeistung = []
+        self.LadeLeistungExterneStationen = [0]*8760 #Geladene Energie von Externen Ladestationen
 
     def Export(self, szen):
         df = pd.DataFrame()
