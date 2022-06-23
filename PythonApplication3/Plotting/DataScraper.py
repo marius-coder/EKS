@@ -9,13 +9,13 @@ class Scraper():
         #Generelle Daten
         self.generell = {
             "personenKilometer Elektrisch durch. [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto elektrisch zurücklegt (km)
-            "personenKilometer Elektrisch [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto elektrisch zurücklegt (km)
-            "personenKilometer Fossil [km]" : 0, #Zählt wie viele Kilometer eine Person im Jahr mit dem Auto fossil zurücklegt (km)
+            "personenKilometer Elektrisch [km]" : 0, #Zählt wie viele Kilometer alle Personen im Jahr mit dem Auto elektrisch zurücklegt (km)
+            "personenKilometer Fossil [km]" : 0, #Zählt wie viele Kilometer alle Personen im Jahr mit dem Auto fossil zurücklegt (km)
             "stromverbrauch Wohnen [kWh]" : 0, #Verbrauch der Wohngebäude (kWh)
             "stromverbrauch Gewerbe [kWh]" : 0, #Verbrauch des Gewerbes (kWh)
             "stromverbrauch Schule [kWh]" : 0, #Verbrauch der Bildungsgebäude (kWh)
             "stromverbrauch WP [kWh]" : 0, #Verbrauch der Wärmepumpen (kWh)
-            "stromverbrauch E-Mobilität [kWh]" : 0, #Verbrauch der E-Mobilität (kWh)
+            "stromverbrauch E-Mobilität [kWh]" : 0, #Verbrauch der E-Mobilität zum Fahren (kWh)
             "pvProduktion [kWh]" : 0, #Wie viel die PV-Anlage insgesamt produziert hat (kWh)
             "pvProduktionGfa [kWh]" : 0 #Wie viel PV Produktion pro m² gfa (kWh/m²gfa a)
             }
@@ -26,10 +26,9 @@ class Scraper():
             "fehlgeschlagene Fahrversuche [%]" : 0, #Anteil an Fahrversuchen der fehlgeschlagen ist
             "ungenutzte Ladung der E-Mobilität [%]" : 0, #Anteil der Ladung der E-Autos, welcher nicht benutzt worden ist (fürs Laden)
             "erhöhung Eigenverbrauch [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch im Verlgiech ohne Ladecontroller erhöht werden konnte
-            "LadeEntlade_Zyklen ohne EMobilität pro Auto [Anzahl]" : 0,
-            "LadeEntlade_Zyklen mit EMobilität pro Auto [Anzahl]" : 0,
-            "Ladevorgänge [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Ladevorgängen
-            "Entladevorgänge [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Entladevorgängen
+            "LadeEntlade_Zyklen pro Auto [Anzahl]" : 0,
+            "Ladevorgänge pro Auto [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Ladevorgängen
+            "Entladevorgänge pro Auto [Anzahl]" : 0, #Anzahl an insgesamt vorkommenden Entladevorgängen
             }
 
         #Verbrauch der E-Mobilität zum Fahren
@@ -60,8 +59,14 @@ class Scraper():
             "Netzbezug [kWh]" : 0,
             }
 
+        self.pvNachZureisenden = {
+            "Eigenverbrauch [kWh]" : 0,
+            "Einspeisung [kWh]" : 0,
+            "Netzbezug [kWh]" : 0,
+            }
+
         #Daten der Außenstehenden     
-        self.außenstehende = {
+        self.zureisenden = {
             "Ladung [kWH]" : 0,
         }
 
@@ -86,18 +91,14 @@ class Zwischenvariablen:
         self.fehlgeschlageneFahrversuche = 0
 
         self.maxLadung = 0
-        self.aktuelleLadung = 0
-
-        self.eMobilityCharge = [0]*8760
-        self.eMobilityDischarge = [0]*8760
+        self.aktuelleLadung = 0 #maximal Vorgekommene Ladung
         self.counterCharging = 0
         self.counterDischarging = 0
 
-        self.resLastBeforeEMobility = [0]*8760
-        self.resLastAfterEMobility = [0]*8760
-        self.resLastAfterDischarging = [0]*8760 
-
         self.gridCharging = 0
+
+
+
 
 ZV = Zwischenvariablen()
 
@@ -107,10 +108,22 @@ class Zeitvariablen:
 
         self.StateofDrivingPersons = []
         self.StateofCars = []
-        self.LadeLeistung = []
+        self.eMobilityCharge = [0]*8760
         self.LadeLeistungAußenstehende = [0]*8760
-        self.EntladeLeistung = []
+        self.eMobilityDischarge = [0]*8760
         self.LadeLeistungExterneStationen = [0]*8760 #Geladene Energie von Externen Ladestationen
+
+        self.resLastBeforeEMobility = [0]*8760
+        self.resLastAfterEMobility = [0]*8760
+        self.resLastAfterZureisende = [0]*8760
+
+        self.gridChargingHourly = [0]*8760
+        self.pvChargingHourly = [0]*8760
+        self.buildingDemandHourly = [0]*8760
+        self.carDemandHourly = [0]*8760
+        
+        self.fahrverbrauchLokal = [0]*8760
+        self.fahrverbrauchNetz = [0]*8760
 
     def Export(self, szen):
         df = pd.DataFrame()

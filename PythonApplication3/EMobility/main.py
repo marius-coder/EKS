@@ -38,9 +38,10 @@ for scen in scenarios:
 	
 			#resLast = 1 - pv
 			resLast = bedarf - pv
-			DS.ZV.resLastBeforeEMobility[hour] = resLast
+			DS.zeitVar.resLastBeforeEMobility[hour] = resLast
 			Control.CheckTimestep(hour= hour,resLast= resLast)
-
+			DS.zeitVar.fahrverbrauchLokal[hour] = DS.zeitVar.pvChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
+			DS.zeitVar.fahrverbrauchNetz[hour] = DS.zeitVar.gridChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
 
 		personenKilometerElektrisch = 0
 		for person in Control.persons:
@@ -65,49 +66,47 @@ for scen in scenarios:
 		#Indikatoren
 		DS.scraper.indikatoren["fehlgeschlagene Fahrversuche [%]"] = DS.ZV.fehlgeschlageneFahrversuche / DS.ZV.fahrversuche * 100
 		DS.scraper.indikatoren["ungenutzte Ladung der E-Mobilit‰t [%]"] = 100 - DS.ZV.aktuelleLadung / DS.ZV.maxLadung * 100
-		DS.scraper.indikatoren["erhˆhung Eigenverbrauch [%]"] = CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastAfterEMobility)[0] \
-																/ CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastBeforeEMobility)[0] * 100 - 100
-		DS.scraper.indikatoren["LadeEntlade_Zyklen ohne EMobilit‰t pro Auto [Anzahl]"] = DS.ZV.gridCharging / DS.ZV.maxLadung / Control.anzAutos
-		DS.scraper.indikatoren["LadeEntlade_Zyklen mit EMobilit‰t pro Auto [Anzahl]"] = (sum(DS.ZV.eMobilityCharge) + DS.ZV.gridCharging) / DS.ZV.maxLadung / Control.anzAutos
-		DS.scraper.indikatoren["Ladevorg‰nge [Anzahl]"] = DS.ZV.counterCharging / Control.anzAutos
-		DS.scraper.indikatoren["Entladevorg‰nge [Anzahl]"] = DS.ZV.counterDischarging / Control.anzAutos
+		DS.scraper.indikatoren["erhˆhung Eigenverbrauch [%]"] = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterEMobility)[0] \
+																/ CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastBeforeEMobility)[0] * 100 - 100
+		DS.scraper.indikatoren["LadeEntlade_Zyklen pro Auto [Anzahl]"] = (sum(DS.zeitVar.eMobilityCharge) + DS.ZV.gridCharging) / DS.ZV.maxLadung / Control.anzAutos
+		DS.scraper.indikatoren["Ladevorg‰nge pro Auto [Anzahl]"] = DS.ZV.counterCharging / Control.anzAutos
+		DS.scraper.indikatoren["Entladevorg‰nge pro Auto [Anzahl]"] = DS.ZV.counterDischarging / Control.anzAutos
 
 		#Verbrauch der E-Mobilit‰t zum Fahren
 		DS.scraper.eMobilit‰tFahren["Gesamt [kWh]"] = DS.ZV.verbrauchFahrenEmobilit‰t
-		DS.scraper.eMobilit‰tFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilit‰t - (DS.ZV.gridCharging-sum(DS.zeitVar.LadeLeistungExterneStationen)) * Control.li_Autos[0].effizienz
-		DS.scraper.eMobilit‰tFahren["Netz [kWh]"] = (DS.ZV.gridCharging-sum(DS.zeitVar.LadeLeistungExterneStationen)) * Control.li_Autos[0].effizienz
+		DS.scraper.eMobilit‰tFahren["Lokal [kWh]"] = sum(DS.zeitVar.fahrverbrauchLokal)
+		DS.scraper.eMobilit‰tFahren["Netz [kWh]"] = sum(DS.zeitVar.fahrverbrauchNetz)
 		DS.scraper.eMobilit‰tFahren["externe Ladung [kWh]"] = sum(DS.zeitVar.LadeLeistungExterneStationen)
 
 		#Daten zu den Energiefl¸ssen zwischen E-Mobilit‰t und Geb‰ude
-		daten = CalcEMobilityBuildingEnergyFlows(discharge= sum(DS.ZV.eMobilityDischarge), charge= sum(DS.ZV.eMobilityCharge),
+		daten = CalcEMobilityBuildingEnergyFlows(discharge= sum(DS.zeitVar.eMobilityDischarge), charge= sum(DS.zeitVar.eMobilityCharge),
 										  car= Control.li_Autos[0],externCharge= sum(DS.zeitVar.LadeLeistungExterneStationen))
 		DS.scraper.eMobilit‰tGeb‰ude["EMobilit‰tzuGeb‰ude [kWh]"] = daten[0]
 		DS.scraper.eMobilit‰tGeb‰ude["Fahrverbrauch [kWh]"] = daten[1]
 		DS.scraper.eMobilit‰tGeb‰ude["Lade/Entladeverluste [kWh]"] = daten[2]
-		DS.scraper.eMobilit‰tGeb‰ude["Geb‰udezuEMobilit‰t [kWh]"] = sum(DS.ZV.eMobilityCharge)
+		DS.scraper.eMobilit‰tGeb‰ude["Geb‰udezuEMobilit‰t [kWh]"] = sum(DS.zeitVar.eMobilityCharge)
 	
 		#PV-Daten vor E-Mobilit‰t
-		daten = CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastBeforeEMobility)
+		daten = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastBeforeEMobility)
 		DS.scraper.pvVorEMobilit‰t["Eigenverbrauch [kWh]"] = daten[0]
 		DS.scraper.pvVorEMobilit‰t["Einspeisung [kWh]"] = daten[1]
-		DS.scraper.pvVorEMobilit‰t["Netzbezug [kWh]"] = abs(sum([x for x in DS.ZV.resLastBeforeEMobility if x > 0])) 
+		DS.scraper.pvVorEMobilit‰t["Netzbezug [kWh]"] = abs(sum([x for x in DS.zeitVar.resLastBeforeEMobility if x > 0])) 
 		
 		#PV-Daten nach E-Mobilit‰t
-		daten = CalcEigenverbrauch(pv= PV, resLast= DS.ZV.resLastAfterEMobility)
+		daten = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterEMobility)
 		DS.scraper.pvNachEMobilit‰t["Eigenverbrauch [kWh]"] = daten[0]
 		DS.scraper.pvNachEMobilit‰t["Einspeisung [kWh]"] = daten[1]
-		DS.scraper.pvNachEMobilit‰t["Netzbezug [kWh]"] = abs(sum([x for x in DS.ZV.resLastAfterDischarging if x > 0]))  
+		DS.scraper.pvNachEMobilit‰t["Netzbezug [kWh]"] = abs(sum([x for x in DS.zeitVar.resLastAfterEMobility if x > 0]))  
 
-		#Auﬂenstehende
-		DS.scraper.auﬂenstehende["Ladung [kWH]"] = sum(DS.zeitVar.LadeLeistungAuﬂenstehende)
+		#PV-Daten nach Zureisenden
+		daten = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterZureisende)
+		DS.scraper.pvNachZureisenden["Eigenverbrauch [kWh]"] = daten[0]
+		DS.scraper.pvNachZureisenden["Einspeisung [kWh]"] = daten[1]
+		DS.scraper.pvNachZureisenden["Netzbezug [kWh]"] = abs(sum([x for x in DS.zeitVar.resLastAfterZureisende if x > 0]))  
+		DS.scraper.zureisenden["Ladung [kWH]"] = sum(DS.zeitVar.LadeLeistungAuﬂenstehende)		
 
 		#Export Data
-		DS.scraper.Export(f"{scen}_{scenariosW‰rme[i]}")
-
-		#Zeitvariablen
-		DS.zeitVar.LadeLeistung = DS.ZV.eMobilityCharge
-		DS.zeitVar.EntladeLeistung = DS.ZV.eMobilityDischarge
-	
+		DS.scraper.Export(f"{scen}_{scenariosW‰rme[i]}")	
 
 		DS.zeitVar.Export(f"{scen}_{scenariosW‰rme[i]}")
 		#PlotStatusCollection(DS.zeitVar.StateofCars)

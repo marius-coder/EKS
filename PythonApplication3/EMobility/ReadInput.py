@@ -45,10 +45,10 @@ def SearchdistMinLadung():
 			counter = 2
 			ret = {}
 			while(True):
-				anteil = row[1].offset(counter,0).value
+				ladung = row[1].offset(counter,0).value
 				if row[1].offset(counter,0).value == None:
 					return ret
-				ladung = row[1].offset(counter,1).value
+				anteil = row[1].offset(counter,1).value
 				ret[str(anteil)] = ladung
 				counter += 1
 
