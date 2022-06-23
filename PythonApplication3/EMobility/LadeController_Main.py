@@ -34,9 +34,9 @@ class LadeController(LadeController_Personen):
 		self.anzAutos = AutoDaten["Anzahl Autos"]
 		self.li_Autos, checksum = self.InitAutos(AutoDaten= AutoDaten, distMinLadung= distMinLadung)
 		self.Auﬂenstehende = InitAuﬂenstehende(AutoDaten= AutoDaten,maxLadung= infoLehrpersonal["Ladung"], percent= infoLehrpersonal["Prozent Mitmachende"]
-										,km= infoLehrpersonal["gefahrene km"], anzAutos= infoLehrpersonal["Anzahl"], bLehrer= True)[0]
+										, anzAutos= infoLehrpersonal["Anzahl"], bLehrer= True)[0]
 		self.Auﬂenstehende.extend(InitAuﬂenstehende(AutoDaten= AutoDaten,maxLadung= infoGewerbepersonal["Ladung"], percent= infoGewerbepersonal["Prozent Mitmachende"]
-											 ,km= infoGewerbepersonal["gefahrene km"], anzAutos= infoGewerbepersonal["Anzahl"], bLehrer= False)[0])
+											 , anzAutos= infoGewerbepersonal["Anzahl"], bLehrer= False)[0])
 		self.gfa= PersonenDaten["gfa"] #Bruttogeschossfl‰che
 
 		self.tooMany = 0 #‹berhang an Personen von einem Tag auf den n‰chsten

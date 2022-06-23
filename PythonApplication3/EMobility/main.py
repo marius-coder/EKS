@@ -74,8 +74,8 @@ for scen in scenarios:
 
 		#Verbrauch der E-Mobilität zum Fahren
 		DS.scraper.eMobilitätFahren["Gesamt [kWh]"] = DS.ZV.verbrauchFahrenEmobilität
-		DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - DS.ZV.gridCharging * Control.li_Autos[0].effizienz
-		DS.scraper.eMobilitätFahren["Netz [kWh]"] = DS.ZV.gridCharging * Control.li_Autos[0].effizienz
+		DS.scraper.eMobilitätFahren["Lokal [kWh]"] = DS.ZV.verbrauchFahrenEmobilität - (DS.ZV.gridCharging-sum(DS.zeitVar.LadeLeistungExterneStationen)) * Control.li_Autos[0].effizienz
+		DS.scraper.eMobilitätFahren["Netz [kWh]"] = (DS.ZV.gridCharging-sum(DS.zeitVar.LadeLeistungExterneStationen)) * Control.li_Autos[0].effizienz
 		DS.scraper.eMobilitätFahren["externe Ladung [kWh]"] = sum(DS.zeitVar.LadeLeistungExterneStationen)
 
 		#Daten zu den Energieflüssen zwischen E-Mobilität und Gebäude

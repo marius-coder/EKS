@@ -25,13 +25,11 @@ inputData = {
 	"ExterneDaten" : {
 		"Info Lehrpersonal" : {
 			"Ladung" : 0,
-			"gefahrene km" : 0,
 			"Anzahl" : 0,
 			"Prozent Mitmachende" : 0,
 			},
 		"Info Sonstiges Personal" : {
 			"Ladung" : 0,
-			"gefahrene km" : 0,
 			"Anzahl" : 0,
 			"Prozent Mitmachende" : 0,
 			}

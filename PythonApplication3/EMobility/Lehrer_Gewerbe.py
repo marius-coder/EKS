@@ -37,7 +37,7 @@ uhrzeitLosfahren = {
 	"10" : 19,
 	}
 
-def InitAußenstehende(AutoDaten:dict, maxLadung:float, km:float, anzAutos:int, percent:float, bLehrer:bool) -> list:
+def InitAußenstehende(AutoDaten:dict, maxLadung:float, anzAutos:int, percent:float, bLehrer:bool) -> list:
 	"""Initialisiert die zureisenden Perseonen mit den gewünschten Attributen
 	AutoDaten: dict
 		Dicitionary, das die gesammelten AutoDaten enthält
@@ -65,13 +65,13 @@ def InitAußenstehende(AutoDaten:dict, maxLadung:float, km:float, anzAutos:int, p
 		for _ in range(anzInter):
 			if checksum == 0:
 				return ret, checksum
-			ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
+			ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 			checksum -= 1
 
 	#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 	for _ in range(checksum):
-		ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, km= km, bLehrer= bLehrer,
+		ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 		checksum -= 1
 
@@ -80,9 +80,8 @@ def InitAußenstehende(AutoDaten:dict, maxLadung:float, km:float, anzAutos:int, p
 
 class Außenstehende(Auto):
 
-	def __init__(self, km,AutoDaten, maxLadung, minLadung, ankommen, losfahren, bLehrer= False) -> None:
+	def __init__(self,AutoDaten, maxLadung, minLadung, ankommen, losfahren, bLehrer= False) -> None:
 		Auto.__init__(self, AutoDaten= AutoDaten, minLadung= minLadung)
-		self.km = km
 		self.ankommen = ankommen  #Wann das Auto ankommt
 		self.losfahren = losfahren #Wann das Auto losfährt
 		self.bCharging = False #Autos starten nicht anwesend
