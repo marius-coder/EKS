@@ -35,7 +35,7 @@ class Simulation():
 					  fenster = {"Fläche":2371.2,"U-Wert":u_Fenster},
 					  dach = {"Fläche":1224,"U-Wert":u_Dach},
 					  boden = {"Fläche":0,"U-Wert":u_Boden},
-					  gfa = 12852, volumen=42228,
+					  gfa = 10282, volumen=42228,
 					  anzPersonen=405, stromVerbrauch = 451627)
 
 		W3 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
@@ -295,7 +295,6 @@ class Simulation():
 		elif "S" in key:
 			wechsel = self.SetLuftwechsel(hour, building, key)		
 		building.Luftwechsel = wechsel
-
 
 	def Simulate(self, szen):
 		if szen == "FW":

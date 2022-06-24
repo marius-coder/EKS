@@ -61,21 +61,21 @@ class Building(HL,Dataflows,WW):
 
     def AddDataflows(self, qHL, qWW, szen, key):
 
-        self.DF.qHL.append(qHL)
-        self.DF.qWW.append(qWW)
-        self.DF.stromBedarf.append(self.stromVerbrauchBetrieb)
+        self.DF.qHL.append(qHL / self.gfa)
+        self.DF.qWW.append(qWW / self.gfa)
+        self.DF.stromBedarf.append(self.stromVerbrauchBetrieb / self.gfa)
         self.DF.tInnen.append(self.ti)
 
         if szen == "WP":
-            self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
-            self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
-            self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb)
-            self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG)
+            self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb / self.gfa)
+            self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG / self.gfa)
+            self.DF.stromWP_WW.append(self.WP_WW.PelBetrieb / self.gfa)
+            self.DF.qWP_WW.append(self.WP_WW.PelBetrieb * self.WP_WW.COP_HZG / self.gfa)
 
         elif szen == "FW":
             if "S" in key:
-                self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb)
-                self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG)
+                self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb / self.gfa)
+                self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG / self.gfa)
 
 
 

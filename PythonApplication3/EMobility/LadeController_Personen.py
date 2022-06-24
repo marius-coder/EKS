@@ -102,7 +102,7 @@ class LadeController_Personen():
 		person.minTimeAway = int(round(km / self.averageSpeed,0))
 		car = self.PickCar(km=km)
 		DS.ZV.fahrversuche += 1
-		if not car:
+		if not car or car.bCharging == False:
 			DS.ZV.fehlgeschlageneFahrversuche += 1
 			return False
 

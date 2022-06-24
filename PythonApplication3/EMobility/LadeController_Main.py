@@ -60,7 +60,7 @@ class LadeController(LadeController_Personen):
 		counter = 0
 
 		for minLadung, percent in sortedMinLadung.items():
-			minLadung = int(minLadung)
+			minLadung = int(minLadung)/100
 			anzInter = int(round(int(percent) * AutoDaten["Anzahl Autos"] / 100 ,0))
 			if anzInter == 0 and checksum != 0:
 				anzInter = 1
@@ -74,21 +74,23 @@ class LadeController(LadeController_Personen):
 		#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 		for _ in range(checksum):
 			li_Autos.append(Auto(AutoDaten, minLadung= minLadung, counter= counter))
+			counter += 1
 			checksum -= 1
 
 		for i in range(int(len(li_Autos)/2)):
 			li_Autos[i].bCharging = True
-
+		if counter != AutoDaten["Anzahl Autos"]:
+			raise ValueError("ID Stimmt nicht")
 		return li_Autos, checksum
 
 	def GetChargingCars(self) -> list:
 		"""Gibt jedes Auto zuruck, welches gerade an der Ladestation hangt"""
 		return [car for car in self.li_Autos if car.bCharging == True]
 
-	def GetAvailableCars(self) -> list:
-		"""Gibt liste an Autos zuruck welche entladbar sind"""
-		chargingCars = self.GetChargingCars() #first get all charging cars
-		return [car for car in chargingCars if car.Speicherstand() > car.minLadungAbs]	
+	#def GetAvailableCars(self) -> list:
+	#	"""Gibt liste an Autos zuruck welche entladbar sind"""
+	#	chargingCars = self.GetChargingCars() #first get all charging cars
+	#	return [car for car in chargingCars if car.Speicherstand() > car.minLadungAbs]	
 
 	def GetAußenstehendeCars(self, hour:int):
 		"""Gibt alle anwesenden Autos von zureisenden Personen zurück"""
@@ -111,10 +113,9 @@ class LadeController(LadeController_Personen):
 
 			if resLast - resLastAfterDischarging < 0:
 				raise ValueError("eMobilityDischarge darf nicht negativ sein")
-			
+
 			DS.zeitVar.eMobilityDischarge[hour] =  entladungEMobility
 			DS.zeitVar.buildingDemandHourly[hour] += entladungEMobility
-			DS.ZV.counterDischarging += 1
 		else:
 			#Autos laden
 
@@ -122,7 +123,6 @@ class LadeController(LadeController_Personen):
 			resLastAfterCharging, ladungEMobility = self.ChargeCars(cars= cars, last= abs(resLast), bTrack= True)
 			DS.zeitVar.eMobilityCharge[hour] = ladungEMobility	
 			DS.zeitVar.pvChargingHourly[hour] += ladungEMobility
-			DS.ZV.counterCharging += 1
 
 			#Nachdem die Quartiersautos geladen haben, werden die zureisenden geladen
 			cars = self.GetAußenstehendeCars(hour)
@@ -160,6 +160,7 @@ class LadeController(LadeController_Personen):
 		if len(statusCars) != len(self.li_Autos):
 			raise ValueError("")
 		DS.zeitVar.StateofCars.append(statusCars)
+		self.CalcUngenutzteLadung(hour)
 
 	def PickCar(self, km:float):
 		"""Funktion die ein passendes Auto aussucht. Dabei wird auf den Bedarf noch ein Sicherheitsfaktor aufgeschlagen
@@ -168,6 +169,7 @@ class LadeController(LadeController_Personen):
 		"""
 
 		cars = self.GetChargingCars()
+		cars = [car for car in cars if car.bCharging == True]
 		if not cars: #Falls es keine verfügbare Autos gibt wird abgebrochen
 			return None
 
@@ -202,7 +204,6 @@ class LadeController(LadeController_Personen):
 			DS.ZV.gridCharging += space
 			DS.zeitVar.gridChargingHourly[hour] += space
 			DS.zeitVar.LadeLeistungExterneStationen[hour] += space
-			DS.ZV.counterCharging += 1
 			auto.kapazitat -= driveHome * auto.spezVerbrauch #Letzte Strecke fahren
 		else:
 			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch
@@ -242,20 +243,24 @@ class LadeController(LadeController_Personen):
 		last: float
 			Residuallast, welche abgedeckt werden soll
 		"""
-		cars = self.GetAvailableCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
+		cars = self.GetChargingCars() #Alle Autos die angesteckt sind und die mindestens die Mindestladung haben
+		carstoDischarge = []
 		for car in cars:
-			car.diff = car.kapazitat - car.minLadung #Potenzielle entladbare Energie berechnen
+			if car.kapazitat > car.minLadung:
+				carstoDischarge.append(car)
+				car.diff = car.kapazitat - car.minLadung #Potenzielle entladbare Energie berechnen
+
 		leistung = last #Leistungs beschreibt die Energie, die entladen werden konnte
-		cars.sort(key=lambda x: x.diff, reverse= True) #Autos werden nach der größten entladbaren Kapazität sortiert
-		if cars:
-			for car in cars:
+		carstoDischarge.sort(key=lambda x: x.diff, reverse= True) #Autos werden nach der größten entladbaren Kapazität sortiert
+		if carstoDischarge:
+			for car in carstoDischarge:
 				if last == 0: #Wenn die Last abgedeckt werden konnte, konnen wir früher abbrechen
 					break
 				qtoTake = min([car.leistung_MAX, last, car.diff]) #Die niedrigste Zahl davon kann entladen werden
 				qtoTake -= car.Entladen(qtoTake)
 				last -= qtoTake
-				if car.kapazitat < car.minLadung:
-					raise ValueError("Auto zu niedrig entladen")
+				#if car.kapazitat < car.minLadung:
+				#	raise ValueError("Auto zu niedrig entladen")
 
 		leistung -= last
 		return last, leistung
@@ -270,13 +275,11 @@ class LadeController(LadeController_Personen):
 				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
 				car.Laden(toLoad/ car.effizienz)
 
-				if car.kapazitat > car.minLadung:
-					raise ValueError("Kapazität ist zu Hoch")
+				#if car.kapazitat > car.minLadung:
+				#	raise ValueError("Kapazität ist zu Hoch")
 				if bTrack:
 					DS.ZV.gridCharging += toLoad
 					DS.zeitVar.gridChargingHourly[hour] += toLoad
-					if car.alreadyLoaded == car.leistung_MAX:
-						DS.ZV.counterCharging += 1
 
 
 	def ResetAlreadyLoaded(self):
@@ -284,3 +287,17 @@ class LadeController(LadeController_Personen):
 		cars = self.GetChargingCars()
 		for car in cars:
 			car.alreadyLoaded = car.leistung_MAX
+
+	def CalcUngenutzteLadung(self, hour):
+		cars = [car for car in self.li_Autos if car.kapazitat > car.minLadung]
+		if cars:
+			maxLadung = sum([car.maxLadung for car in cars])
+			minLadung = sum([car.minLadung for car in cars])
+			aktLadung = sum([car.kapazitat for car in cars])
+		
+			genutzt = aktLadung - minLadung
+			ungenutzt = maxLadung - aktLadung
+			percent = ungenutzt / (ungenutzt+genutzt) * 100
+			DS.zeitVar.ungenutzteLadung[hour] = percent
+		else:
+			DS.zeitVar.ungenutzteLadung[hour] = 100

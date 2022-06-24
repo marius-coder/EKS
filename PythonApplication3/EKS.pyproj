@@ -39,6 +39,8 @@
     <Compile Include="EMobility\main.py" />
     <Compile Include="EMobility\LadeController_Main.py" />
     <Compile Include="EMobility\Ladecontroller_Helper.py" />
+    <Compile Include="EMobility\Optimization.py" />
+    <Compile Include="EMobility\PE_CO2.py" />
     <Compile Include="EMobility\PlotScenarios.py" />
     <Compile Include="EMobility\PlotMobility.py" />
     <Compile Include="EMobility\ReadInput.py" />

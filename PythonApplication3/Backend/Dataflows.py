@@ -15,7 +15,6 @@ class Dataflows():
         self.ventilationVerluste = [0] * 8760 #Ventilationswärmeverluste
         self.infiltrationVerluste = [0] * 8760 #Infiltrationswärmeverluste
         self.transmissionVerluste = [0] * 8760 #Transmissionswärmeverluste
-
         
     def InitSzenWP(self):
         self.stromWP_HZG = [] #Liste mit dem verbrauchten Strom der Warmepumpe fur Heizen
