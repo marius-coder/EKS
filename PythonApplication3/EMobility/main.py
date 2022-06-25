@@ -15,6 +15,7 @@ from PE_CO2 import PE_CO2
 import Plotting.DataScraper as DS
 
 import numpy as np
+import pandas as pd
 
 AutoDaten = inputData["AutoDaten"]
 PersonenDaten = inputData["PersonenDaten"]
@@ -47,11 +48,14 @@ for scen in scenarios:
 			if DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour] > 0:
 				DS.zeitVar.fahrverbrauchLokal[hour] = DS.zeitVar.pvChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
 				DS.zeitVar.fahrverbrauchNetz[hour] = DS.zeitVar.gridChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
-		
-		PE_CO2.CalcPE(szen= scenariosWärme[i], name= "OhnePV", gfa= Control.gfa, resLast= gesamtBedarf)
-		PE_CO2.CalcPE(szen= scenariosWärme[i], name= "MitPV", gfa= Control.gfa, resLast= DS.zeitVar.resLastBeforeEMobility)
-		PE_CO2.CalcPE(szen= scenariosWärme[i], name= "MitLC", gfa= Control.gfa, resLast= DS.zeitVar.resLastAfterEMobility)
-		PE_CO2.CalcPE(szen= scenariosWärme[i], name= "MitZureisende", gfa= Control.gfa, resLast= DS.zeitVar.resLastAfterZureisende)
+
+		names = ["VonWärme","OhnePV","MitPV","MitLC","MitZureisende"]
+		datas = [None,gesamtBedarf,DS.zeitVar.resLastBeforeEMobility,DS.zeitVar.resLastAfterEMobility,DS.zeitVar.resLastAfterZureisende]
+		df= pd.read_csv(f"./Ergebnis/Ergebnis_Gebäude{scenariosWärme[i]}.csv", delimiter= ";", decimal= ",", encoding= "cp1252")
+		for name, data in zip(names,datas):
+			PE_CO2.CalcPE(szen= scenariosWärme[i], df= df, szenPV= scen, name= name, gfa= Control.gfa, resLast= data)
+		df.to_csv(f"./Ergebnis/Endergebnis/Ergebnis_Gebäude_{scen}_{scenariosWärme[i]}.csv", sep= ";", decimal= ",", encoding= "cp1252")
+
 				
 		personenKilometerElektrisch = 0
 		for person in Control.persons:

@@ -41,11 +41,11 @@ class Konversionsfaktoren():
 		
 
 
-	def CalcPE(self, szen, name, gfa, resLast = None):
+	def CalcPE(self, szen, szenPV, name, gfa, df, resLast = None):
 		buildings = {"W1":15.35,"W2":15.99,"W3":16.33,"W4":14.19,"G1":3.07,"G2":3.9,"G3":4.98,"G4":2.87,"S1":17.98,"S2":5.35}
 		#szens = ["FW","WP"]
 
-		df = pd.read_csv(f"./Ergebnis/Ergebnis_Gebäude{szen}.csv", delimiter= ";", decimal= ",", encoding= "cp1252")
+		
 		for building, percent in buildings.items():
 			interPE = []
 			interCO2 = []
@@ -66,7 +66,7 @@ class Konversionsfaktoren():
 					interCO2.append(strombedarf * list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1])
 			df[f"{building}_Primärenergie_{name} [kWh/m²]"]= interPE
 			df[f"{building}_CO2_{name} [kgCO2/m²]"]= interCO2
-		df.to_csv(f"./Ergebnis/Ergebnis_Gebäude"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
+		
 PE_CO2 = Konversionsfaktoren()
 	
 

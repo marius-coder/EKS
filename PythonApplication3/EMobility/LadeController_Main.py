@@ -160,7 +160,7 @@ class LadeController(LadeController_Personen):
 		if len(statusCars) != len(self.li_Autos):
 			raise ValueError("")
 		DS.zeitVar.StateofCars.append(statusCars)
-		self.CalcUngenutzteLadung(hour)
+		self.CalcUngenutzterSpeicherplatz(hour)
 
 	def PickCar(self, km:float):
 		"""Funktion die ein passendes Auto aussucht. Dabei wird auf den Bedarf noch ein Sicherheitsfaktor aufgeschlagen
@@ -288,8 +288,13 @@ class LadeController(LadeController_Personen):
 		for car in cars:
 			car.alreadyLoaded = car.leistung_MAX
 
-	def CalcUngenutzteLadung(self, hour):
-		cars = [car for car in self.li_Autos if car.kapazitat > car.minLadung]
+	def CalcUngenutzterSpeicherplatz(self, hour):
+		"""Berechnet den Anteil der nicht verfügbaren Ladung für die bi-direktionalität
+		Dabei wird der Anteil für alle Autos berechnet, die laden und mindestens die Mindestladung haben
+		hour: int
+			Stunde des Jahres"""
+		cars = [car for car in self.GetChargingCars() if car.kapazitat > car.minLadung]
+
 		if cars:
 			maxLadung = sum([car.maxLadung for car in cars])
 			minLadung = sum([car.minLadung for car in cars])
