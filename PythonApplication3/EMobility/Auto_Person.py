@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-
-
+import Plotting.DataScraper as DS
 
 from Ladecontroller_Helper import set_unit
 
@@ -28,6 +28,8 @@ class Auto():
 		self.ID = counter #Unique ID die jedem Auto gegeben wird
 		self.spezVerbrauch = AutoDaten["Verbrauch"] #kWh/km https://ev-database.de/cheatsheet/energy-consumption-electric-car
 		self.alreadyLoaded = self.leistung_MAX	#Laufvariable die angibt wie viel nach der PV noch geladen werden darf
+
+		DS.ZV.emobilitätNetzGeladen += self.kapazitat
 
 	@set_unit("kWh")
 	def Laden(self, qtoLoad):

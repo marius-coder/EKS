@@ -94,6 +94,9 @@ class Zwischenvariablen:
 
         self.gridCharging = 0
 
+        self.emobilitätErneuerbarGeladen = 0
+        self.emobilitätNetzGeladen = 0
+
 
 
 
@@ -121,6 +124,9 @@ class Zeitvariablen:
         
         self.fahrverbrauchLokal = [0]*8760
         self.fahrverbrauchNetz = [0]*8760
+        
+        self.entladungLokal = [0]*8760
+        self.entladungNetz = [0]*8760
 
         self.ungenutzteLadung = [0]*8760 #Prozent der ungenutzten Ladung
 

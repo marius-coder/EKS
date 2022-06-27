@@ -26,8 +26,30 @@ scenarios = ["PV", "PV_max"]
 dataWärme = [[0]*8760,Strombedarf["WP"]]
 scenariosWärme = ["FW","WP"]
 
+
+def GetPVOnly(scen):
+	DS.scraper.__init__()
+	DS.ZV.__init__()
+	DS.zeitVar.__init__()
+	PVOnly = LadeController(AutoDaten= AutoDaten, distMinLadung= {"100":100}, PersonenDaten= PersonenDaten,
+						   infoLehrpersonal= ExterneDaten["Info Lehrpersonal"], infoGewerbepersonal= ExterneDaten["Info Sonstiges Personal"])
+	PV = DefinePV(scen)
+	for hour in range(8760):
+		pv = PV[hour]
+		bedarf = Strombedarf["Wohnen"][hour] + Strombedarf["Gewerbe"][hour] + Strombedarf["Schule"][hour] + scenWärme[hour]
+
+		resLast = bedarf - pv
+		DS.zeitVar.resLastBeforeEMobility[hour] = resLast
+		PVOnly.CheckTimestep(hour= hour,resLast= resLast)
+
+	return DS.zeitVar.gridChargingHourly, DS.zeitVar.pvChargingHourly
+
+
+df_PE_CO2 = pd.DataFrame()
+
 for scen in scenarios:
 	for i, scenWärme in enumerate(dataWärme):
+		PVDaten = GetPVOnly(scen)
 		DS.scraper.__init__()
 		DS.ZV.__init__()
 		DS.zeitVar.__init__()
@@ -36,6 +58,18 @@ for scen in scenarios:
 		PV = DefinePV(scen)
 
 		gesamtBedarf = [a + b + c + d for a,b,c,d in zip(Strombedarf["Wohnen"], Strombedarf["Gewerbe"],Strombedarf["Schule"],scenWärme)]
+		primEnergieOhnePV={"Netz":[],"Erneuerbar":[],"Gutschreibung":[]}
+		primEnergieMitPV={"Netz":[],"Erneuerbar":[],"Gutschreibung":[]}
+		primEnergieMitLC={"Netz":[],"Erneuerbar":[],"Gutschreibung":[]}
+		primEnergieMitZureisende={"Netz":[],"Erneuerbar":[],"Gutschreibung":[]}
+		listPE = [primEnergieOhnePV,primEnergieMitPV,primEnergieMitLC,primEnergieMitZureisende]
+		listCO2 = []
+
+		dict_PE_CO2= {"PE_OhnePV [kWh/m²]":[],"CO2_OhnePV [kg/m²]":[],"PE_MitPV [kWh/m²]":[],"CO2_MitPV [kg/m²]":[],
+						"PE_MitLC [kWh/m²]":[],"CO2_MitLC [kg/m²]":[],"PE_MitZureisende [kWh/m²]":[],"CO2_MitZureisende [kg/m²]":[]}
+		
+
+
 
 		for hour in range(8760):
 			pv = PV[hour]
@@ -45,18 +79,30 @@ for scen in scenarios:
 			resLast = bedarf - pv
 			DS.zeitVar.resLastBeforeEMobility[hour] = resLast
 			Control.CheckTimestep(hour= hour,resLast= resLast)
-			if DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour] > 0:
-				DS.zeitVar.fahrverbrauchLokal[hour] = DS.zeitVar.pvChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
-				DS.zeitVar.fahrverbrauchNetz[hour] = DS.zeitVar.gridChargingHourly[hour]/(DS.zeitVar.gridChargingHourly[hour]+DS.zeitVar.pvChargingHourly[hour])*DS.zeitVar.carDemandHourly[hour]
+			
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieOhnePV, gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+												externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour])
+			 
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitPV,gebäudeLast= bedarf,emobilitätGridCharging= PVDaten[0][hour],
+									externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, 
+									emobilitätPVCharging= PVDaten[1][hour])
 
-		names = ["VonWärme","OhnePV","MitPV","MitLC","MitZureisende"]
-		datas = [None,gesamtBedarf,DS.zeitVar.resLastBeforeEMobility,DS.zeitVar.resLastAfterEMobility,DS.zeitVar.resLastAfterZureisende]
-		df= pd.read_csv(f"./Ergebnis/Ergebnis_Gebäude{scenariosWärme[i]}.csv", delimiter= ";", decimal= ",", encoding= "cp1252")
-		for name, data in zip(names,datas):
-			PE_CO2.CalcPE(szen= scenariosWärme[i], df= df, szenPV= scen, name= name, gfa= Control.gfa, resLast= data)
-		df.to_csv(f"./Ergebnis/Endergebnis/Ergebnis_Gebäude_{scen}_{scenariosWärme[i]}.csv", sep= ";", decimal= ",", encoding= "cp1252")
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitLC,gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+							externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, EmobilitätzuGebäudeErneuerbar= DS.zeitVar.entladungLokal[hour],
+							emobilitätPVCharging= DS.zeitVar.pvChargingHourly[hour],EmobilitätzuGebäudeNetz= DS.zeitVar.entladungNetz[hour])
 
-				
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitZureisende,gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+							externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, 
+							emobilitätPVCharging= DS.zeitVar.pvChargingHourly[hour],emobilitätZureisende= DS.zeitVar.LadeLeistungAußenstehende[hour])
+			names = ["OhnePV","MitPV","MitLC","MitZureisende"]
+			liste = []
+			for dic,name in zip(listPE,names):
+				pe = PE_CO2.CalcPrimärEnergie(data= dic, hour= hour, gfa= Control.gfa)
+				co2 = PE_CO2.CalcCO2(data= dic, hour= hour, gfa= Control.gfa)
+				dict_PE_CO2[f"PE_{name} [kWh/m²]"].append(pe)
+				dict_PE_CO2[f"CO2_{name} [kg/m²]"].append(co2)
+		df_PE_CO2 = pd.DataFrame(dict_PE_CO2)
+		df_PE_CO2.to_csv(f"./Ergebnis/Endergebnis/Ergebnis_Gebäude_{scen}_{scenariosWärme[i]}.csv", sep= ";", decimal= ",", encoding= "cp1252")
 		personenKilometerElektrisch = 0
 		for person in Control.persons:
 			personenKilometerElektrisch += person.wegMitAuto 

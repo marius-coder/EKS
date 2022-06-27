@@ -113,7 +113,7 @@ class LadeController(LadeController_Personen):
 
 			if resLast - resLastAfterDischarging < 0:
 				raise ValueError("eMobilityDischarge darf nicht negativ sein")
-
+			self.CalcFahrverbrauch(demand= entladungEMobility,hour= hour, demandType= "Entladung")
 			DS.zeitVar.eMobilityDischarge[hour] =  entladungEMobility
 			DS.zeitVar.buildingDemandHourly[hour] += entladungEMobility
 		else:
@@ -123,7 +123,7 @@ class LadeController(LadeController_Personen):
 			resLastAfterCharging, ladungEMobility = self.ChargeCars(cars= cars, last= abs(resLast), bTrack= True)
 			DS.zeitVar.eMobilityCharge[hour] = ladungEMobility	
 			DS.zeitVar.pvChargingHourly[hour] += ladungEMobility
-
+			DS.ZV.emobilitätErneuerbarGeladen += ladungEMobility
 			#Nachdem die Quartiersautos geladen haben, werden die zureisenden geladen
 			cars = self.GetAußenstehendeCars(hour)
 			if resLastAfterCharging > 0:
@@ -183,6 +183,27 @@ class LadeController(LadeController_Personen):
 		car = next(x for x in cars if x.kapazitat >= demand) #Es wird das Auto gesucht, welche den Bedarf gerade noch decken kann
 		return car
 
+	def CalcFahrverbrauch(self, demand, hour, demandType):
+		factorErneuerbar = DS.ZV.emobilitätErneuerbarGeladen / (DS.ZV.emobilitätErneuerbarGeladen + DS.ZV.emobilitätNetzGeladen)
+		factorNetz = DS.ZV.emobilitätNetzGeladen / (DS.ZV.emobilitätErneuerbarGeladen + DS.ZV.emobilitätNetzGeladen)
+
+		entladungErn = factorErneuerbar * demand
+		entladungNetz = factorNetz * demand
+		DS.ZV.emobilitätErneuerbarGeladen -= entladungErn
+		DS.ZV.emobilitätNetzGeladen -= entladungNetz
+
+		if DS.ZV.emobilitätErneuerbarGeladen < 0 or DS.ZV.emobilitätNetzGeladen < 0:
+			raise ValueError("EmobilitätLadung unter Null")
+
+		if demandType == "Fahren":
+			DS.zeitVar.fahrverbrauchLokal[hour] += entladungErn
+			DS.zeitVar.fahrverbrauchNetz[hour] += entladungNetz
+		elif demandType == "Entladung":
+			DS.zeitVar.entladungLokal[hour] += entladungErn
+			DS.zeitVar.entladungNetz[hour] += entladungNetz
+		
+		
+
 	def UpdateLadestand(self, auto:Auto, kilometer:list, hour:int) -> None:
 		"""Nimmt ein 'Auto' und zufallig generierte kilometer um die Ladung zu reduzieren
 		auto: Auto
@@ -199,14 +220,17 @@ class LadeController(LadeController_Personen):
 			driveHome = choice(kilometer) #Es wird ein zufälliger Weg als Rückweg gewählt
 			kilometer.remove(driveHome)
 			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch #Erste Strecke fahren
+			self.CalcFahrverbrauch(demand=sum(kilometer) * auto.spezVerbrauch,hour= hour, demandType= "Fahren")
 			space = auto.maxLadung - auto.kapazitat
 			auto.kapazitat = auto.maxLadung #Auto vollladen
 			DS.ZV.gridCharging += space
-			DS.zeitVar.gridChargingHourly[hour] += space
-			DS.zeitVar.LadeLeistungExterneStationen[hour] += space
+			DS.ZV.emobilitätNetzGeladen += space
+			DS.zeitVar.LadeLeistungExterneStationen[hour] += space / auto.effizienz
 			auto.kapazitat -= driveHome * auto.spezVerbrauch #Letzte Strecke fahren
+			self.CalcFahrverbrauch(demand=driveHome * auto.spezVerbrauch,hour= hour, demandType= "Fahren")
 		else:
 			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch
+			self.CalcFahrverbrauch(demand=sum(kilometer) * auto.spezVerbrauch,hour= hour, demandType= "Fahren")
 
 		if auto.kapazitat < 0:
 			raise ValueError("Auto hat negative Ladung")
@@ -278,8 +302,9 @@ class LadeController(LadeController_Personen):
 				#if car.kapazitat > car.minLadung:
 				#	raise ValueError("Kapazität ist zu Hoch")
 				if bTrack:
+					DS.ZV.emobilitätNetzGeladen += toLoad
 					DS.ZV.gridCharging += toLoad
-					DS.zeitVar.gridChargingHourly[hour] += toLoad
+					DS.zeitVar.gridChargingHourly[hour] += toLoad  / car.effizienz
 
 
 	def ResetAlreadyLoaded(self):

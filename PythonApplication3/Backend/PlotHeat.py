@@ -17,10 +17,20 @@ def PlotspezVerbrauch(dicBuildings):
     dic = {}
 
     for key,building in dicBuildings.items():
-        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL <= 0 ]) / building.gfa)
+        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL <= 0 ]))
 
+    toPlot = pd.DataFrame({ "W1" : dic["W1"],
+                            "W2" : dic["W2"],
+                            "W3" : dic["W3"],
+                            "W4" : dic["W4"],
+                            #"G1" : dic["G1"],
+                            #"G2" : dic["G2"],
+                            #"G3" : dic["G3"],
+                            #"G4" : dic["G4"],
+                            "S1" : dic["S1"],
+                            "S2" : dic["S2"],
 
-    toPlot = pd.DataFrame(dic, index = ['W1', 'W2', 'W3', 'W4'])
+                            }, index = ['W1', 'W2', 'W3', 'W4'])
 
     sns.barplot(data=toPlot, ax = ax)
     
@@ -29,6 +39,7 @@ def PlotspezVerbrauch(dicBuildings):
     ax.set_ylabel('spezifischer Heizwärmebedarf [kWh/m²a]', fontsize=14)
     ax.tick_params(axis='both', which='major', labelsize=12)
     ax.set_axisbelow(True)
+    ax.set_ylim([0, 50])
     ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 
@@ -38,10 +49,21 @@ def PlotspezVerbrauchKWB(dicBuildings):
     dic = {}
 
     for key,building in dicBuildings.items():
-        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL >= 0 ]) / building.gfa)
+        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL >= 0 ]))
 
 
-    toPlot = pd.DataFrame(dic, index = ['W1', 'W2', 'W3', 'W4'])
+    toPlot = pd.DataFrame({ "W1" : dic["W1"],
+                            "W2" : dic["W2"],
+                            "W3" : dic["W3"],
+                            "W4" : dic["W4"],
+                            #"G1" : dic["G1"],
+                            #"G2" : dic["G2"],
+                            #"G3" : dic["G3"],
+                            #"G4" : dic["G4"],
+                            "S1" : dic["S1"],
+                            "S2" : dic["S2"],
+
+                            }, index = ['W1', 'W2', 'W3', 'W4'])
 
     sns.barplot(data=toPlot, ax = ax)
     
@@ -51,7 +73,7 @@ def PlotspezVerbrauchKWB(dicBuildings):
     ax.tick_params(axis='both', which='major', labelsize=12)
     ax.set_axisbelow(True)
     ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
-    ax.set_ylim([0, 35])
+    ax.set_ylim([0, 50])
     plt.show()
 
 
@@ -94,10 +116,10 @@ def PlotInnentemperatur(data):
                             "W2" : data["W2"].DF.tInnen,
                             "W3" : data["W3"].DF.tInnen,
                             "W4" : data["W4"].DF.tInnen,
-                            "G1" : data["G1"].DF.tInnen,
-                            "G2" : data["G2"].DF.tInnen,
-                            "G3" : data["G3"].DF.tInnen,
-                            "G4" : data["G4"].DF.tInnen,
+                            #"G1" : data["G1"].DF.tInnen,
+                            #"G2" : data["G2"].DF.tInnen,
+                            #"G3" : data["G3"].DF.tInnen,
+                            #"G4" : data["G4"].DF.tInnen,
                             "S1" : data["S1"].DF.tInnen,
                             "S2" : data["S2"].DF.tInnen,
                             })

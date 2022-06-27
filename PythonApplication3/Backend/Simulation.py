@@ -29,28 +29,28 @@ class Simulation():
 			  dach = {"Fläche":1973.94,"U-Wert":u_Dach},
 			  boden = {"Fläche":0,"U-Wert":u_Boden}, 
 			  gfa = 9870, volumen=35532,
-			  anzPersonen=311, stromVerbrauch = 346885)
+			  anzPersonen=311, stromVerbrauch = 256647)
 
 		W2 = Building( wand = {"Fläche":3556.8,"U-Wert":u_Wand},
 					  fenster = {"Fläche":2371.2,"U-Wert":u_Fenster},
 					  dach = {"Fläche":1224,"U-Wert":u_Dach},
 					  boden = {"Fläche":0,"U-Wert":u_Boden},
 					  gfa = 10282, volumen=42228,
-					  anzPersonen=405, stromVerbrauch = 451627)
+					  anzPersonen=405, stromVerbrauch = 334086)
 
 		W3 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
 					  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
 					  dach = {"Fläche":748.52,"U-Wert":u_Dach},
 					  boden = {"Fläche":0,"U-Wert":u_Boden},
 					  gfa = 10500, volumen=33750,
-					  anzPersonen=331, stromVerbrauch = 368929)
+					  anzPersonen=331, stromVerbrauch = 272862)
 
 		W4 = Building( wand = {"Fläche":2350.65,"U-Wert":u_Wand},
 					  fenster = {"Fläche":1567.10,"U-Wert":u_Fenster},
 					  dach = {"Fläche":652.8,"U-Wert":u_Dach},
 					  boden = {"Fläche":0,"U-Wert":u_Boden},
 					  gfa = 9128, volumen=29340,
-					  anzPersonen=288, stromVerbrauch = 321124)
+					  anzPersonen=288, stromVerbrauch = 237511)
 
 		G1 = Building( wand = {"Fläche":262.69,"U-Wert":u_Wand},
 					  fenster = {"Fläche":175.13,"U-Wert":u_Fenster},
@@ -92,7 +92,7 @@ class Simulation():
 					  dach = {"Fläche":906.67,"U-Wert":u_Dach},
 					  boden = {"Fläche":912.67+454.89,"U-Wert":u_Boden},
 					  gfa = 3438.46, volumen=9966.3,
-					  anzPersonen=198, stromVerbrauch = 68769)
+					  anzPersonen=198, stromVerbrauch = 103153)
 		self.dic_buildings = {"W1":W1,"W2":W2,"W3":W3,"W4":W4,"G1":G1,"G2":G2,"G3":G3,"G4":G4,"S1":S1,"S2":S2}  
 		for key,item in self.dic_buildings.items():
 			item.InitHeizlast()
@@ -344,10 +344,10 @@ class Simulation():
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 
 
-		#PlotspezVerbrauch(self.dic_buildings)
-		#PlotspezVerbrauchKWB(self.dic_buildings)
+		PlotspezVerbrauch(self.dic_buildings)
+		PlotspezVerbrauchKWB(self.dic_buildings)
 		#PlotWochenVerbrauch(self.dic_buildings)
-		#PlotInnentemperatur(self.dic_buildings)
+		PlotInnentemperatur(self.dic_buildings)
 
 	def GetStrombedarf(self, szen):
 		self.summeWohnen = 0

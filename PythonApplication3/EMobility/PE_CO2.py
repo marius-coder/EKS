@@ -38,34 +38,66 @@ class Konversionsfaktoren():
 		self.fernwärmePrimärenergie = 1.6
 		self.fernwärmeEmissionen = 59 #kgCO2/kWh
 
+
+	def CalcEnergieflüsse(self, obj, gebäudeLast, emobilitätGridCharging, externeLadung, emobilitätPVCharging=0 ,pv=0,
+					  emobilitätZureisende=0,EmobilitätzuGebäudeErneuerbar=0, EmobilitätzuGebäudeNetz=0,
+					  fahrverbrauchLokal=0,fahrverbrauchNetz=0):
+		PVtoGebäude = min(pv,gebäudeLast)
+		
+		PVtoEmobilität = emobilitätPVCharging
+
+		PVtoZureisende = emobilitätZureisende
+
+		PVtoNetz = max(0,pv-(PVtoGebäude+PVtoEmobilität+PVtoZureisende))
+
+		ExterntoEmobilität = externeLadung
+		NetztoEmobilität = emobilitätGridCharging
+
+		EmobilitätzuGebäudeErneuerbar = EmobilitätzuGebäudeErneuerbar
+		EmobilitätzuGebäudeNetz = EmobilitätzuGebäudeNetz
+
+		NetztoGebäude = gebäudeLast - (PVtoGebäude + EmobilitätzuGebäudeErneuerbar + EmobilitätzuGebäudeNetz)
+
+
+		Netz = NetztoEmobilität + NetztoGebäude + ExterntoEmobilität
+		Erneuerbar = PVtoGebäude + PVtoEmobilität
+		Gutschreibung = PVtoZureisende + PVtoNetz
+
+		obj["Netz"].append(Netz)
+		obj["Erneuerbar"].append(Erneuerbar)
+		obj["Gutschreibung"].append(Gutschreibung)
+
+
+	def CalcPrimärEnergie(self, data, hour, gfa):
+		pe = 0
+		pe += data["Netz"][hour] * list(self.stromnetzPrimärenergie.values())[DetermineMonth(hour)-1] / gfa
+		pe += data["Erneuerbar"][hour] / gfa
+		pe += data["Gutschreibung"][hour] *-1 / gfa
+
+		return pe
+
+	def CalcCO2(self, data, hour, gfa):
+		co2 = 0
+		co2 += data["Netz"][hour] * list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1] / gfa
+		co2 += data["Erneuerbar"][hour] * 0.045 / gfa
+		co2 += data["Gutschreibung"][hour] * (list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1]-0.045) *-1 / gfa
+
+		return co2
+
 		
 
-
-	def CalcPE(self, szen, szenPV, name, gfa, df, resLast = None):
-		buildings = {"W1":15.35,"W2":15.99,"W3":16.33,"W4":14.19,"G1":3.07,"G2":3.9,"G3":4.98,"G4":2.87,"S1":17.98,"S2":5.35}
-		#szens = ["FW","WP"]
-
+	def CalcPE(self, szen,szenPV, name, gfa, pvChargingHourly, gridChargingHourly, resLast = None):
+		df= pd.DataFrame()
+		primEnergieOhnePV = self.CalcEnergieflüsse()
 		
-		for building, percent in buildings.items():
-			interPE = []
-			interCO2 = []
-			for hour in range(8760):
-				if szen == "WP":
-					if resLast == None:
-						strombedarf = df[building+"_stromBedarf [kWh]"][hour]
-					else:
-						strombedarf = (resLast[hour] / gfa) * percent / 100
-					interPE.append(strombedarf * list(self.stromnetzPrimärenergie.values())[DetermineMonth(hour)-1])
-					interCO2.append(strombedarf * list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1])
-				if szen == "FW":
-					if resLast == None:
-						strombedarf = df[building+"_stromBedarf [kWh]"][hour]
-					else:
-						strombedarf = (resLast[hour] / gfa) * percent / 100
-					interPE.append(strombedarf * list(self.stromnetzPrimärenergie.values())[DetermineMonth(hour)-1])
-					interCO2.append(strombedarf * list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1])
-			df[f"{building}_Primärenergie_{name} [kWh/m²]"]= interPE
-			df[f"{building}_CO2_{name} [kgCO2/m²]"]= interCO2
+
+		df[f"Primärenergie_{name[0]} [kWh/m²]"]= primEnergieOhnePV
+		df[f"Primärenergie_{name[1]} [kWh/m²]"]= primEnergieMitPV
+		df[f"Primärenergie_{name[2]} [kWh/m²]"]= primEnergieMitPVMitLC
+		df[f"Primärenergie_{name[3]} [kWh/m²]"]= primEnergieMitPVMitZureisende
+		df.to_csv(f"./Ergebnis/Endergebnis/Ergebnis_Gebäude_{szenPV}_{szen}.csv", sep= ";", decimal= ",", encoding= "cp1252")
+
+
 		
 PE_CO2 = Konversionsfaktoren()
 	
