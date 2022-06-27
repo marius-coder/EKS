@@ -41,8 +41,8 @@ def GetPVOnly(scen):
 		resLast = bedarf - pv
 		DS.zeitVar.resLastBeforeEMobility[hour] = resLast
 		PVOnly.CheckTimestep(hour= hour,resLast= resLast)
-
-	return DS.zeitVar.gridChargingHourly, DS.zeitVar.pvChargingHourly
+		LadeZyklen = (sum(DS.zeitVar.eMobilityCharge) + DS.ZV.gridCharging) / DS.ZV.maxLadung / PVOnly.anzAutos
+	return DS.zeitVar.gridChargingHourly, DS.zeitVar.pvChargingHourly, DS.zeitVar.fahrverbrauchNetz, DS.zeitVar.fahrverbrauchLokal, LadeZyklen
 
 
 df_PE_CO2 = pd.DataFrame()
@@ -80,20 +80,20 @@ for scen in scenarios:
 			DS.zeitVar.resLastBeforeEMobility[hour] = resLast
 			Control.CheckTimestep(hour= hour,resLast= resLast)
 			
-			PE_CO2.CalcEnergieflüsse(obj= primEnergieOhnePV, gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieOhnePV, gebäudeLast= bedarf,fahrverbrauchNetz= DS.zeitVar.fahrverbrauchNetz[hour]+ DS.zeitVar.fahrverbrauchLokal[hour],
 												externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour])
 			 
-			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitPV,gebäudeLast= bedarf,emobilitätGridCharging= PVDaten[0][hour],
-									externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, 
-									emobilitätPVCharging= PVDaten[1][hour])
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitPV,gebäudeLast= bedarf,fahrverbrauchNetz= PVDaten[2][hour],
+									externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, fahrverbrauchLokal= PVDaten[3][hour]
+									)
 
-			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitLC,gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitLC,gebäudeLast= bedarf,fahrverbrauchNetz= DS.zeitVar.fahrverbrauchNetz[hour],
 							externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, EmobilitätzuGebäudeErneuerbar= DS.zeitVar.entladungLokal[hour],
-							emobilitätPVCharging= DS.zeitVar.pvChargingHourly[hour],EmobilitätzuGebäudeNetz= DS.zeitVar.entladungNetz[hour])
+							fahrverbrauchLokal= DS.zeitVar.fahrverbrauchLokal[hour],EmobilitätzuGebäudeNetz= DS.zeitVar.entladungNetz[hour])
 
-			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitZureisende,gebäudeLast= bedarf,emobilitätGridCharging= DS.zeitVar.gridChargingHourly[hour],
+			PE_CO2.CalcEnergieflüsse(obj= primEnergieMitZureisende,gebäudeLast= bedarf,fahrverbrauchNetz= DS.zeitVar.fahrverbrauchNetz[hour],
 							externeLadung= DS.zeitVar.LadeLeistungExterneStationen[hour], pv= pv, 
-							emobilitätPVCharging= DS.zeitVar.pvChargingHourly[hour],emobilitätZureisende= DS.zeitVar.LadeLeistungAußenstehende[hour])
+							fahrverbrauchLokal= DS.zeitVar.fahrverbrauchLokal[hour],emobilitätZureisende= DS.zeitVar.LadeLeistungAußenstehende[hour])
 			names = ["OhnePV","MitPV","MitLC","MitZureisende"]
 			liste = []
 			for dic,name in zip(listPE,names):
@@ -131,6 +131,7 @@ for scen in scenarios:
 		DS.scraper.indikatoren["erhöhung Eigenverbrauch Zureisende [%]"] = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterZureisende)[0] \
 																/ CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterEMobility)[0] * 100 - 100
 		DS.scraper.indikatoren["LadeEntlade_Zyklen pro Auto [Anzahl]"] = (sum(DS.zeitVar.eMobilityCharge) + DS.ZV.gridCharging) / DS.ZV.maxLadung / Control.anzAutos
+		DS.scraper.indikatoren["LadeEntlade_Zyklen pro Auto ohne LC [Anzahl]"] = PVDaten[4]
 
 		#Verbrauch der E-Mobilität zum Fahren
 		DS.scraper.eMobilitätFahren["Gesamt [kWh/Auto]"] = DS.ZV.verbrauchFahrenEmobilität / Control.anzAutos

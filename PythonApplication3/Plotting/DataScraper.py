@@ -28,6 +28,7 @@ class Scraper():
             "erhöhung Eigenverbrauch E-Mobilität [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch im Vergleich ohne Ladecontroller erhöht werden konnte
             "erhöhung Eigenverbrauch Zureisende [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch durch die Zureisenden erhöht wird
             "LadeEntlade_Zyklen pro Auto [Anzahl]" : 0,
+            "LadeEntlade_Zyklen pro Auto ohne LC [Anzahl]" : 0,            
             }
 
         #Verbrauch der E-Mobilität zum Fahren
