@@ -81,6 +81,9 @@ class LadeController_Personen():
 		self.tooMany = len(self.readytoComeBack + self.awayPersons)
 		self.wegfahren = GenerateReiseProfil(self.travelData["Losfahren"], self.percentAbweichung)
 		self.ankommen = GenerateReiseProfil(self.travelData["Ankommen"], self.percentAbweichung)
+		if DS.ZV.anzahlReserveAutos != None:
+			DS.zeitVar.anzahlReserveAutos.append(DS.ZV.anzahlReserveAutos)
+		DS.ZV.anzahlReserveAutos = self.anzAutos
 		return drivingPersons
 
 	def Control(self, losZahl2, conZahl):
@@ -167,6 +170,7 @@ class LadeController_Personen():
 			statePersons.append(False)
 		for person in self.readytoComeBack:
 			statePersons.append(False)
-
+		if len(self.GetChargingCars()) < DS.ZV.anzahlReserveAutos:
+			DS.ZV.anzahlReserveAutos = len(self.GetChargingCars())
 		DS.zeitVar.StateofDrivingPersons.append(statePersons)
 				

@@ -28,7 +28,8 @@ class Scraper():
             "erhöhung Eigenverbrauch E-Mobilität [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch im Vergleich ohne Ladecontroller erhöht werden konnte
             "erhöhung Eigenverbrauch Zureisende [%]" : 0, #Anteil der angibt, wie sehr der Eigenverbrauch durch die Zureisenden erhöht wird
             "LadeEntlade_Zyklen pro Auto [Anzahl]" : 0,
-            "LadeEntlade_Zyklen pro Auto ohne LC [Anzahl]" : 0,            
+            "LadeEntlade_Zyklen pro Auto ohne LC [Anzahl]" : 0,  
+            "Reserveautos [Anzahl]" : 0, #Anzahl Autos die nicht unter Tags fahren, (Täglicher Durchschnitt)
             }
 
         #Verbrauch der E-Mobilität zum Fahren
@@ -97,6 +98,7 @@ class Zwischenvariablen:
 
         self.emobilitätErneuerbarGeladen = 0
         self.emobilitätNetzGeladen = 0
+        self.anzahlReserveAutos = None
 
 
 
@@ -129,6 +131,8 @@ class Zeitvariablen:
         self.entladungLokal = [0]*8760
         self.entladungNetz = [0]*8760
 
+        self.anzahlReserveAutos = []
+
         self.ungenutzteLadung = [0]*8760 #Prozent der ungenutzten Ladung
 
     def Export(self, szen):
@@ -136,7 +140,7 @@ class Zeitvariablen:
         attributes = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))]
         for attr in attributes:    
             data = getattr(self, attr)
-            if type(data[0]) != list:
+            if type(data[0]) != list and len(data)==8760:
                 df[f"{attr}"] = getattr(self, attr)
         df.to_csv(f"./Ergebnis/ZeitVar/Ergebnis_ZeitVar_Szenario"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
 

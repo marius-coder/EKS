@@ -132,6 +132,8 @@ for scen in scenarios:
 																/ CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterEMobility)[0] * 100 - 100
 		DS.scraper.indikatoren["LadeEntlade_Zyklen pro Auto [Anzahl]"] = (sum(DS.zeitVar.eMobilityCharge) + DS.ZV.gridCharging) / DS.ZV.maxLadung / Control.anzAutos
 		DS.scraper.indikatoren["LadeEntlade_Zyklen pro Auto ohne LC [Anzahl]"] = PVDaten[4]
+		DS.scraper.indikatoren["Reserveautos [Anzahl]"] = sum(DS.zeitVar.anzahlReserveAutos) / len(DS.zeitVar.anzahlReserveAutos)
+		
 
 		#Verbrauch der E-Mobilität zum Fahren
 		DS.scraper.eMobilitätFahren["Gesamt [kWh/Auto]"] = DS.ZV.verbrauchFahrenEmobilität / Control.anzAutos
