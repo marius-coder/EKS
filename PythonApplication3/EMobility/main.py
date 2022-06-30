@@ -125,7 +125,7 @@ for scen in scenarios:
 
 		#Indikatoren
 		DS.scraper.indikatoren["fehlgeschlagene Fahrversuche [%]"] = DS.ZV.fehlgeschlageneFahrversuche / DS.ZV.fahrversuche * 100
-		DS.scraper.indikatoren["ungenutzte Ladung der E-Mobilit‰t [%]"] = np.mean(DS.zeitVar.ungenutzteLadung)
+		DS.scraper.indikatoren["ungenutzte Ladung der E-Mobilit‰t [%/Auto]"] = np.mean(DS.zeitVar.ungenutzteLadung) / Control.anzAutos
 		DS.scraper.indikatoren["erhˆhung Eigenverbrauch E-Mobilit‰t [%]"] = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterEMobility)[0] \
 																/ CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastBeforeEMobility)[0] * 100 - 100
 		DS.scraper.indikatoren["erhˆhung Eigenverbrauch Zureisende [%]"] = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastAfterZureisende)[0] \
@@ -148,6 +148,9 @@ for scen in scenarios:
 		DS.scraper.eMobilit‰tGeb‰ude["Fahrverbrauch [kWh/Auto]"] = daten[1] / Control.anzAutos
 		DS.scraper.eMobilit‰tGeb‰ude["Lade/Entladeverluste [kWh/Auto]"] = daten[2] / Control.anzAutos
 		DS.scraper.eMobilit‰tGeb‰ude["Geb‰udezuEMobilit‰t [kWh/Auto]"] = sum(DS.zeitVar.eMobilityCharge) * Control.li_Autos[0].effizienz / Control.anzAutos
+		DS.scraper.eMobilit‰tGeb‰ude["EMobilit‰tzuGeb‰ude [kWh/m≤]"] = daten[0] * Control.li_Autos[0].effizienz / Control.gfa
+		DS.scraper.eMobilit‰tGeb‰ude["Lade/Entladeverluste [kWh/m≤]"] = daten[2] / Control.gfa
+		DS.scraper.eMobilit‰tGeb‰ude["Geb‰udezuEMobilit‰t [kWh/m≤]"] = sum(DS.zeitVar.eMobilityCharge) * Control.li_Autos[0].effizienz / Control.gfa
 	
 		#PV-Daten vor E-Mobilit‰t
 		daten = CalcEigenverbrauch(pv= PV, resLast= DS.zeitVar.resLastBeforeEMobility)
@@ -168,17 +171,30 @@ for scen in scenarios:
 		DS.scraper.pvNachZureisenden["Netzbezug [kWh/m≤]"] = abs(sum([x for x in DS.zeitVar.resLastAfterZureisende if x > 0])) / Control.gfa
 		DS.scraper.zureisenden["Ladung [kWh/m≤]"] = sum(DS.zeitVar.LadeLeistungAuﬂenstehende) / Control.gfa	
 
+		#Prim‰renergie
+		DS.scraper.prim‰renergie["PE_OhnePV [kWh/m≤]"] = sum(dict_PE_CO2["PE_OhnePV [kWh/m≤]"])
+		DS.scraper.prim‰renergie["PE_MitPV [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitPV [kWh/m≤]"])
+		DS.scraper.prim‰renergie["PE_MitEmobilit‰t [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitLC [kWh/m≤]"])
+
+		#CO2-Emissionen
+		DS.scraper.CO2Emissionen["CO2_OhnePV [kg/m≤]"] = sum(dict_PE_CO2["CO2_OhnePV [kg/m≤]"])
+		DS.scraper.CO2Emissionen["CO2_MitPV [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitPV [kg/m≤]"])
+		DS.scraper.CO2Emissionen["CO2_MitEmobilit‰t [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitLC [kg/m≤]"])
+
 		#Export Data
 		DS.scraper.Export(f"{scen}_{scenariosW‰rme[i]}")	
 
 		DS.zeitVar.Export(f"{scen}_{scenariosW‰rme[i]}")
-		#PlotStatusCollection(DS.zeitVar.StateofCars)
-		#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
-		#PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.EntladeLeistung)
-		#PlotVerteilungen(DS.zeitVar.LadeLeistung, "Ladeleistung")
-		#PlotVerteilungen(DS.zeitVar.EntladeLeistung, "EntladeLeistung")
-		#PlotVerteilungen(DS.zeitVar.LadeLeistungAuﬂenstehende, "LadeLeistung Zureisende")
-		#PlotVerteilungen(gesamtBedarf, "Geb‰udebedarf")
+
+
+		if scenariosW‰rme[i] == "WP" and scen == "PV":
+			#PlotStatusCollection(DS.zeitVar.StateofCars)
+			#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
+			PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.entladungLokal, DS.zeitVar.pvChargingHourly) #DS.zeitVar.pvChargingHourly
+			PlotVerteilungen(DS.zeitVar.eMobilityCharge, "Ladeleistung")
+			PlotVerteilungen(DS.zeitVar.eMobilityDischarge, "EntladeLeistung")
+			#PlotVerteilungen(DS.zeitVar.LadeLeistungAuﬂenstehende, "LadeLeistung Zureisende")
+			#PlotVerteilungen(gesamtBedarf, "Geb‰udebedarf")
 
 
 		

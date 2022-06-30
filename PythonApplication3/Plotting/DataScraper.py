@@ -16,7 +16,6 @@ class Scraper():
             "stromverbrauch Schule [kWh/m≤]" : 0, #Verbrauch der Bildungsgeb‰ude (kWh)
             "stromverbrauch WP [kWh/m≤]" : 0, #Verbrauch der W‰rmepumpen (kWh)
             "stromverbrauch E-Mobilit‰t [kWh/Auto]" : 0, #Verbrauch der E-Mobilit‰t zum Fahren (kWh)
-            "pvProduktion [kWh/m≤]" : 0, #Wie viel die PV-Anlage insgesamt produziert hat (kWh)
             "pvProduktionGfa [kWh/m≤]" : 0 #Wie viel PV Produktion pro m≤ gfa (kWh/m≤gfa a)
             }
     
@@ -44,7 +43,10 @@ class Scraper():
         self.eMobilit‰tGeb‰ude = {
             "Lade/Entladeverluste [kWh/Auto]" : 0, #Lade
             "Geb‰udezuEMobilit‰t [kWh/Auto]" : 0, #Ohne Verluste / Verluste rausgerechnet
-            "EMobilit‰tzuGeb‰ude [kWh/Auto]" : 0  #Ohne Verluste / Verluste rausgerechnet
+            "EMobilit‰tzuGeb‰ude [kWh/Auto]" : 0, #Ohne Verluste / Verluste rausgerechnet
+            "Lade/Entladeverluste [kWh/m≤]" : 0,  #Ohne Verluste / Verluste rausgerechnet
+            "Geb‰udezuEMobilit‰t [kWh/m≤]" : 0,  #Ohne Verluste / Verluste rausgerechnet
+            "EMobilit‰tzuGeb‰ude [kWh/m≤]" : 0,  #Ohne Verluste / Verluste rausgerechnet
             }
 
         #PV-Daten vor E-Mobilit‰t
@@ -64,6 +66,16 @@ class Scraper():
             "Eigenverbrauch [kWh/m≤]" : 0,
             "Einspeisung [kWh/m≤]" : 0,
             "Netzbezug [kWh/m≤]" : 0,
+            }
+        self.prim‰renergie = {
+            "PE_OhnePV [kWh/m≤]" : 0,
+            "PE_MitPV [kWh/m≤]" : 0,
+            "PE_MitEmobilit‰t [kWh/m≤]" : 0,
+            }
+        self.CO2Emissionen = {
+            "CO2_OhnePV [kg/m≤]" : 0,
+            "CO2_MitPV [kg/m≤]" : 0,
+            "CO2_MitEmobilit‰t [kg/m≤]" : 0,
             }
 
         #Daten der Auﬂenstehenden     

@@ -144,36 +144,42 @@ def PlotVerteilungen(data, name):
     sns.set_theme(style="white")
 
     sns.boxplot(x="Stunde",y= name, palette="muted", data=toPlot, ax= ax)
-    ax.set_title(f"Tagesverteilung: {name}")
-    ax.set_ylabel("Energie [kWh]")
+    ax.set_title(f"Tagesverteilung: {name} der E-Mobilität")
+    ax.set_ylabel("Leistung [kW]")
     ax.yaxis.grid(True)
     plt.show()
 
-def PlotEinflussLDC(Verbrauch, PV, Endladung):
+def PlotEinflussLDC(Verbrauch, PV, Endladung, Ladung):
     fig, ax = plt.subplots()
     hours = np.linspace(0,8759,8760)
     toPlot = pd.DataFrame({ 
                             "Gebäudeverbrauch" : Verbrauch,
                             "Gebäudeverbrauch mit PV" : [a-b for a,b in zip(Verbrauch,PV)],
-                            "Gebäudeverbrauch mit PV/LC" : [a-b-c for a,b,c in zip(Verbrauch,PV,Endladung)]
+                            "Gebäudeverbrauch mit PV/LC" : [a-b-c+d for a,b,c,d in zip(Verbrauch,PV,Endladung,Ladung)]
                             })
     toPlot["Stunde"] = [int(hour % 24) for hour in hours]
-    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=toPlot, ax= ax, color= "blue")
-    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=toPlot, ax= ax, color= "orange")
-    sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=toPlot, ax= ax, color= "green")
-    ax.set_title("Einfluss des Ladecontrollers auf den stündlichen Gebäudebedarf")
-    ax.set_ylabel("Verbrauch [kWh]")
-    ax.set_xlabel("Stunde")  
-    leg = ax.legend(labels = ['Gebäudeverbrauch', 'Gebäudeverbrauch mit PV', 'Gebäudeverbrauch mit PV/LC'], prop={'size': 7},                  
-           ncol = 3,facecolor='#f5f5f5', framealpha=1, loc= "lower center")
-    for legobj in leg.legendHandles:
-        legobj.set_linewidth(5)
-    leg.legendHandles[0].set_color('blue')
-    leg.legendHandles[1].set_color('orange')
-    leg.legendHandles[2].set_color('green')
-    plt.gca().set_ylim(bottom=0)
-    plt.grid()  
-    plt.show()
+
+    toPlot = toPlot.set_index(pd.to_datetime(time))
+    for quart in [3,3]:
+        df_inter=toPlot[toPlot.index.quarter == quart]
+        #df_inter=toPlot[toPlot.index.month == 8]
+        #df_inter=df_inter[df_inter.index.day == 1]
+        sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=df_inter, ax= ax, color= "blue")
+        sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=df_inter, ax= ax, color= "orange")
+        sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=df_inter, ax= ax, color= "green")
+        ax.set_title("Einfluss des Ladecontrollers auf den stündlichen Gebäudebedarf im Sommer")
+        ax.set_ylabel("Verbrauch [kWh]")
+        ax.set_xlabel("Stunde")  
+        leg = ax.legend(labels = ['Gebäudeverbrauch', 'Gebäudeverbrauch mit PV', 'Gebäudeverbrauch mit PV/LC'], prop={'size': 7},                  
+               ncol = 3,facecolor='#f5f5f5', framealpha=1, loc= "lower center")
+        for legobj in leg.legendHandles:
+            legobj.set_linewidth(5)
+        leg.legendHandles[0].set_color('blue')
+        leg.legendHandles[1].set_color('orange')
+        leg.legendHandles[2].set_color('green')
+        #plt.gca().set_ylim(bottom=0)
+        ax.yaxis.grid(True) 
+        plt.show()
 
 
 

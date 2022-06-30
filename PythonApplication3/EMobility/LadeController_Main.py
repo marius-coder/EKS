@@ -214,8 +214,9 @@ class LadeController(LadeController_Personen):
 			Stunde des Jahres
 			"""
 		#Fahrverbrauch tracken
-		DS.ZV.verbrauchFahrenEmobilität += sum(kilometer) * auto.spezVerbrauch			
-		DS.zeitVar.carDemandHourly[hour] += sum(kilometer) * auto.spezVerbrauch
+		demand = sum(kilometer) * auto.spezVerbrauch	
+		DS.ZV.verbrauchFahrenEmobilität += demand
+		DS.zeitVar.carDemandHourly[hour] += demand
 		if self.anteilExterneLadestationen > uniform(0,99):
 			driveHome = choice(kilometer) #Es wird ein zufälliger Weg als Rückweg gewählt
 			kilometer.remove(driveHome)
@@ -231,6 +232,8 @@ class LadeController(LadeController_Personen):
 		else:
 			auto.kapazitat -= sum(kilometer) * auto.spezVerbrauch
 			self.CalcFahrverbrauch(demand=sum(kilometer) * auto.spezVerbrauch,hour= hour, demandType= "Fahren")
+
+
 
 		if auto.kapazitat < 0:
 			raise ValueError("Auto hat negative Ladung")
