@@ -239,10 +239,10 @@ class Simulation():
 		building.WP_WW.CheckSpeicher(mode = "WW")
 		building.stromVerbrauchBetrieb += building.WP_WW.PelBetrieb
 
-		print(f"Status WP: {building.WP_WW.bIsOn}")
-		print(f"Innentemperatur: {building.ti} °C")
-		print(f"Ladestand Speicher Warmwasser: {round(building.WP_WW.speicher.Speicherstand(),3)}")
-		print("------------------")
+		#print(f"Status WP: {building.WP_WW.bIsOn}")
+		#print(f"Innentemperatur: {building.ti} °C")
+		#print(f"Ladestand Speicher Warmwasser: {round(building.WP_WW.speicher.Speicherstand(),3)}")
+		#print("------------------")
 
 
 	def SimWP(self, building):
@@ -254,10 +254,10 @@ class Simulation():
 		building.WP_HZG.CheckSpeicher(mode = "HZG")
 		building.stromVerbrauchBetrieb += building.WP_HZG.PelBetrieb
 		
-		print(f"Status WP: {building.WP_HZG.bIsOn}")
-		print(f"Innentemperatur: {building.ti} °C")
-		print(f"Ladestand Speicher Heizen: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
-		print("------------------")
+		#print(f"Status WP: {building.WP_HZG.bIsOn}")
+		#print(f"Innentemperatur: {building.ti} °C")
+		#print(f"Ladestand Speicher Heizen: {round(building.WP_HZG.speicher.Speicherstand(),3)}")
+		#print("------------------")
 
 	def SimFW(self, key, building, qHLSum):
 		if any(x in key for x in ["S","G"]) and building.ti >= building.TsSommer:
@@ -344,10 +344,10 @@ class Simulation():
 			#print("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_")
 
 
-		PlotspezVerbrauch(self.dic_buildings)
-		PlotspezVerbrauchKWB(self.dic_buildings)
+		#PlotspezVerbrauch(self.dic_buildings)
+		#PlotspezVerbrauchKWB(self.dic_buildings)
 		#PlotWochenVerbrauch(self.dic_buildings)
-		PlotInnentemperatur(self.dic_buildings)
+		#PlotInnentemperatur(self.dic_buildings)
 
 	def GetStrombedarf(self, szen):
 		self.summeWohnen = 0

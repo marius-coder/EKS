@@ -39,40 +39,39 @@ class Konversionsfaktoren():
 		self.fernwärmeEmissionen = 59 #kgCO2/kWh
 
 
-	def CalcEnergieflüsse(self, obj, gebäudeLast, externeLadung=0, emobilitätPVCharging=0 ,pv=0,
+	def CalcEnergieflüsse(self, obj, gebäudeLast, externeLadung=0, emobilitätPVCharging=0 ,pv=0, emobilitätGridCharging= 0,
 					  emobilitätZureisende=0,EmobilitätzuGebäudeErneuerbar=0, EmobilitätzuGebäudeNetz=0,
 					  fahrverbrauchLokal=0,fahrverbrauchNetz=0):
 		PVtoGebäude = min(pv,gebäudeLast)
 		
-		#PVtoEmobilität = emobilitätPVCharging
+		PVtoEmobilität = emobilitätPVCharging
 
 		PVtoZureisende = emobilitätZureisende
 
 		PVtoNetz = max(0,pv-(PVtoGebäude+PVtoZureisende))
 
 		ExterntoEmobilität = externeLadung
-		#NetztoEmobilität = emobilitätGridCharging
+		NetztoEmobilität = emobilitätGridCharging
 
-		EmobilitätzuGebäudeErneuerbar = EmobilitätzuGebäudeErneuerbar
-		EmobilitätzuGebäudeNetz = EmobilitätzuGebäudeNetz
+		#EmobilitätzuGebäudeErneuerbar = EmobilitätzuGebäudeErneuerbar
+		#EmobilitätzuGebäudeNetz = EmobilitätzuGebäudeNetz
 
 		NetztoGebäude = gebäudeLast - (PVtoGebäude + EmobilitätzuGebäudeErneuerbar + EmobilitätzuGebäudeNetz)
 
 
-		Netz = NetztoGebäude + ExterntoEmobilität + fahrverbrauchNetz + EmobilitätzuGebäudeNetz
-		Erneuerbar = PVtoGebäude + fahrverbrauchLokal + EmobilitätzuGebäudeErneuerbar
+		Netz = NetztoGebäude + ExterntoEmobilität + NetztoEmobilität
+		Erneuerbar = PVtoGebäude
 		Gutschreibung = PVtoZureisende + PVtoNetz
 
 		obj["Netz"].append(Netz)
 		obj["Erneuerbar"].append(Erneuerbar)
 		obj["Gutschreibung"].append(Gutschreibung)
 
-
 	def CalcPrimärEnergie(self, data, hour, gfa):
 		pe = 0
 		pe += data["Netz"][hour] * list(self.stromnetzPrimärenergie.values())[DetermineMonth(hour)-1] / gfa
 		pe += data["Erneuerbar"][hour] / gfa
-		pe += data["Gutschreibung"][hour] *-1 / gfa
+		pe += data["Gutschreibung"][hour] * list(self.stromnetzPrimärenergie.values())[DetermineMonth(hour)-1] *-1 / gfa
 
 		return pe
 

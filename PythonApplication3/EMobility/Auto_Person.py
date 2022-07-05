@@ -10,7 +10,7 @@ class Person():
 		self.anzAutoWege = 0 #Anzahl der Wege die mit dem Auto zurückgelegt werden
 		self.km = [] #Laufvariable die die km für den derzeitigen Weg angeben
 		self.wegMitAuto = 0 #Weg der insgesamt mit dem Auto zurückgelegt wurde
-		self.carID = None
+		self.carID = None #ID des zugewiesenen Autos
 		self.minTimeAway = 0 #gibt an wie lange ein Auto mindestens weg sein muss
 
 class Auto():
@@ -97,9 +97,9 @@ class Auto():
 		return qtoTake
 
 
-	def Speicherstand(self):
-		"""Gibt den aktuellen Speicherstand in Anteilen (0-1) zuruck"""
-		return abs(self.kapazitat) / self.maxLadung
+	#def Speicherstand(self):
+	#	"""Gibt den aktuellen Speicherstand in Anteilen (0-1) zuruck"""
+	#	return abs(self.kapazitat) / self.maxLadung
 
 
 

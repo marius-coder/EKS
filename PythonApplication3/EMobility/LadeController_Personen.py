@@ -2,9 +2,8 @@
 from numpy import round_
 from Auto_Person import Auto, Person
 from math import ceil, floor
-from Backend.Helper import DetermineHourofDay, DetermineDay
 from random import choice, shuffle, seed
-from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege, GenerateReiseProfil
+from Ladecontroller_Helper import DetermineHourofDay, DetermineDay,CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege, GenerateReiseProfil
 import Plotting.DataScraper as DS
 
 seed(10)
@@ -19,10 +18,10 @@ class LadeController_Personen():
 		self.basisPersonenKilometer = 5775.77 #Kilometeranzahl die eine Person in einem Jahr mit dem Auto zurücklegt
 		self.personenKilometer = PersonenDaten["personenKilometer"]
 		self.adjustKilometers = self.personenKilometer / self.basisPersonenKilometer #Faktor um die Kilometer anzahl zu korrigieren
-		self.InitPersonen()
-		self.drivingPersons = []
+		self.InitPersonen() #Personen Initialisieren
+		self.drivingPersons = [] #Personen die gerade unterwegs sind
 		self.readytoComeBack = [] #Liste in der die Personen gesammelt werden, die bereit sind zurückzukommen
-		self.averageSpeed = 50 #km/h
+		self.averageSpeed = 50 #km/h   Durchschnittsgeschwindigkeit die die Mindestdauer bestimmt die eine Person weg ist
 		self.percentAbweichung = PersonenDaten["percentAbweichung"] / 100 #Prozentwert in Anteile umrechnen
 
 		self.wegfahren = []
@@ -123,9 +122,10 @@ class LadeController_Personen():
 	def CheckPersonsHourly(self, hour:int):
 		"""Setzt jede Stunde alle Personen die losfahren und zurückkommen sollen
 		Zu Tagesbeginn werden alle mobile Personen ausgewählt"""
-		day = DetermineDay(hour)
+		
 		hourIndex = DetermineHourofDay(hour)
-		if hourIndex == 0:			
+		if hourIndex == 0:		
+			day = DetermineDay(hour)
 			self.drivingPersons = self.InitDay(day) #Neue Personen generieren und Laufvariablen setzen
 			
 

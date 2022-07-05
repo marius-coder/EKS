@@ -37,8 +37,8 @@ uhrzeitLosfahren = {
 	"10" : 19,
 	}
 
-def InitAußenstehende(AutoDaten:dict, maxLadung:float, anzAutos:int, percent:float, bLehrer:bool) -> list:
-	"""Initialisiert die zureisenden Perseonen mit den gewünschten Attributen
+def InitZureisende(AutoDaten:dict, maxLadung:float, anzAutos:int, percent:float, bLehrer:bool) -> list:
+	"""Initialisiert die zureisenden Personen mit den gewünschten Attributen
 	AutoDaten: dict
 		Dicitionary, das die gesammelten AutoDaten enthält
 	maxLadung: float
@@ -65,30 +65,30 @@ def InitAußenstehende(AutoDaten:dict, maxLadung:float, anzAutos:int, percent:flo
 		for _ in range(anzInter):
 			if checksum == 0:
 				return ret, checksum
-			ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
+			ret.append(Zureisende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 			checksum -= 1
 
 	#Edge-Case Handling (Um Rundungsfehler auszugleichen / Der Fehler sollte immer nur 1 betragen)
 	for _ in range(checksum):
-		ret.append(Außenstehende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
+		ret.append(Zureisende(AutoDaten= AutoDaten,maxLadung= maxLadung, minLadung= 1, bLehrer= bLehrer,
 									  ankommen= uhrzeitAnkommen[percent], losfahren= uhrzeitLosfahren[percent]))
 		checksum -= 1
 
 	return ret, checksum
 
 
-class Außenstehende(Auto):
+class Zureisende(Auto):
 
 	def __init__(self,AutoDaten, maxLadung, minLadung, ankommen, losfahren, bLehrer= False) -> None:
 		Auto.__init__(self, AutoDaten= AutoDaten, minLadung= minLadung)
 		self.ankommen = ankommen  #Wann das Auto ankommt
 		self.losfahren = losfahren #Wann das Auto losfährt
 		self.bCharging = False #Autos starten nicht anwesend
-		self.bLehrer = bLehrer #Bool ob der Außenstehende ein Lehrer ist
+		self.bLehrer = bLehrer #Bool ob der Zureisende ein Lehrpersonal ist
 		self.maxLadung = maxLadung #Maximale Ladung des Autos in kWh
-		self.minLadungAbs = minLadung #Minimale Ladung die eingehalten werden muss in kWh
-		self.minLadung = self.maxLadung * self.minLadungAbs #Minimale Ladung die eingehalten werden muss in Anteilen
+		self.minLadungAbs = minLadung #Minimale Ladung die eingehalten werden muss in Anteilen
+		self.minLadung = self.maxLadung * self.minLadungAbs #Minimale Ladung die eingehalten werden muss in kWh
 		self.kapazitat = maxLadung #Laufvariable die die aktuelle Kapazität angibt
 
 	def CheckFerien(self, hour:int) -> bool:

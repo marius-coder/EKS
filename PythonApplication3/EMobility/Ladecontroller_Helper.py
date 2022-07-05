@@ -4,6 +4,8 @@ from random import seed, choices, uniform
 from collections import Counter
 from numpy.random import Generator, PCG64
 import numpy as np
+import pandas as pd
+import holidays
 
 #from Auto_Person import Auto
 
@@ -126,9 +128,6 @@ def GenerateReiseProfil(profil : list, prozent : int) -> list:
         return ret
     else:
         return profil
-       
-
-
 
 uberlauf = 0 #Uberlauf gibt an, ob ein Autoweg auf 2 aufgestockt werden soll.
 def CalcAutoWege(ways, day) -> int:
@@ -222,6 +221,29 @@ def DetermineMonth(hour):
 		return 11
 	elif 8016 < hour <= 8760:
 		return 12
+
+
+def DetermineHourofDay(hour):
+	return (hour) % 24
+
+time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[h]')
+time = pd.to_datetime(time)
+Feiertage = holidays.country_holidays('Austria')
+
+
+def DetermineDay(hour) -> str:
+	"""Findet den Typ des Tages heraus. Achtet dabei auf Feiertage.
+	hour: int
+		Stunde des Jahres"""
+	if time[hour] in Feiertage:
+		#Feiertage werden als Sonntage gehandhabt
+		return "Sonntag"
+	if time[hour].weekday() == 5:
+		return "Samstag"
+	elif time[hour].weekday() == 6:
+		return "Sonntag"
+	else:
+		return "Werktag"
 
 def set_unit(unit):
     """Register a unit on a function"""

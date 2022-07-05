@@ -30,6 +30,7 @@ class Speicher():
         if self.speicherstand > self.MAX_Speicherstand:
             rest = self.speicherstand - self.MAX_Speicherstand
             self.speicherstand = self.MAX_Speicherstand
+
         return rest
 
     def SpeicherEntladen(self, qtoTake, MIN_Speicherstand):
@@ -43,8 +44,6 @@ class Speicher():
         else:
             self.speicherstand -= qtoTake
             rest = 0
-
-
 
         return rest
 

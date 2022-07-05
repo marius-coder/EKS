@@ -5,7 +5,7 @@ from random import choice, seed, uniform
 from Auto_Person import Auto, Person
 from Ladecontroller_Helper import CalcMobilePersonen,CalcNumberofWays,GenerateWegZweck,GenerateTransportmittel,GenerateKilometer,CalcAutoWege
 from Backend.Helper import DetermineHourofDay, DetermineDay
-from Lehrer_Gewerbe import InitAuﬂenstehende
+from Lehrer_Gewerbe import InitZureisende
 seed(10)
 
 import Plotting.DataScraper as DS
@@ -33,9 +33,9 @@ class LadeController(LadeController_Personen):
 		
 		self.anzAutos = AutoDaten["Anzahl Autos"]
 		self.li_Autos, checksum = self.InitAutos(AutoDaten= AutoDaten, distMinLadung= distMinLadung)
-		self.Auﬂenstehende = InitAuﬂenstehende(AutoDaten= AutoDaten,maxLadung= infoLehrpersonal["Ladung"], percent= infoLehrpersonal["Prozent Mitmachende"]
+		self.Auﬂenstehende = InitZureisende(AutoDaten= AutoDaten,maxLadung= infoLehrpersonal["Ladung"], percent= infoLehrpersonal["Prozent Mitmachende"]
 										, anzAutos= infoLehrpersonal["Anzahl"], bLehrer= True)[0]
-		self.Auﬂenstehende.extend(InitAuﬂenstehende(AutoDaten= AutoDaten,maxLadung= infoGewerbepersonal["Ladung"], percent= infoGewerbepersonal["Prozent Mitmachende"]
+		self.Auﬂenstehende.extend(InitZureisende(AutoDaten= AutoDaten,maxLadung= infoGewerbepersonal["Ladung"], percent= infoGewerbepersonal["Prozent Mitmachende"]
 											 , anzAutos= infoGewerbepersonal["Anzahl"], bLehrer= False)[0])
 		self.gfa= PersonenDaten["gfa"] #Bruttogeschossfl‰che
 
