@@ -21,8 +21,9 @@ li_Strom_Wohnen_WW = [0]*8760
 
 li_Strom_Schule_HZG = [0]*8760
 li_Strom_Schule_WW = [0]*8760
-for key, building in sim.dic_buildings.items():
 
+for key, building in sim.dic_buildings.items():
+	
 	if any(x in key for x in ["W","G"]):
 		li_Strom_Wohnen_HZG = [a + b for a, b in zip(building.DF.stromWP_HZG, li_Strom_Wohnen_HZG)]
 		li_Strom_Wohnen_WW = [a + b for a, b in zip(building.DF.stromWP_WW, li_Strom_Wohnen_WW)]

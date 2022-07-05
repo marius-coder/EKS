@@ -23,7 +23,7 @@ ExterneDaten = inputData["ExterneDaten"]
 LadeDaten = inputData["LadeDaten"]["distMinLadung"]
 
 scenarios = ["PV", "PV_max"]
-dataW‰rme = [[0]*8760,Strombedarf["WP"]]
+dataW‰rme = [Strombedarf["FW"],Strombedarf["WP"]]
 scenariosW‰rme = ["FW","WP"]
 
 
@@ -172,16 +172,21 @@ for scen in scenarios:
 		DS.scraper.zureisenden["Ladung [kWh/m≤]"] = sum(DS.zeitVar.LadeLeistungAuﬂenstehende) / Control.gfa	
 
 		#Prim‰renergie
-		PE_Fossil = Control.anzPers*(1-Control.percent)*80*1.2 / Control.gfa
-		DS.scraper.prim‰renergie["PE_OhnePV [kWh/m≤]"] = sum(dict_PE_CO2["PE_OhnePV [kWh/m≤]"]) + PE_Fossil
-		DS.scraper.prim‰renergie["PE_MitPV [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitPV [kWh/m≤]"]) + PE_Fossil
-		DS.scraper.prim‰renergie["PE_MitEmobilit‰t [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitLC [kWh/m≤]"]) + PE_Fossil
+		PE_Fossil = Control.anzPers*(1-Control.percent)*80/100*personenKilometerElektrisch*1.2 / Control.gfa
+		if scenariosW‰rme[i] == "FW":
+			PE_FW = abs(sum(pd.read_csv("./Ergebnis/Strombedarf_FW.csv", decimal=",", sep=";", encoding= "cp1252")["W‰rmebedarf_FW"].tolist()) / Control.gfa * PE_CO2.fernw‰rmePrim‰renergie)
+		else:
+			PE_FW = 0
+		DS.scraper.prim‰renergie["PE_OhnePV [kWh/m≤]"] = sum(dict_PE_CO2["PE_OhnePV [kWh/m≤]"]) + PE_Fossil + PE_FW
+		DS.scraper.prim‰renergie["PE_MitPV [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitPV [kWh/m≤]"]) + PE_Fossil + PE_FW
+		DS.scraper.prim‰renergie["PE_MitEmobilit‰t [kWh/m≤]"] = sum(dict_PE_CO2["PE_MitLC [kWh/m≤]"]) + PE_Fossil + PE_FW
 
 		#CO2-Emissionen
 		CO2_Fossil = PE_Fossil * 0.250
-		DS.scraper.CO2Emissionen["CO2_OhnePV [kg/m≤]"] = sum(dict_PE_CO2["CO2_OhnePV [kg/m≤]"]) + CO2_Fossil
-		DS.scraper.CO2Emissionen["CO2_MitPV [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitPV [kg/m≤]"]) + CO2_Fossil
-		DS.scraper.CO2Emissionen["CO2_MitEmobilit‰t [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitLC [kg/m≤]"]) + CO2_Fossil
+		CO2_FW = PE_FW * PE_CO2.fernw‰rmeEmissionen
+		DS.scraper.CO2Emissionen["CO2_OhnePV [kg/m≤]"] = sum(dict_PE_CO2["CO2_OhnePV [kg/m≤]"]) + CO2_Fossil + CO2_FW
+		DS.scraper.CO2Emissionen["CO2_MitPV [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitPV [kg/m≤]"]) + CO2_Fossil + CO2_FW
+		DS.scraper.CO2Emissionen["CO2_MitEmobilit‰t [kg/m≤]"] = sum(dict_PE_CO2["CO2_MitLC [kg/m≤]"]) + CO2_Fossil + CO2_FW
 
 		#Export Data
 		DS.scraper.Export(f"{scen}_{scenariosW‰rme[i]}")	

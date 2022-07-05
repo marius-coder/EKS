@@ -1,4 +1,4 @@
-
+# -*- coding: cp1252 -*-
 import pandas as pd
 from pandas.core.frame import DataFrame
 
@@ -8,14 +8,14 @@ def DefinePV(name: str) -> DataFrame:
 
 #Strombedarf ist auf 1 kWh genormt
 Strombedarf = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")
+
 Strombedarf["WP"] = pd.read_csv("./Ergebnis/Strombedarf_WP.csv", decimal=",", sep=";")["Strombedarf_WP"]
-#Bedarf_Schule = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")["Schule"].to_list()  #in kWh
-#Bedarf_Gewerbe = pd.read_csv("./Data/Strombedarf.csv", decimal=",", sep=";")["Gewerbe"].to_list()  #in kWh
+Strombedarf["FW"] = pd.read_csv("./Ergebnis/Strombedarf_FW.csv", decimal=",", sep=";", encoding= "cp1252")["Strombedarf_FW"]
 
 
-wohnen = 1488565
+wohnen = 1101106
 gewerbe = 514674
-schule = 300104
+schule = 334489
 
 Strombedarf["Wohnen"] = Strombedarf["Wohnen"] * wohnen
 Strombedarf["Gewerbe"] = Strombedarf["Gewerbe"] * gewerbe

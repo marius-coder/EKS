@@ -76,7 +76,9 @@ class Building(HL,Dataflows,WW):
             if "S" in key:
                 self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb / 1)
                 self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG / 1)
-
+            elif "G" in key:
+                self.DF.stromWP_HZG.append(self.WP_HZG.PelBetrieb / 1)
+                self.DF.qWP_HZG.append(self.WP_HZG.PelBetrieb * self.WP_HZG.COP_HZG / 1)
 
 
 

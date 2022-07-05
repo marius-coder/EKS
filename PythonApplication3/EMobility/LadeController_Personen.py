@@ -156,7 +156,7 @@ class LadeController_Personen():
 				person = choice(self.readytoComeBack)
 				car = next((x for x in self.li_Autos if x.ID == person.carID), None)
 				if car == None:
-					raise TypeError("Keine Auto gefunden")
+					raise TypeError("Kein Auto gefunden")
 				if person.status == True or car.bCharging == True:
 					raise TypeError("Person oder Auto sind schon zurück")
 				person.status = True

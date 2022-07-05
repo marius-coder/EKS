@@ -1,4 +1,4 @@
-﻿
+﻿# -*- coding: cp1252 -*-
 import pandas as pd
 import numpy as np
 import math
@@ -355,6 +355,7 @@ class Simulation():
 		self.summeSchule = 0
 
 		self.summeGesamt = [0] * 8760
+		self.PE_FW = [0] * 8760
 
 		if szen == "WP":
 			for key,building in self.dic_buildings.items():
@@ -371,18 +372,30 @@ class Simulation():
 				temp = [a + b for a, b in zip(building.DF.stromWP_HZG, building.DF.stromWP_WW)]
 				self.summeGesamt = [a + b for a, b in zip(temp, self.summeGesamt)]
 		else:
-			for key,building in self.dic_buildings.items():			
+			for key,building in self.dic_buildings.items():		
+				qHL = [0]*8760
+				for hour in range(len(building.DF.qHL)):
+					if DetermineMonth(hour) < 6 or DetermineMonth(hour) > 8:
+						if building.DF.qHL[hour] < 0:
+							qHL[hour] = building.DF.qHL[hour]
+
+				self.PE_FW = [a + b for a, b in zip(building.DF.qHL, self.PE_FW)]
+				self.PE_FW = [a + b for a, b in zip(building.DF.qWW, self.PE_FW)]
+
+
 				if "G" in key:
 					self.summeGewerbe += sum(building.DF.stromWP_HZG)
+					self.summeGesamt = [a + b for a, b in zip(building.DF.stromWP_HZG, self.summeGesamt)]
 				elif "S" in key:
 					self.summeSchule += sum(building.DF.stromWP_HZG)
-
-				self.summeGesamt = [a + b for a, b in zip(building.DF.stromWP_HZG, self.summeGesamt)]
+					self.summeGesamt = [a + b for a, b in zip(building.DF.stromWP_HZG, self.summeGesamt)]
 
 	def ExportData(self, szen):
 
 		df = pd.DataFrame()
-		df["Strombedarf_WP"] = self.summeGesamt
+		df[f"Strombedarf_{szen}"] = self.summeGesamt
+		if szen == "FW":
+			df[f"Wärmebedarf_{szen}"] = self.PE_FW
 		df.to_csv(f"./Ergebnis/Strombedarf_"+szen+".csv", sep= ";", decimal= ",", encoding= "cp1252")
 
 		df = pd.DataFrame()
