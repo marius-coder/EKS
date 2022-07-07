@@ -3,6 +3,7 @@
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+from Helper import DetermineMonth
 from matplotlib import cm
 import bokeh
 import pandas as pd
@@ -17,20 +18,26 @@ def PlotspezVerbrauch(dicBuildings):
     dic = {}
 
     for key,building in dicBuildings.items():
-        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL <= 0 ]))
+        inter = [0]*8760
+        
+        for hour in range(8760):
+            if DetermineMonth(hour) < 6 or DetermineMonth(hour) > 8:
+                if building.DF.qHL[hour] < 0:
+                    inter[hour] = abs(building.DF.qHL[hour]) / building.gfa
+        dic[key] = sum(inter)
 
     toPlot = pd.DataFrame({ "W1" : dic["W1"],
                             "W2" : dic["W2"],
                             "W3" : dic["W3"],
                             "W4" : dic["W4"],
-                            #"G1" : dic["G1"],
-                            #"G2" : dic["G2"],
-                            #"G3" : dic["G3"],
-                            #"G4" : dic["G4"],
+                            "G1" : dic["G1"],
+                            "G2" : dic["G2"],
+                            "G3" : dic["G3"],
+                            "G4" : dic["G4"],
                             "S1" : dic["S1"],
                             "S2" : dic["S2"],
 
-                            }, index = ['W1', 'W2', 'W3', 'W4'])
+                            }, index = ['W1', 'W2', 'W3', 'W4','G1', 'G2', 'G3', 'G4','S1', 'S2'])
 
     sns.barplot(data=toPlot, ax = ax)
     
@@ -39,7 +46,7 @@ def PlotspezVerbrauch(dicBuildings):
     ax.set_ylabel('spezifischer Heizwärmebedarf [kWh/m²a]', fontsize=14)
     ax.tick_params(axis='both', which='major', labelsize=12)
     ax.set_axisbelow(True)
-    ax.set_ylim([0, 50])
+    ax.set_ylim([0, 60])
     ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
     plt.show()
 
@@ -49,17 +56,25 @@ def PlotspezVerbrauchKWB(dicBuildings):
     dic = {}
 
     for key,building in dicBuildings.items():
-        dic[key] = abs(sum([qHL for qHL in building.DF.qHL if qHL >= 0 ]))
+        inter = [0]*8760
+        if hasattr(building, 'WP_HZG'):
+            for hour in range(8760):
+                if DetermineMonth(hour) < 6 or DetermineMonth(hour) > 8:
+                    pass
+                else:
+                    if building.DF.qHL[hour] > 0:
+                        inter[hour] = abs(building.DF.qHL[hour]) / building.gfa
+        dic[key] = sum(inter)
 
 
     toPlot = pd.DataFrame({ "W1" : dic["W1"],
                             "W2" : dic["W2"],
                             "W3" : dic["W3"],
                             "W4" : dic["W4"],
-                            #"G1" : dic["G1"],
-                            #"G2" : dic["G2"],
-                            #"G3" : dic["G3"],
-                            #"G4" : dic["G4"],
+                            "G1" : dic["G1"],
+                            "G2" : dic["G2"],
+                            "G3" : dic["G3"],
+                            "G4" : dic["G4"],
                             "S1" : dic["S1"],
                             "S2" : dic["S2"],
 
@@ -73,7 +88,7 @@ def PlotspezVerbrauchKWB(dicBuildings):
     ax.tick_params(axis='both', which='major', labelsize=12)
     ax.set_axisbelow(True)
     ax.grid(axis='y', color='black', linestyle='-', linewidth=0.2)
-    ax.set_ylim([0, 50])
+    ax.set_ylim([0, 60])
     plt.show()
 
 

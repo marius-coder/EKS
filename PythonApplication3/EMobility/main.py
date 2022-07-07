@@ -107,6 +107,7 @@ for scen in scenarios:
 		for person in Control.persons:
 			personenKilometerElektrisch += person.wegMitAuto 
 		print(personenKilometerElektrisch / len(Control.persons))
+
 		#Personenkilometer
 		DS.scraper.generell["personenKilometer Elektrisch durch. [km]"] = personenKilometerElektrisch / len(Control.persons)
 		DS.scraper.generell["personenKilometer Elektrisch [km]"] = personenKilometerElektrisch
@@ -172,7 +173,7 @@ for scen in scenarios:
 		DS.scraper.zureisenden["Ladung [kWh/m≤]"] = sum(DS.zeitVar.LadeLeistungAuﬂenstehende) / Control.gfa	
 
 		#Prim‰renergie
-		PE_Fossil = Control.anzPers*(1-Control.percent)*80/100*personenKilometerElektrisch*1.2 / Control.gfa
+		PE_Fossil = Control.anzPersonen*(1-Control.percent)*80/100*Control.personenKilometer*1.2 / Control.gfa
 		if scenariosW‰rme[i] == "FW":
 			PE_FW = abs(sum(pd.read_csv("./Ergebnis/Strombedarf_FW.csv", decimal=",", sep=";", encoding= "cp1252")["W‰rmebedarf_FW"].tolist()) / Control.gfa * PE_CO2.fernw‰rmePrim‰renergie)
 		else:
@@ -194,14 +195,15 @@ for scen in scenarios:
 		DS.zeitVar.Export(f"{scen}_{scenariosW‰rme[i]}")
 
 
-		if scenariosW‰rme[i] == "WP" and scen == "PV":
-			pass
+		if scenariosW‰rme[i] == "WP" and scen == "PV_max":
+			
 			#PlotStatusCollection(DS.zeitVar.StateofCars)
 			#PlotPersonStatus(DS.zeitVar.StateofDrivingPersons)
-			#PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.entladungLokal, DS.zeitVar.pvChargingHourly) #DS.zeitVar.pvChargingHourly
-			#PlotVerteilungen(DS.zeitVar.eMobilityCharge, "Ladeleistung")
-			#PlotVerteilungen(DS.zeitVar.eMobilityDischarge, "EntladeLeistung")
-			#PlotVerteilungen(DS.zeitVar.LadeLeistungAuﬂenstehende, "LadeLeistung Zureisende")
+			PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.entladungLokal, DS.zeitVar.pvChargingHourly, mode= "Genau") #DS.zeitVar.pvChargingHourly
+			PlotEinflussLDC(gesamtBedarf, PV, DS.zeitVar.entladungLokal, DS.zeitVar.pvChargingHourly)
+			PlotVerteilungen(DS.zeitVar.eMobilityCharge, "Ladeleistung")
+			PlotVerteilungen(DS.zeitVar.eMobilityDischarge, "EntladeLeistung")
+			PlotVerteilungen(DS.zeitVar.LadeLeistungAuﬂenstehende, "LadeLeistung Zureisende")
 			#PlotVerteilungen(gesamtBedarf, "Geb‰udebedarf")
 
 

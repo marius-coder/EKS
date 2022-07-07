@@ -109,7 +109,7 @@ class LadeController(LadeController_Personen):
 		
 		if resLast > 0:
 			#Autos entladen
-			resLastAfterDischarging, entladungEMobility = self.DischargeCars(resLast)
+			resLastAfterDischarging, entladungEMobility = self.DischargeCars(resLast,hour)
 
 			if resLast - resLastAfterDischarging < 0:
 				raise ValueError("eMobilityDischarge darf nicht negativ sein")
@@ -120,14 +120,15 @@ class LadeController(LadeController_Personen):
 			#Autos laden
 
 			cars = self.GetChargingCars() #Es können nur anwesende Autos laden
-			resLastAfterCharging, ladungEMobility = self.ChargeCars(cars= cars, last= abs(resLast), bTrack= True)
+			resLastAfterCharging, ladungEMobility = self.ChargeCars(cars= cars, hour= hour, last= abs(resLast), bTrack= True)
 			DS.zeitVar.eMobilityCharge[hour] = ladungEMobility	
 			DS.zeitVar.pvChargingHourly[hour] += ladungEMobility
+			DS.zeitVar.pvChargingHourlyMitVerluste[hour] += ladungEMobility / self.li_Autos[0].effizienz
 			DS.ZV.emobilitätErneuerbarGeladen += ladungEMobility
 			#Nachdem die Quartiersautos geladen haben, werden die zureisenden geladen
 			cars = self.GetAußenstehendeCars(hour)
 			if resLastAfterCharging > 0:
-				resLastAfterChargingZureisende, ladungZureisende  = self.ChargeCars(cars= cars, last= resLastAfterCharging)
+				resLastAfterChargingZureisende, ladungZureisende  = self.ChargeCars(cars= cars, hour= hour, last= resLastAfterCharging)
 				DS.zeitVar.LadeLeistungAußenstehende[hour] = ladungZureisende
 
 				
@@ -199,8 +200,8 @@ class LadeController(LadeController_Personen):
 			DS.zeitVar.fahrverbrauchLokal[hour] += entladungErn
 			DS.zeitVar.fahrverbrauchNetz[hour] += entladungNetz
 		elif demandType == "Entladung":
-			DS.zeitVar.entladungLokal[hour] += entladungErn
-			DS.zeitVar.entladungNetz[hour] += entladungNetz
+			DS.zeitVar.entladungLokal[hour] += entladungErn / self.li_Autos[0].effizienz
+			DS.zeitVar.entladungNetz[hour] += entladungNetz / self.li_Autos[0].effizienz
 		
 		
 
@@ -238,7 +239,7 @@ class LadeController(LadeController_Personen):
 		if auto.kapazitat < 0:
 			raise ValueError("Auto hat negative Ladung")
 
-	def ChargeCars(self, cars:list, last:float, bTrack=False):
+	def ChargeCars(self, cars:list, hour:int, last:float, bTrack=False):
 		"""Diese Funktion kümmert sich um das Laden der Autos. Es wird dabei nicht mit Netzstrom geladen
 		cars: list
 			Liste an Auto Objekten, welche geladen werden sollen
@@ -253,7 +254,7 @@ class LadeController(LadeController_Personen):
 				break
 			space = car.maxLadung - car.kapazitat
 			ladung = min([car.leistung_MAX, last, space]) #Die niedrigste Zahl davon kann geladen werden
-			rest = car.Laden(ladung)
+			rest = car.Laden(ladung,hour)
 			if rest > 0.00001:
 				raise ValueError("Ladung ist nicht 0")
 			last -= ladung
@@ -265,7 +266,7 @@ class LadeController(LadeController_Personen):
 		leistung -= last
 		return last, leistung
 
-	def DischargeCars(self, last:float):
+	def DischargeCars(self, last:float, hour:int):
 		"""Diese Funktion kümmert sich um das Entladen der Autos um die Gebäudelast abzudecken
 		last: float
 			Residuallast, welche abgedeckt werden soll
@@ -284,7 +285,7 @@ class LadeController(LadeController_Personen):
 				if last == 0: #Wenn die Last abgedeckt werden konnte, konnen wir früher abbrechen
 					break
 				qtoTake = min([car.leistung_MAX, last, car.diff]) #Die niedrigste Zahl davon kann entladen werden
-				qtoTake -= car.Entladen(qtoTake)
+				qtoTake -= car.Entladen(qtoTake, hour)
 				last -= qtoTake
 				#if car.kapazitat < car.minLadung:
 				#	raise ValueError("Auto zu niedrig entladen")
@@ -300,7 +301,7 @@ class LadeController(LadeController_Personen):
 			if car.kapazitat < car.minLadung:
 				space = (car.minLadung - car.kapazitat)
 				toLoad = min([space, car.leistung_MAX, car.alreadyLoaded])
-				car.Laden(toLoad/ car.effizienz)
+				car.Laden(toLoad/ car.effizienz,hour= hour)
 
 				#if car.kapazitat > car.minLadung:
 				#	raise ValueError("Kapazität ist zu Hoch")

@@ -114,7 +114,6 @@ class Zwischenvariablen:
 
 
 
-
 ZV = Zwischenvariablen()
 
 class Zeitvariablen:
@@ -134,6 +133,7 @@ class Zeitvariablen:
 
         self.gridChargingHourly = [0]*8760
         self.pvChargingHourly = [0]*8760
+        self.pvChargingHourlyMitVerluste = [0]*8760
         self.buildingDemandHourly = [0]*8760
         self.carDemandHourly = [0]*8760
         

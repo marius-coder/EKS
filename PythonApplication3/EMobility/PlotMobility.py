@@ -149,7 +149,7 @@ def PlotVerteilungen(data, name):
     ax.yaxis.grid(True)
     plt.show()
 
-def PlotEinflussLDC(Verbrauch, PV, Endladung, Ladung):
+def PlotEinflussLDC(Verbrauch, PV, Endladung, Ladung, mode=""):
     fig, ax = plt.subplots()
     hours = np.linspace(0,8759,8760)
     toPlot = pd.DataFrame({ 
@@ -162,8 +162,10 @@ def PlotEinflussLDC(Verbrauch, PV, Endladung, Ladung):
     toPlot = toPlot.set_index(pd.to_datetime(time))
     for quart in [3,3]:
         df_inter=toPlot[toPlot.index.quarter == quart]
-        #df_inter=toPlot[toPlot.index.month == 8]
-        #df_inter=df_inter[df_inter.index.day == 1]
+        if mode == "Genau":
+            df_inter=toPlot[toPlot.index.month == 8]
+            df_inter=df_inter[df_inter.index.day == 1]
+
         sns.lineplot(x="Stunde",y= "Gebäudeverbrauch", data=df_inter, ax= ax, color= "blue")
         sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV", data=df_inter, ax= ax, color= "orange")
         sns.lineplot(x="Stunde",y= "Gebäudeverbrauch mit PV/LC", data=df_inter, ax= ax, color= "green")

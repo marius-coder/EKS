@@ -35,8 +35,8 @@ class HL():
         #Gesamtlüftungsverluste in Watt
         qinf = Hinf * (ta - self.ti) # Watt
 
-        self.DF.ventilationVerluste[hour] = qv / 1000 / self.gfa
-        self.DF.infiltrationVerluste[hour] = qinf / 1000 / self.gfa
+        self.DF.ventilationVerluste[hour] = qv / 1000 / 1
+        self.DF.infiltrationVerluste[hour] = qinf / 1000 / 1
         qGes = qv + qinf
         return qGes / self.gfa
     	 
@@ -58,9 +58,6 @@ class HL():
     
     def calc_QT_Sum(self, ta):
       		"""Transmissionswärmeverlust nach ÖNORM H 7500-1:2015"""
-      		if ta > self.ti:
-    		    return 0
-
       		q_boden = self.calc_QT_Boden(ta)
       		q_dach = self.calc_QT_Dach(ta)            
       		q_wand = self.calc_QT_Wand(ta)
@@ -86,15 +83,15 @@ class HL():
         Diese Wrapperfunktion callt alle unterfunktionen um alle thermischen Energieflüsse
             eines Gebäudes zu berechnen."""
         qT = self.calc_QT_Sum(ta) 
-        self.DF.transmissionVerluste[hour] = qT * self.gfa / 1000 / self.gfa
+        self.DF.transmissionVerluste[hour] = qT * self.gfa / 1000 / 1
         qV = self.calc_QV(ta, hour)
         
         #print(f"spez. Heizlast: {(qT+qV)/self.gfa} W/m²")
         qP = self.calc_Personen(hour = hour, anz_Personen = anz_Personen)
         qM = self.calc_Maschinen(strom) * 1000
-        self.DF.interneGewinne[hour] = (qP+qM) / 1000
+        self.DF.interneGewinne[hour] = (qP+qM) / 1000  * self.gfa
         qS = (self.qsolar[hour] * self.fenster["Fläche"])/self.gfa
-        self.DF.solareGewinne[hour] = qS / 1000
+        self.DF.solareGewinne[hour] = qS / 1000 * self.gfa
         qSum = qT+qV+qP+qS+qM
         #print(f"spez. Heizlast: {(qSum)/self.gfa} W/m²")
         return qSum

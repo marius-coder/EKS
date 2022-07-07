@@ -36,7 +36,7 @@ class Konversionsfaktoren():
 			"Dezember" : 0.291,
 			}
 		self.fernwärmePrimärenergie = 1.6
-		self.fernwärmeEmissionen = 59 #kgCO2/kWh
+		self.fernwärmeEmissionen = 0.059 #kgCO2/kWh
 
 
 	def CalcEnergieflüsse(self, obj, gebäudeLast, externeLadung=0, emobilitätPVCharging=0 ,pv=0, emobilitätGridCharging= 0,
@@ -48,7 +48,7 @@ class Konversionsfaktoren():
 
 		PVtoZureisende = emobilitätZureisende
 
-		PVtoNetz = max(0,pv-(PVtoGebäude+PVtoZureisende))
+		PVtoNetz = max(0,pv-(PVtoGebäude+PVtoZureisende+PVtoEmobilität))
 
 		ExterntoEmobilität = externeLadung
 		NetztoEmobilität = emobilitätGridCharging
@@ -59,7 +59,7 @@ class Konversionsfaktoren():
 		NetztoGebäude = gebäudeLast - (PVtoGebäude + EmobilitätzuGebäudeErneuerbar + EmobilitätzuGebäudeNetz)
 
 
-		Netz = NetztoGebäude + ExterntoEmobilität + NetztoEmobilität
+		Netz = NetztoGebäude + ExterntoEmobilität + NetztoEmobilität 
 		Erneuerbar = PVtoGebäude
 		Gutschreibung = PVtoZureisende + PVtoNetz
 
@@ -79,7 +79,7 @@ class Konversionsfaktoren():
 		co2 = 0
 		co2 += data["Netz"][hour] * list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1] / gfa
 		co2 += data["Erneuerbar"][hour] * 0.045 / gfa
-		co2 += data["Gutschreibung"][hour] * (list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1]-0.045) *-1 / gfa
+		co2 += data["Gutschreibung"][hour] * (list(self.stromnetzEmissionen.values())[DetermineMonth(hour)-1]) *-1 / gfa
 
 		return co2
 

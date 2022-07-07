@@ -105,7 +105,7 @@ class Zureisende(Auto):
 				ret.append(False)
 		if any(ret):
 			return True
-		else:
+		else:										
 			return False
 
 	def Fahren(self):

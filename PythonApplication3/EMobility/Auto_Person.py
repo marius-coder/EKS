@@ -32,7 +32,7 @@ class Auto():
 		DS.ZV.emobilitätNetzGeladen += self.kapazitat
 
 	@set_unit("kWh")
-	def Laden(self, qtoLoad):
+	def Laden(self, qtoLoad, hour):
 		"""Ladet das Auto mit einer gegebenen Ladung
 		qtoLoad: float,  
 			Ladung mit dem das Auto geladen wird in kWh
@@ -58,11 +58,10 @@ class Auto():
 		qtoLoad -= (self.leistung + self.verlust)
         
 		self.alreadyLoaded -= (self.leistung + self.verlust)
-
 		return qtoLoad
 
 	@set_unit("kWh")
-	def Entladen(self, qtoTake):
+	def Entladen(self, qtoTake, hour):
 		"""Entladet das Auto mit einer gegebenen Ladung
 		qtoTake: float,  
 			Ladung mit dem das Auto entladen wird in kWh
@@ -93,7 +92,6 @@ class Auto():
 		#Ausfuhren des Entladevorgangs
 		self.kapazitat -= self.leistung + self.verlust
 		qtoTake -= self.leistung 
-
 		return qtoTake
 
 
